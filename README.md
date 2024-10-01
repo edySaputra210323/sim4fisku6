@@ -1,6 +1,6 @@
 ## Laravel 11 + FilamentPHP v3 Boilerplate
 
-Laravel 11.21.0 and FilamentPHP vv3.2.108 Boilerplate for start a new project
+Laravel 11 and FilamentPHP v3 Boilerplate for start a new project
 
 ### Features
 - Roles and Permissions using [Shield](https://github.com/bezhanSalleh/filament-shield)
@@ -35,7 +35,7 @@ php artisan key:generate
 
 Migrate
 ```bash
-php artisan migrate
+php artisan migrate --seed
 ```
 
 initialize Shield and create an admin user
