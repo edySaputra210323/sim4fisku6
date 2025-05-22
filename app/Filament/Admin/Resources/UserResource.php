@@ -32,6 +32,7 @@ class UserResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
+            ->inlineLabel()
             ->schema([
                 Forms\Components\Section::make()
                     ->schema([
