@@ -1,0 +1,72 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@config 'tailwind.config.js';
+
+body {
+    @apply !bg-white dark:!bg-gray-950;
+}
+
+.fi-main {
+    @apply bg-gray-100 dark:bg-gray-800 shadow !max-w-full !overflow-y-auto flex-grow;
+}
+
+.fi-sidebar-item-active a {
+    @apply bg-primary-600 dark:bg-primary-950/70 hover:bg-primary-600 dark:hover:bg-primary-950/70 text-white dark:text-white;
+}
+
+.fi-sidebar-item-active .fi-sidebar-item-label {
+    @apply text-white dark:text-white;
+}
+
+.fi-sidebar-item-active svg {
+    @apply text-white dark:text-white;
+}
+
+.fi-sidebar-item:not(.fi-sidebar-item-active) a {
+    @apply dark:text-gray-400 hover:bg-primary-100 dark:hover:bg-primary-800/50 dark:hover:text-white;
+}
+
+.fi-sidebar-item:not(.fi-sidebar-item-active):hover a svg {
+    @apply dark:text-white;
+}
+
+.fi-main-ctn {
+    @apply !h-screen;
+}
+
+.fi-topbar {
+    @apply relative;
+}
+
+.table-row-success {
+    @apply border-l-4 bg-success-50 !border-l-success-600 dark:!bg-success-900 dark:!text-white;
+}
+.table-row-success .fi-ta-text-item-label {
+    @apply text-success-900;
+}
+
+.table-row-danger {
+    @apply border-l-4 bg-danger-50 !border-l-danger-600 dark:!bg-danger-900;
+}
+.table-row-danger .fi-ta-text-item-label {
+    @apply text-danger-900;
+}
+
+.table-row-warning {
+    @apply border-l-4 bg-warning-50 !border-l-warning-600 dark:!bg-warning-900;
+}
+.table-row-warning .fi-ta-text-item-label {
+    @apply text-warning-900;
+}
+
+.table-vertical-align-top .fi-ta-cell {
+    vertical-align: top;
+}
+
+.fi-ta-table > thead > tr {
+    @apply divide-x divide-gray-200 dark:divide-white/5;
+}
+
+.fi-ta-row {
+    @apply divide-x divide-gray-200 dark:divide-white/5;
+}
