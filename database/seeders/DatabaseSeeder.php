@@ -6,6 +6,7 @@ use App\Models\User;
 use Closure;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 use Symfony\Component\Console\Helper\ProgressBar;
 
 class DatabaseSeeder extends Seeder
@@ -24,6 +25,17 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('12345678'),
         ]));
         $this->command->info('Superadmin user has been created successfully.');
+
+        $this->command->warn(PHP_EOL . 'Set user superadmin as role superadmin...');
+        Artisan::call('shield:super-admin');
+        $this->command->info('The superadmin user has been successfully configured.');
+
+        $this->command->warn(PHP_EOL . 'Generate all permissions...');
+        Artisan::call('shield:generate', [
+            '--all' => true,
+            '--panel' => 'admin',
+        ]);
+        $this->command->info('Permissions have been generated.');
     }
 
     protected function withProgressBar(int $amount, Closure $createCollectionOfOne): Collection
