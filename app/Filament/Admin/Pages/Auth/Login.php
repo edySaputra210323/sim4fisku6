@@ -8,6 +8,19 @@ use Illuminate\Validation\ValidationException;
 
 class Login extends BaseAuth
 {
+    public function mount(): void
+    {
+        parent::mount();
+
+        if (app()->environment('local')) {
+            $this->form->fill([
+                'login' => 'superadmin',
+                'password' => '12345678',
+                'remember' => true,
+            ]);
+        }
+    }
+
     public function form(Forms\Form $form): Forms\Form
     {
         return $form
