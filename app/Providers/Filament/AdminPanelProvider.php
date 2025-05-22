@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Admin\Pages\Auth\Login;
+use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -33,8 +34,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->brandName(env('APP_NAME'))
             ->brandLogo(asset('images/logo.png'))
-            ->favicon(asset('images/favicons/android-chrome-192x192.png'))
+            ->favicon(asset('favicons/android-chrome-192x192.png'))
             ->brandLogoHeight(fn() => request()->route()->getName() == 'filament.admin.auth.login' ? '7rem' : '3rem')
+            ->defaultThemeMode(ThemeMode::Light)
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\\Filament\\Admin\\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\\Filament\\Admin\\Pages')
             ->pages([
