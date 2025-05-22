@@ -38,11 +38,6 @@ Migrate
 php artisan migrate --seed
 ```
 
-initialize Shield and create an admin user
-```bash
-php artisan shield:install --fresh
-```
-
 Serve
 ```bash
 php artisan serve
