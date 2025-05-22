@@ -43,7 +43,12 @@ Serve
 php artisan serve
 ```
 
-That's it, Open http://localhost:8000/login and login
+That's it, Open http://localhost:8000/login and login using this credential
+
+```
+username: superadmin
+password: 12345678
+```
 
 
 
