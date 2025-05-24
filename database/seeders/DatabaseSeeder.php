@@ -36,6 +36,11 @@ class DatabaseSeeder extends Seeder
             '--panel' => 'admin',
         ]);
         $this->command->info('Permissions have been generated.');
+
+        $this->call([
+            KategoriSuratSeeder::class,
+            TahunAjaranSeeder::class,
+        ]);
     }
 
     protected function withProgressBar(int $amount, Closure $createCollectionOfOne): Collection
