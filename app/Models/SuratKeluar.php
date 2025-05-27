@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Models\User;
-use App\Models\Smester;
+use App\Models\Semester;
 use App\Models\TahunAjaran;
 use App\Models\KategoriSurat;
 use Illuminate\Database\Eloquent\Model;
@@ -23,7 +23,7 @@ class SuratKeluar extends Model
         'deskripsi', 
         'dokumen',
         'dibuat_oleh_id', 
-        'smester_id',
+        'semester_id',
         'th_ajaran_id',
         'nomor_urut',
     ];
