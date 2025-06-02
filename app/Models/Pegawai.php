@@ -42,12 +42,6 @@ class Pegawai extends Model
     return $tempatLahir && $formattedDate ? $tempatLahir . ', ' . $formattedDate : ($tempatLahir ?: $formattedDate);
     }
 
-    public function getFotoPegawaiAttribute($value)
-    {
-        return $value ? asset('storage/' . $value) : asset('images/no_pic.png');
-    }
-
-
     public function user()
     {
         return $this->belongsTo(User::class);

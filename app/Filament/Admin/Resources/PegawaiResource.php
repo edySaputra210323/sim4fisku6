@@ -8,6 +8,7 @@ use App\Models\Pegawai;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Illuminate\Support\HtmlString;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Placeholder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -41,6 +42,7 @@ class PegawaiResource extends Resource
                     ->unique(table: Pegawai::class, ignoreRecord: true)
                     ->required()
                     ->maxLength(16)
+                    ->minLength(16)
                     ->extraInputAttributes([
                         'oninput' => "this.value = this.value.replace(/[^0-9]/g, '')",
                         ])
@@ -99,6 +101,7 @@ class PegawaiResource extends Resource
                 ->unique(table: Pegawai::class, ignoreRecord: true)
                 ->placeholder('Masukkan Nomor Unik Pendidik dan Tenaga Kependidikan')
                 ->maxLength(16)
+                ->minLength(16)
                 ->extraInputAttributes([
                     'oninput' => "this.value = this.value.replace(/[^0-9]/g, '')",
                 ])
@@ -115,6 +118,7 @@ class PegawaiResource extends Resource
                 ->unique(table: Pegawai::class, ignoreRecord: true)
                 ->placeholder('Masukkan Nomor Pegawai Yayasan')
                 ->maxLength(7)
+                ->minLength(7)
                 ->extraInputAttributes([
                     'oninput' => "this.value = this.value.replace(/[^0-9]/g, '')",
                 ])
@@ -131,26 +135,15 @@ class PegawaiResource extends Resource
                 ])
                 ->label('Status')
                 ->required(),
-                Forms\Components\Group::make([
-                    Placeholder::make('foto_pegawai_preview')
-                        ->label('Foto Saat Ini')
-                        ->content(function ($record) {
-                            return view('components.image-preview', [
-                                'url' => $record ? $record->foto_pegawai : asset('images/no_pic.png'),
-                            ]);
-                        }),
-                    Forms\Components\FileUpload::make('foto_pegawai')
-                        ->image()
-                        ->directory('pegawai_photos')
-                        ->label('Unggah Foto Pegawai')
-                        ->maxSize(2048)
-                        ->imageResizeMode('cover')
-                        ->imageCropAspectRatio('1:1')
-                        ->acceptedFileTypes(['image/jpeg', 'image/png']),
-                ])->columns(2),
-
-
-
+            Forms\Components\FileUpload::make('foto_pegawai')
+                ->image(['jpg', 'png'])
+                ->label('Foto Pegawai')
+                ->disk('public')
+                ->minSize(50)
+                ->maxSize(5120)
+                ->openable()
+                ->removeUploadedFileButtonPosition('right')
+                ->visibility('public'),
             Forms\Components\Toggle::make('create_user_account')
                 ->label('Buat Akun Pengguna')
                 ->reactive()
@@ -173,15 +166,51 @@ class PegawaiResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->extremePaginationLinks()
+            ->recordUrl(null)
+            ->paginated([5, 10, 20, 50])
+            ->defaultPaginationPageOption(10)
+            ->striped()
+            ->recordClasses(function () {
+                $classes = 'table-vertical-align-top ';
+                return $classes;
+            })
             ->columns([
-                Tables\Columns\TextColumn::make('user_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('nik')
-                    ->searchable(),
+
+                Tables\Columns\ImageColumn::make('foto_pegawai')
+                    ->simpleLightbox()
+                    ->label('Foto')
+                    ->circular()
+                    ->size(80)
+                    ->grow(false)
+                    ->defaultImageUrl(asset('storage/images/no_pic.png')),
+                // Tables\Columns\ImageColumn::make('foto_pegawai')    
+                //     ->label('Foto')
+                //     ->circular()
+                //     ->size(80)
+                //     ->grow(false)
+                //     ->defaultImageUrl(asset('storage/images/no_pic.png')),
                 Tables\Columns\TextColumn::make('nm_pegawai')
-                    ->searchable(),
-                    Tables\Columns\TextColumn::make('tempat_tanggal_lahir')
+                    ->searchable()
+                    ->label('Nama Pegawai')
+                    ->description(function ($record) {
+                        $data = '';
+                        if (!empty($record->nik)) {
+                            $data .= '<small>NIK : ' . $record->nik . '</small>';
+                        }
+                        if (!empty($record->npy)) {
+                            if ($data != '')
+                                $data .= '<br>';
+                            $data .= '<small>NPY : ' . $record->npy . '</small>';
+                        }
+                        if (!empty($record->nuptk)) {
+                            if ($data != '')
+                                $data .= '<br>';
+                            $data .= '<small>Nuptk : ' . $record->nuptk . '</small>';
+                        }
+                        return new HtmlString($data);
+                    }),
+                Tables\Columns\TextColumn::make('tempat_tanggal_lahir')
                     ->label('Tempat, Tanggal Lahir'),
                 Tables\Columns\TextColumn::make('jenis_kelamin')
                     ->label('JK'),
@@ -189,15 +218,11 @@ class PegawaiResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('nuptk')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('npy')
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('user_id')
+                    ->numeric()
+                    ->sortable(),
                 Tables\Columns\IconColumn::make('status')
                     ->boolean(),
-                Tables\Columns\ImageColumn::make('foto_pegawai')
-                    ->label('Foto')
-                    ->defaultImageUrl(asset('storage/images/no_pic.png')),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
