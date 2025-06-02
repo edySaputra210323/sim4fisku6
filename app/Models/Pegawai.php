@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Pegawai extends Model
@@ -29,14 +30,32 @@ class Pegawai extends Model
         'jenis_kelamin' => 'string',
     ];
 
-    public function jabatanPegawai()
+    public function getTempatTanggalLahirAttribute()
     {
-        return $this->belongsTo(PosisiKepegawaian::class);
+    // Atur locale Carbon ke Indonesia
+    Carbon::setLocale('id');
+
+    // Format tanggal dengan bulan penuh
+    $formattedDate = $this->tgl_lahir ? $this->tgl_lahir->translatedFormat('d F Y') : '';
+    $tempatLahir = $this->tempat_lahir ?? '';
+
+    return $tempatLahir && $formattedDate ? $tempatLahir . ', ' . $formattedDate : ($tempatLahir ?: $formattedDate);
     }
+
+    public function getFotoPegawaiAttribute($value)
+    {
+        return $value ? asset('storage/' . $value) : asset('images/no_pic.png');
+    }
+
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function posisiKepegawaian()
+    {
+        return $this->hasMany(PosisiKepegawaian::class);
     }
 
     public function pendidikan()

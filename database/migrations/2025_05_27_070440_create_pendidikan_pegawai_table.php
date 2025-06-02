@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('pendidikan_pegawai', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pegawai_id')->constrained()->onDelete('cascade');
+            $table->foreignId('pegawai_id')->constrained('pegawai')->onDelete('cascade');
             $table->string('level')->comment('Jenjang: S1, S2, D3, dll.');
             $table->string('jurusan');
             $table->string('universitas');
             $table->year('tahun_lulus');
-            $table->string('no_sertifikat')->nullable();
+            $table->string('no_ijazah')->nullable();
+            $table->string('file_ijazah')->nullable();
             $table->timestamps();
         });
     }

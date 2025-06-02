@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('training_pegawai', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pegawai_id')->constrained()->onDelete('cascade');
+            $table->foreignId('pegawai_id')->constrained('pegawai')->onDelete('cascade');
             $table->string('nm_training')->comment('Nama Pelatihan');
             $table->string('penyelenggara')->comment('Penyelenggara');
             $table->date('start_date');
             $table->date('end_date')->nullable();
             $table->integer('duration_hours')->nullable()->comment('Durasi dalam jam');
             $table->string('no_sertifikat')->nullable();
+            $table->string('file_sertifikat_training')->nullable();
             $table->timestamps();
         });
     }

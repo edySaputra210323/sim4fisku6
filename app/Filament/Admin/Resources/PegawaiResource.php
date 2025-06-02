@@ -1,0 +1,251 @@
+<?php
+
+namespace App\Filament\Admin\Resources;
+
+use Filament\Forms;
+use Filament\Tables;
+use App\Models\Pegawai;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms\Components\Placeholder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Admin\Resources\PegawaiResource\Pages;
+use App\Filament\Admin\Resources\PegawaiResource\RelationManagers;
+
+class PegawaiResource extends Resource
+{
+    protected static ?string $model = Pegawai::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+
+    protected static ?string $navigationLabel = 'Pegawai';
+
+    protected static ?string $modelLabel = 'Pegawai';
+
+    protected static ?string $pluralModelLabel = 'Pegawai';
+
+    protected static ?string $slug = 'pegawai';
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Section::make()
+                    ->schema([
+            Forms\Components\TextInput::make('nik')
+                    ->label('NIK')
+                    ->placeholder('Nomor Induk Kependudukan')
+                    ->numeric()
+                    ->unique(table: Pegawai::class, ignoreRecord: true)
+                    ->required()
+                    ->maxLength(16)
+                    ->extraInputAttributes([
+                        'oninput' => "this.value = this.value.replace(/[^0-9]/g, '')",
+                        ])
+                    ->validationMessages([
+                        'required' => 'NIK tidak boleh kosong',
+                        'max' => 'NIK tidak boleh lebih dari 16 angka',
+                        'numeric' => 'NIK harus angka',
+                        'unique' => 'NIK sudah ada',
+                        ]),
+            Forms\Components\TextInput::make('nm_pegawai')
+                ->label('Nama')
+                ->placeholder('masukkan nama lengkap dan gelar')
+                ->maxLength(100)
+                ->required()
+                ->validationMessages([
+                    'required' => 'Nama Lengkap tidak boleh kosong',
+                    'max' => 'Nama Lengkap tidak boleh lebih dari 100 karakter',
+                ]),
+            Forms\Components\TextInput::make('tempat_lahir')
+                ->label('Tempat Lahir')
+                ->placeholder('masukkan tempat lahir')
+                ->maxLength(100)
+                ->required()
+                ->validationMessages([
+                    'required' => 'Tempat Lahir tidak boleh kosong',
+                    'max' => 'Tempat Lahir tidak boleh lebih dari 100 karakter',
+                ]),
+            Forms\Components\DatePicker::make('tgl_lahir')
+                ->label('Tanggal Lahir')
+                ->required()
+                ->native(false)
+                ->displayFormat('d/m/Y')
+                ->validationMessages([
+                    'required' => 'Tanggal Lahir tidak boleh kosong',
+                ]),
+            Forms\Components\Select::make('jenis_kelamin')
+                ->options(['L' => 'Laki-laki', 'P' => 'Perempuan'])
+                ->label('JK')
+                ->required(),
+            Forms\Components\TextInput::make('alamat')
+                ->label('Alamat'),
+            Forms\Components\TextInput::make('phone')
+                ->tel()
+                ->label('Nomor Telepon'),
+            Forms\Components\TextInput::make('email')
+                ->email()
+                ->unique(table: Pegawai::class, ignoreRecord: true)
+                ->validationMessages([
+                    'unique' => 'Email sudah ada',
+                ])
+                ->required(),
+            Forms\Components\TextInput::make('nuptk')
+                ->label('NUPTK')
+                ->required()
+                ->numeric()
+                ->unique(table: Pegawai::class, ignoreRecord: true)
+                ->placeholder('Masukkan Nomor Unik Pendidik dan Tenaga Kependidikan')
+                ->maxLength(16)
+                ->extraInputAttributes([
+                    'oninput' => "this.value = this.value.replace(/[^0-9]/g, '')",
+                ])
+                ->validationMessages([
+                    'max' => 'NUPTK tidak boleh lebih dari 16 karakter',
+                    'required' => 'NUPTK tidak boleh kosong',
+                    'unique' => 'NUPTK sudah ada',
+                    'numeric' => 'NUPTK harus angka',
+                ]),
+                Forms\Components\TextInput::make('npy')
+                ->label('NPY')
+                ->required()
+                ->numeric()
+                ->unique(table: Pegawai::class, ignoreRecord: true)
+                ->placeholder('Masukkan Nomor Pegawai Yayasan')
+                ->maxLength(7)
+                ->extraInputAttributes([
+                    'oninput' => "this.value = this.value.replace(/[^0-9]/g, '')",
+                ])
+                ->validationMessages([
+                    'max' => 'NPY tidak boleh lebih dari 7 angka',
+                    'required' => 'NPY tidak boleh kosong',
+                    'unique' => 'NPY sudah ada',
+                    'numeric' => 'NPY harus angka',
+                ]),
+            Forms\Components\Select::make('status')
+                ->options([
+                    true => 'Aktif',
+                    false => 'Nonaktif',
+                ])
+                ->label('Status')
+                ->required(),
+                Forms\Components\Group::make([
+                    Placeholder::make('foto_pegawai_preview')
+                        ->label('Foto Saat Ini')
+                        ->content(function ($record) {
+                            return view('components.image-preview', [
+                                'url' => $record ? $record->foto_pegawai : asset('images/no_pic.png'),
+                            ]);
+                        }),
+                    Forms\Components\FileUpload::make('foto_pegawai')
+                        ->image()
+                        ->directory('pegawai_photos')
+                        ->label('Unggah Foto Pegawai')
+                        ->maxSize(2048)
+                        ->imageResizeMode('cover')
+                        ->imageCropAspectRatio('1:1')
+                        ->acceptedFileTypes(['image/jpeg', 'image/png']),
+                ])->columns(2),
+
+
+
+            Forms\Components\Toggle::make('create_user_account')
+                ->label('Buat Akun Pengguna')
+                ->reactive()
+                ->default(false),
+            Forms\Components\TextInput::make('user_email')
+                ->email()
+                ->required(fn ($get) => $get('create_user_account'))
+                ->unique(table: \App\Models\User::class, column: 'email')
+                ->label('Email Pengguna')
+                ->visible(fn ($get) => $get('create_user_account')),
+            Forms\Components\TextInput::make('password')
+                ->password()
+                ->required(fn ($get) => $get('create_user_account'))
+                ->label('Kata Sandi')
+                ->visible(fn ($get) => $get('create_user_account')),
+            ])
+                ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('user_id')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('nik')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('nm_pegawai')
+                    ->searchable(),
+                    Tables\Columns\TextColumn::make('tempat_tanggal_lahir')
+                    ->label('Tempat, Tanggal Lahir'),
+                Tables\Columns\TextColumn::make('jenis_kelamin')
+                    ->label('JK'),
+                Tables\Columns\TextColumn::make('phone')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('email')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('nuptk')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('npy')
+                    ->searchable(),
+                Tables\Columns\IconColumn::make('status')
+                    ->boolean(),
+                Tables\Columns\ImageColumn::make('foto_pegawai')
+                    ->label('Foto')
+                    ->defaultImageUrl(asset('storage/images/no_pic.png')),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make()
+                    ->iconButton()
+                    ->color('warning')
+                    ->icon('heroicon-m-pencil-square'),
+                Tables\Actions\DeleteAction::make()
+                    ->iconButton()
+                    ->color('danger')
+                    ->icon('heroicon-m-trash')
+                    ->modalHeading('Hapus Bank'),
+                Tables\Actions\ViewAction::make()
+                ->iconButton()
+                    ->color('primary')
+                    ->icon('heroicon-m-eye'),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListPegawais::route('/'),
+            'create' => Pages\CreatePegawai::route('/create'),
+            'view' => Pages\ViewPegawai::route('/{record}'),
+            'edit' => Pages\EditPegawai::route('/{record}/edit'),
+        ];
+    }
+}

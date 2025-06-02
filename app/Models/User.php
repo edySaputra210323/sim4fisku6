@@ -54,4 +54,9 @@ class User extends Authenticatable implements FilamentUser
     {
         return true;
     }
+
+    public function pegawai()
+    {
+        return $this->hasOne(Pegawai::class);
+    }
 }

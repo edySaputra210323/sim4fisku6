@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('posisi_kepegawaian', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pegawai_id')->constrained()->onDelete('cascade');
+            $table->foreignId('pegawai_id')->constrained('pegawai')->onDelete('cascade');
             $table->foreignId('jabatan_id')->constrained('jabatan')->onDelete('restrict');
             $table->foreignId('unit_id')->constrained('unit')->onDelete('restrict');
             $table->enum('status', ['permanent', 'contract', 'honorary'])->comment('Status Kepegawaian');

@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('sertifikasi_pegawai', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pegawai_id')->constrained()->onDelete('cascade');
+            $table->foreignId('pegawai_id')->constrained('pegawai')->onDelete('cascade');
             $table->string('nm_sertifikasi');
             $table->string('penerbit');
             $table->date('tgl_sertifikasi');
             $table->date('tgl_kadaluarsa')->nullable();
             $table->string('no_sertifikat')->nullable();
+            $table->string('file_sertifikat_sertifikasi')->nullable();
             $table->timestamps();
         });
     }
