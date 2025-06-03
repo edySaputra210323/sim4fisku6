@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Illuminate\Support\HtmlString;
+use Filament\Support\Enums\FontWeight;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Placeholder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -159,6 +160,16 @@ class PegawaiResource extends Resource
                 ->required(fn ($get) => $get('create_user_account'))
                 ->label('Kata Sandi')
                 ->visible(fn ($get) => $get('create_user_account')),
+            Forms\Components\TextInput::make('password_confirmation')
+                ->password()
+                ->required(fn ($get) => $get('create_user_account'))
+                ->same('password')
+                ->label('Konfirmasi Kata Sandi')
+                ->visible(fn ($get) => $get('create_user_account'))
+                ->validationMessages([
+                    'required' => 'Konfirmasi kata sandi wajib diisi',
+                    'same' => 'Konfirmasi kata sandi tidak cocok',
+                ]),
             ])
                 ]);
     }
@@ -176,14 +187,13 @@ class PegawaiResource extends Resource
                 return $classes;
             })
             ->columns([
-
                 Tables\Columns\ImageColumn::make('foto_pegawai')
                     ->simpleLightbox()
                     ->label('Foto')
                     ->circular()
-                    ->size(80)
+                    ->size(60)
                     ->grow(false)
-                    ->defaultImageUrl(asset('storage/images/no_pic.png')),
+                    ->defaultImageUrl(asset('images/no_pic.jpg')),
                 // Tables\Columns\ImageColumn::make('foto_pegawai')    
                 //     ->label('Foto')
                 //     ->circular()
@@ -192,6 +202,7 @@ class PegawaiResource extends Resource
                 //     ->defaultImageUrl(asset('storage/images/no_pic.png')),
                 Tables\Columns\TextColumn::make('nm_pegawai')
                     ->searchable()
+                    ->weight(FontWeight::Bold)
                     ->label('Nama Pegawai')
                     ->description(function ($record) {
                         $data = '';
