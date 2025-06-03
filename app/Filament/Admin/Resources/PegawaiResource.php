@@ -15,6 +15,7 @@ use Filament\Forms\Components\Placeholder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Admin\Resources\PegawaiResource\Pages;
 use App\Filament\Admin\Resources\PegawaiResource\RelationManagers;
+use App\Models\User;
 
 class PegawaiResource extends Resource
 {
@@ -88,13 +89,13 @@ class PegawaiResource extends Resource
             Forms\Components\TextInput::make('phone')
                 ->tel()
                 ->label('Nomor Telepon'),
-            Forms\Components\TextInput::make('email')
-                ->email()
-                ->unique(table: Pegawai::class, ignoreRecord: true)
-                ->validationMessages([
-                    'unique' => 'Email sudah ada',
-                ])
-                ->required(),
+            // Forms\Components\TextInput::make('user_email')
+            //     ->email()
+            //     ->unique(table: User::class, ignoreRecord: true)
+            //     ->validationMessages([
+            //         'unique' => 'Email sudah ada',
+            //     ])
+            //     ->required(),
             Forms\Components\TextInput::make('nuptk')
                 ->label('NUPTK')
                 ->required()
@@ -143,6 +144,7 @@ class PegawaiResource extends Resource
                 ->minSize(50)
                 ->maxSize(5120)
                 ->openable()
+                ->directory('pegawai_photos')
                 ->removeUploadedFileButtonPosition('right')
                 ->visibility('public'),
             Forms\Components\Toggle::make('create_user_account')
@@ -154,6 +156,12 @@ class PegawaiResource extends Resource
                 ->required(fn ($get) => $get('create_user_account'))
                 ->unique(table: \App\Models\User::class, column: 'email')
                 ->label('Email Pengguna')
+                ->visible(fn ($get) => $get('create_user_account')),
+            Forms\Components\TextInput::make('username_pegawai')
+                ->placeholder('Masukkan username')
+                ->required(fn ($get) => $get('create_user_account'))
+                ->unique(table: \App\Models\User::class, column: 'username')
+                ->label('username')
                 ->visible(fn ($get) => $get('create_user_account')),
             Forms\Components\TextInput::make('password')
                 ->password()
@@ -227,11 +235,9 @@ class PegawaiResource extends Resource
                     ->label('JK'),
                 Tables\Columns\TextColumn::make('phone')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('user_id')
-                    ->numeric()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('user.email')
+                    ->searchable()
+                    ->label('Email'),
                 Tables\Columns\IconColumn::make('status')
                     ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')

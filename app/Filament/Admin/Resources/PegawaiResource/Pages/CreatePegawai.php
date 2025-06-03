@@ -30,7 +30,7 @@ class CreatePegawai extends CreateRecord
                 // Bikin user baru
                 $user = User::create([
                     'name' => $data['nm_pegawai'],
-                    'username' => $data['nm_pegawai'],
+                    'username' => $data['username_pegawai'],
                     'email' => $data['user_email'],
                     'password' => Hash::make($data['password']),
                 ]);
