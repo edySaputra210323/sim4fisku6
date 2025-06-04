@@ -258,9 +258,8 @@ class SuratKeluarResource extends Resource
                 TextColumn::make('tujuan_pengiriman')
                     ->label('Tujuan')
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('dibuatOleh.karyawan.nama_lengkap')
-                    ->label('Dibuat')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('user.pegawai.nm_pegawai')
+                    ->label('Dibuat Oleh'),
             ])
             ->filters([
                 SelectFilter::make('kategori_surat_id')

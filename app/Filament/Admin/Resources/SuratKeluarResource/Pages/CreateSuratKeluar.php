@@ -37,7 +37,7 @@ class CreateSuratKeluar extends CreateRecord
        }
 
         // Menambahkan ID user yang sedang login ke field 'dibuat_oleh'
-        $data['dibuat_oleh'] = auth()->id();
+        $data['dibuat_oleh_id'] = auth()->id();
         $data['th_ajaran_id'] = $activeTahunAjaran->id;
         $data['semester_id'] = $activeSemester->id;
 
