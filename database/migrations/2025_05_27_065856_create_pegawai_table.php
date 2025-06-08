@@ -21,7 +21,6 @@ return new class extends Migration
             $table->enum('jenis_kelamin', ['L', 'P']);
             $table->text('alamat')->nullable();
             $table->string('phone', 15)->nullable();
-            // $table->string('email')->unique()->nullable();
             $table->string('nuptk', 16)->unique()->nullable()->comment('Nomor Unik Pendidik dan Tenaga Kependidikan');
             $table->string('npy', 7)->unique()->nullable()->comment('Nomor Pegawai Yayasan');
             $table->boolean('status')->default(false);

@@ -15,13 +15,7 @@ class EditSemester extends EditRecord
         return $this->getResource()::getUrl('index');
     }
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
-        ];
-    }
+    
 
     public function getSubNavigation(): array
     {
@@ -30,6 +24,14 @@ class EditSemester extends EditRecord
         }
 
         return [];
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\ViewAction::make(),
+            Actions\DeleteAction::make(),
+        ];
     }
 
     protected function mutateFormDataBeforeSave(array $data): array

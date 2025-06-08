@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Pegawai extends Model
 {
@@ -18,7 +19,7 @@ class Pegawai extends Model
         'jenis_kelamin',
         'alamat',
         'phone',
-        // 'email',
+        // 'email_pegawai',
         'nuptk',
         'npy',
         'status',
@@ -30,6 +31,25 @@ class Pegawai extends Model
         'jenis_kelamin' => 'string',
     ];
 
+    // Boot method untuk handle event
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Event deleting
+        static::deleting(function ($pegawai) {
+            // Hapus file foto dari storage
+            if ($pegawai->foto_pegawai) {
+                Storage::disk('public')->delete($pegawai->foto_pegawai);
+            }
+
+            // Hapus user terkait (jika ada)
+            if ($pegawai->user) {
+                $pegawai->user->delete();
+            }
+        });
+    }
+
     public function getTempatTanggalLahirAttribute()
     {
     // Atur locale Carbon ke Indonesia
@@ -40,6 +60,12 @@ class Pegawai extends Model
     $tempatLahir = $this->tempat_lahir ?? '';
 
     return $tempatLahir && $formattedDate ? $tempatLahir . ', ' . $formattedDate : ($tempatLahir ?: $formattedDate);
+    }
+
+    // Accessor untuk foto_pegawai
+    public function getFotoPegawaiAttribute($value)
+    {
+        return $value ? asset('storage/' . $value) : asset('images/no_pic.png');
     }
 
     public function user()

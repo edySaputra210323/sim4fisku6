@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources;
 
 use Filament\Forms;
+use App\Models\User;
 use Filament\Tables;
 use App\Models\Pegawai;
 use Filament\Forms\Form;
@@ -10,12 +11,12 @@ use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Illuminate\Support\HtmlString;
 use Filament\Support\Enums\FontWeight;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Placeholder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Admin\Resources\PegawaiResource\Pages;
 use App\Filament\Admin\Resources\PegawaiResource\RelationManagers;
-use App\Models\User;
 
 class PegawaiResource extends Resource
 {
@@ -87,15 +88,18 @@ class PegawaiResource extends Resource
             Forms\Components\TextInput::make('alamat')
                 ->label('Alamat'),
             Forms\Components\TextInput::make('phone')
-                ->tel()
-                ->label('Nomor Telepon'),
-            // Forms\Components\TextInput::make('user_email')
-            //     ->email()
-            //     ->unique(table: User::class, ignoreRecord: true)
-            //     ->validationMessages([
-            //         'unique' => 'Email sudah ada',
-            //     ])
-            //     ->required(),
+                ->label('Nomor Telepon')
+                ->maxLength(15)
+                ->minLength(10)
+                ->numeric()
+                ->extraInputAttributes([
+                    'oninput' => "this.value = this.value.replace(/[^0-9]/g, '')",
+                ])
+                ->validationMessages([
+                    'max' => 'Nomor Telepon tidak boleh lebih dari 15 angka',
+                    'min' => 'Nomor Telepon tidak boleh kurang dari 10 angka',
+                    'numeric' => 'Nomor Telepon harus angka',
+                ]),
             Forms\Components\TextInput::make('nuptk')
                 ->label('NUPTK')
                 ->required()
@@ -146,7 +150,22 @@ class PegawaiResource extends Resource
                 ->openable()
                 ->directory('pegawai_photos')
                 ->removeUploadedFileButtonPosition('right')
-                ->visibility('public'),
+                ->visibility('public')
+                ->acceptedFileTypes(['image/jpeg', 'image/png'])
+                            ->afterStateUpdated(function ($state, $record, callable $set, callable $get) {
+                                // Hapus file lama kalo upload file baru
+                                if ($state && $record && $record->foto_pegawai) {
+                                    Storage::disk('public')->delete($record->foto_pegawai);
+                                }
+                            })
+                            ->deleteUploadedFileUsing(function ($record) {
+                                // Hapus file kalo tombol remove diklik
+                                if ($record && $record->foto_pegawai) {
+                                    Storage::disk('public')->delete($record->foto_pegawai);
+                                    $record->foto_pegawai = null;
+                                    $record->save();
+                                }
+                            }),
             Forms\Components\Toggle::make('create_user_account')
                 ->label('Buat Akun Pengguna')
                 ->reactive()
@@ -175,9 +194,11 @@ class PegawaiResource extends Resource
                 ->label('Konfirmasi Kata Sandi')
                 ->visible(fn ($get) => $get('create_user_account'))
                 ->validationMessages([
-                    'required' => 'Konfirmasi kata sandi wajib diisi',
-                    'same' => 'Konfirmasi kata sandi tidak cocok',
-                ]),
+                        'required' => 'Konfirmasi kata sandi wajib diisi',
+                        'same' => 'Konfirmasi kata sandi tidak cocok',
+                        ]),
+            
+            
             ])
                 ]);
     }
@@ -277,7 +298,7 @@ class PegawaiResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            PosisiKepegawaianRelationManager::class,
         ];
     }
 

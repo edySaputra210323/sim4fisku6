@@ -2,17 +2,19 @@
 
 namespace App\Filament\Admin\Clusters\Master\Resources;
 
-use App\Filament\Admin\Clusters\Master;
-use App\Filament\Admin\Clusters\Master\Resources\UnitResource\Pages;
-use App\Filament\Admin\Clusters\Master\Resources\UnitResource\RelationManagers;
-use App\Models\Unit;
+use stdClass;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\Unit;
 use Filament\Tables;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use App\Filament\Admin\Clusters\Master;
+use Filament\Tables\Contracts\HasTable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Admin\Clusters\Master\Resources\UnitResource\Pages;
+use App\Filament\Admin\Clusters\Master\Resources\UnitResource\RelationManagers;
 
 class UnitResource extends Resource
 {
@@ -22,25 +24,93 @@ class UnitResource extends Resource
 
     protected static ?string $cluster = Master::class;
 
+    protected static ?int $navigationSort = 4;
+
+    protected static ?string $navigationLabel = 'Unit';
+
+    protected static ?string $modelLabel = 'Unit';
+
+    protected static ?string $pluralModelLabel = 'Unit';
+
+    protected static ?string $slug = 'unit';
+
     public static function form(Form $form): Form
     {
         return $form
+            ->inlineLabel()
             ->schema([
+                Forms\Components\Section::make()
+                    ->schema([
                 Forms\Components\TextInput::make('nm_unit')
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->label('Nama Unit')
+                    ->placeholder('Contoh: Unit Sekolah Menengah Pertama Islam Terpadu')
+                    ->required()
+                    // ->extraInputAttributes([
+                    //     'oninput' => 'this.value = this.value.toUpperCase()',
+                    // ])
+                ->validationMessages([
+                    'required' => ' Nama unit tidak boleh kosong',
+                    ]),
                 Forms\Components\TextInput::make('kode_unit')
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->label('Kode Unit')
+                    ->placeholder('Contoh: SMPIT')
+                    ->required()
+                    // ->extraInputAttributes([
+                    //     'oninput' => 'this.value = this.value.toUpperCase()',
+                    // ])
+                ->validationMessages([
+                    'required' => 'Kode unit tidak boleh kosong',
+                    ]),
+                    ])
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query) {
+            return $query
+            ->orderBy('nm_unit', 'asc');
+            })
+            ->recordAction(null)
+            ->recordUrl(null)
+            ->extremePaginationLinks()
+            ->paginated([5, 10, 20, 50])
+            ->defaultPaginationPageOption(10)
+            ->striped()
+            ->recordClasses(function () {
+            $classes = 'table-vertical-align-top ';
+            return $classes;
+        })
+        // ->groups([
+        //     Tables\Grouping\Group::make('nm_jabatan')
+        //         ->label('Jabatan'),
+        // ])
             ->columns([
+                 Tables\Columns\TextColumn::make('index')
+                    ->label('No')
+                    ->width('1%')
+                    ->alignCenter()
+                    ->state(
+                        static function (HasTable $livewire, stdClass $rowLoop): string {
+                            return (string) (
+                                $rowLoop->iteration +
+                                (intval($livewire->getTableRecordsPerPage()) * (
+                                    intval($livewire->getTablePage()) - 1
+                                ))
+                            );
+                        }
+                    ),
                 Tables\Columns\TextColumn::make('nm_unit')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable()
+                    ->label('Nama Unit'),
                 Tables\Columns\TextColumn::make('kode_unit')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable()
+                    ->label('Kode Unit'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -54,8 +124,15 @@ class UnitResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->iconButton()
+                    ->color('warning')
+                    ->icon('heroicon-m-pencil-square'),
+                Tables\Actions\DeleteAction::make()
+                    ->iconButton()
+                    ->color('danger')
+                    ->icon('heroicon-m-trash')
+                    ->modalHeading('Hapus Jabatan'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

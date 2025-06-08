@@ -2,17 +2,19 @@
 
 namespace App\Filament\Admin\Clusters\Master\Resources;
 
-use App\Filament\Admin\Clusters\Master;
-use App\Filament\Admin\Clusters\Master\Resources\JabatanResource\Pages;
-use App\Filament\Admin\Clusters\Master\Resources\JabatanResource\RelationManagers;
-use App\Models\Jabatan;
+use stdClass;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Jabatan;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use App\Filament\Admin\Clusters\Master;
+use Filament\Tables\Contracts\HasTable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Admin\Clusters\Master\Resources\JabatanResource\Pages;
+use App\Filament\Admin\Clusters\Master\Resources\JabatanResource\RelationManagers;
 
 class JabatanResource extends Resource
 {
@@ -22,22 +24,77 @@ class JabatanResource extends Resource
 
     protected static ?string $cluster = Master::class;
 
+    protected static ?int $navigationSort = 5;
+
+    protected static ?string $navigationLabel = 'Jabatan';
+
+    protected static ?string $modelLabel = 'Jabatan';
+
+    protected static ?string $pluralModelLabel = 'Jabatan';
+
+    protected static ?string $slug = 'jabatan';
+
     public static function form(Form $form): Form
     {
         return $form
+            ->inlineLabel()
             ->schema([
+                Forms\Components\Section::make()
+                    ->schema([
                 Forms\Components\TextInput::make('nm_jabatan')
+                    ->label('Jabatan')
+                    ->placeholder('Contoh: Wali Kelas IX A')
                     ->required()
-                    ->maxLength(255),
+                    // ->extraInputAttributes([
+                    //     'oninput' => 'this.value = this.value.toUpperCase()',
+                    // ])
+                ->validationMessages([
+                    'required' => 'Jabatan tidak boleh kosong',
+                    ])
+                    ])
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+        ->modifyQueryUsing(function (Builder $query) {
+            return $query
+                ->orderBy('nm_jabatan', 'asc');
+        })
+        ->recordAction(null)
+        ->recordUrl(null)
+        ->extremePaginationLinks()
+        ->paginated([5, 10, 20, 50])
+        ->defaultPaginationPageOption(10)
+        ->striped()
+        ->recordClasses(function () {
+            $classes = 'table-vertical-align-top ';
+            return $classes;
+        })
+        // ->groups([
+        //     Tables\Grouping\Group::make('nm_jabatan')
+        //         ->label('Jabatan'),
+        // ])
             ->columns([
+                Tables\Columns\TextColumn::make('index')
+                    ->label('No')
+                    ->width('1%')
+                    ->alignCenter()
+                    ->state(
+                        static function (HasTable $livewire, stdClass $rowLoop): string {
+                            return (string) (
+                                $rowLoop->iteration +
+                                (intval($livewire->getTableRecordsPerPage()) * (
+                                    intval($livewire->getTablePage()) - 1
+                                ))
+                            );
+                        }
+                    ),
                 Tables\Columns\TextColumn::make('nm_jabatan')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable()
+                    ->label('Jabatan'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -51,8 +108,15 @@ class JabatanResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->iconButton()
+                    ->color('warning')
+                    ->icon('heroicon-m-pencil-square'),
+                Tables\Actions\DeleteAction::make()
+                    ->iconButton()
+                    ->color('danger')
+                    ->icon('heroicon-m-trash')
+                    ->modalHeading('Hapus Jabatan'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
