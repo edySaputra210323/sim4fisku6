@@ -2,16 +2,19 @@
 
 namespace App\Filament\Admin\Resources;
 
-use App\Filament\Admin\Resources\PosisiKepegawaianResource\Pages;
-use App\Filament\Admin\Resources\PosisiKepegawaianResource\RelationManagers;
-use App\Models\PosisiKepegawaian;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\Unit;
 use Filament\Tables;
+use App\Models\Jabatan;
+use App\Models\Pegawai;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use App\Models\PosisiKepegawaian;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Admin\Resources\PosisiKepegawaianResource\Pages;
+use App\Filament\Admin\Resources\PosisiKepegawaianResource\RelationManagers;
 
 class PosisiKepegawaianResource extends Resource
 {
@@ -33,15 +36,21 @@ class PosisiKepegawaianResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('pegawai_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('jabatan_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('unit_id')
-                    ->required()
-                    ->numeric(),
+                Forms\Components\Select::make('pegawai_id')
+                            ->label('Nama Pegawai')
+                            ->placeholder('Pilih Nama Pegawai')
+                            ->options(Pegawai::all()->pluck('nm_pegawai', 'id'))
+                            ->searchable(),
+                Forms\Components\Select::make('jabatan_id')
+                            ->label('Jabatan')
+                            ->placeholder('Pilih Jabatan')
+                            ->options(Jabatan::all()->pluck('nm_jabatan', 'id'))
+                            ->searchable(),
+                Forms\Components\Select::make('unit_id')
+                            ->label('Unit')
+                            ->placeholder('Pilih Unit')
+                            ->options(Unit::all()->pluck('nm_unit', 'id'))
+                            ->searchable(),
                 Forms\Components\TextInput::make('status')
                     ->required(),
                 Forms\Components\TextInput::make('no_sk_pengangkatan')
