@@ -26,7 +26,9 @@ class PegawaiResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
-    protected static ?string $navigationLabel = 'Pegawai';
+    protected static ?string $navigationGroup = 'Pengelolaan Pegawai';
+
+    protected static ?string $navigationLabel = 'Data Pegawai';
 
     protected static ?string $modelLabel = 'Pegawai';
 
@@ -300,7 +302,7 @@ class PegawaiResource extends Resource
     public static function getRelations(): array
     {
         return [
-            PosisiKepegawaianRelationManager::class,
+            //
         ];
     }
 
