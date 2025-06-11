@@ -156,20 +156,21 @@ class PegawaiResource extends Resource
                 ->removeUploadedFileButtonPosition('right')
                 ->visibility('public')
                 ->acceptedFileTypes(['image/jpeg', 'image/png'])
-                            ->afterStateUpdated(function ($state, $record, callable $set, callable $get) {
-                                // Hapus file lama kalo upload file baru
-                                if ($state && $record && $record->foto_pegawai) {
-                                    Storage::disk('public')->delete($record->foto_pegawai);
-                                }
-                            })
-                            ->deleteUploadedFileUsing(function ($record) {
-                                // Hapus file kalo tombol remove diklik
-                                if ($record && $record->foto_pegawai) {
-                                    Storage::disk('public')->delete($record->foto_pegawai);
-                                    $record->foto_pegawai = null;
-                                    $record->save();
-                                }
-                            }),
+                ->default(function ($record) {
+                    return $record?->foto_pegawai; // Ambil nilai dari model
+                })
+                ->afterStateUpdated(function ($state, $record, callable $set, callable $get) {
+                    if ($state && $record && $record->foto_pegawai) {
+                        Storage::disk('public')->delete($record->foto_pegawai);
+                    }
+                })
+                ->deleteUploadedFileUsing(function ($record) {
+                    if ($record && $record->foto_pegawai) {
+                        Storage::disk('public')->delete($record->foto_pegawai);
+                        $record->foto_pegawai = null;
+                        $record->save();
+                    }
+                }),
             Forms\Components\Toggle::make('create_user_account')
                 ->label('Buat Akun Pengguna')
                 ->reactive()

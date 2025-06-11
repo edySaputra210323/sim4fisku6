@@ -31,24 +31,28 @@ class Pegawai extends Model
         'jenis_kelamin' => 'string',
     ];
 
-    // Boot method untuk handle event
-    protected static function boot()
-    {
-        parent::boot();
-
-        // Event deleting
-        static::deleting(function ($pegawai) {
-            // Hapus file foto dari storage
-            if ($pegawai->foto_pegawai) {
+// Boot method untuk handle event
+protected static function boot()
+{
+    parent::boot();
+    // Event deleting
+    static::deleting(function ($pegawai) {
+        // Hapus file foto dari storage
+        if ($pegawai->foto_pegawai) {
+            try {
                 Storage::disk('public')->delete($pegawai->foto_pegawai);
+                \Log::info("File foto pegawai dihapus: {$pegawai->foto_pegawai}");
+            } catch (\Exception $e) {
+                \Log::warning("Gagal menghapus file foto pegawai: {$pegawai->foto_pegawai}, Error: {$e->getMessage()}");
             }
+        }
 
-            // Hapus user terkait (jika ada)
-            if ($pegawai->user) {
-                $pegawai->user->delete();
-            }
-        });
-    }
+        // Hapus user terkait (jika ada)
+        if ($pegawai->user) {
+            $pegawai->user->delete();
+        }
+    });
+}
 
     public function getTempatTanggalLahirAttribute()
     {
@@ -63,9 +67,9 @@ class Pegawai extends Model
     }
 
     // Accessor untuk foto_pegawai
-    public function getFotoPegawaiAttribute($value)
+    public function getFotoPegawaiUrlAttribute()
     {
-        return $value ? asset('storage/' . $value) : asset('images/no_pic.png');
+        return $this->foto_pegawai ? Storage::url($this->foto_pegawai) : asset('images/no_pic.jpg');
     }
 
     public function user()

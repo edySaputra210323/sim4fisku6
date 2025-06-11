@@ -36,6 +36,8 @@ class PosisiKepegawaianResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Section::make()
+                    ->schema([
                 Forms\Components\Select::make('pegawai_id')
                             ->label('Nama Pegawai')
                             ->placeholder('Pilih Nama Pegawai')
@@ -56,8 +58,22 @@ class PosisiKepegawaianResource extends Resource
                 Forms\Components\TextInput::make('no_sk_pengangkatan')
                     ->maxLength(255),
                 Forms\Components\DatePicker::make('start_date')
-                    ->required(),
-                Forms\Components\DatePicker::make('end_date'),
+                    ->label('Tanggal Pengangkatan')
+                    ->required()
+                    ->native(false)
+                    ->displayFormat('d/m/Y')
+                    ->validationMessages([
+                        'required' => 'Tanggal Pengangkatan tidak boleh kosong',
+                    ]),
+                Forms\Components\DatePicker::make('end_date')
+                    ->label('Tanggal Pengunduran Diri / Akhir Masa Jabatan')
+                    ->required()
+                    ->native(false)
+                    ->displayFormat('d/m/Y')
+                    ->validationMessages([
+                        'required' => 'Tanggal Pengunduran Diri tidak boleh kosong',
+                    ]),
+                ])
             ]);
     }
 
