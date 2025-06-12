@@ -77,6 +77,23 @@ protected static function boot()
         return $this->belongsTo(User::class);
     }
 
+    // Relasi ke SuratMasuk (untuk created_by dan updated_by)
+    public function createdSuratMasuk()
+    {
+        return $this->hasMany(SuratMasuk::class, 'created_by');
+    }
+
+    public function updatedSuratMasuk()
+    {
+        return $this->hasMany(SuratMasuk::class, 'updated_by');
+    }
+
+    // Relasi ke SuratMasuk (untuk pegawai_id)
+    public function suratMasuk()
+    {
+        return $this->hasMany(SuratMasuk::class, 'pegawai_id');
+    }
+
     public function posisiKepegawaian()
     {
         return $this->hasMany(PosisiKepegawaian::class);
