@@ -67,12 +67,8 @@ class PosisiKepegawaianResource extends Resource
                     ]),
                 Forms\Components\DatePicker::make('end_date')
                     ->label('Tanggal Pengunduran Diri / Akhir Masa Jabatan')
-                    ->required()
                     ->native(false)
                     ->displayFormat('d/m/Y')
-                    ->validationMessages([
-                        'required' => 'Tanggal Pengunduran Diri tidak boleh kosong',
-                    ]),
                 ])
             ]);
     }
