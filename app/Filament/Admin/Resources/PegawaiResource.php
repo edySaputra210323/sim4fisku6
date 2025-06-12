@@ -26,6 +26,8 @@ class PegawaiResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $navigationGroup = 'Pengelolaan Pegawai';
 
     protected static ?string $navigationLabel = 'Data Pegawai';
@@ -265,7 +267,8 @@ class PegawaiResource extends Resource
                     ->searchable()
                     ->label('Email'),
                 Tables\Columns\IconColumn::make('status')
-                    ->boolean(),
+                    ->boolean()
+                    ->label('Status'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
