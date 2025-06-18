@@ -281,7 +281,7 @@ class SuratKeluarResource extends Resource
                     ->default($activeSemester ? $activeSemester->id : null),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
+            Tables\Actions\EditAction::make()
                 ->iconButton()
                 ->color('warning')
                 ->tooltip('Ubah Data')

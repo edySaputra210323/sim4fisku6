@@ -2,24 +2,26 @@
 
 namespace App\Models;
 
-use App\Models\Pegawai;
+use App\Models\User;
+use App\Models\Semester;
+use App\Models\TahunAjaran;
 use Illuminate\Database\Eloquent\Model;
 
 class SuratMasuk extends Model
 {
     protected $table = 'surat_masuk';
     protected $fillable = [
-        'pegawai_id',
+        'dibuat_oleh_id',
         'nm_pengirim',
         'tgl_terima',
         'no_surat',
         'tgl_surat',
         'perihal',
-        'asal_surat',
+        'tujuan_surat',
         'file_surat',
         'status',
-        'created_by',
-        'updated_by',
+        'semester_id',
+        'th_ajaran_id',
     ];
 
     protected $casts = [
@@ -27,39 +29,18 @@ class SuratMasuk extends Model
         'tgl_surat' => 'date',
     ];
 
-    // Relasi ke Pegawai untuk pegawai_id
-    public function pegawai()
+    public function user()
     {
-        return $this->belongsTo(Pegawai::class, 'pegawai_id');
+        return $this->belongsTo(User::class, 'dibuat_oleh_id');
     }
 
-    // Relasi ke Pegawai untuk created_by
-    public function createdBy()
+    public function tahunAjaran()
     {
-        return $this->belongsTo(Pegawai::class, 'created_by');
+        return $this->belongsTo(TahunAjaran::class, 'th_ajaran_id');
     }
 
-    // Relasi ke Pegawai untuk updated_by
-    public function updatedBy()
+    public function semester()
     {
-        return $this->belongsTo(Pegawai::class, 'updated_by');
+        return $this->belongsTo(Semester::class, 'semester_id');
     }
-
-     // Mengisi created_by dan updated_by secara otomatis
-     protected static function boot()
-     {
-         parent::boot();
- 
-         static::creating(function ($model) {
-             if (auth()->check() && auth()->user()->pegawai) {
-                 $model->created_by = auth()->user()->pegawai->id;
-             }
-         });
- 
-         static::updating(function ($model) {
-             if (auth()->check() && auth()->user()->pegawai) {
-                 $model->updated_by = auth()->user()->pegawai->id;
-             }
-         });
-     }
 }

@@ -13,17 +13,17 @@ return new class extends Migration
     {
         Schema::create('surat_masuk', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pegawai_id')->constrained('pegawai')->nullOnDelete();
+            $table->foreignId('dibuat_oleh_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('nm_pengirim', 255)->nullable();
             $table->date('tgl_terima')->nullable();
             $table->string('no_surat', 50)->nullable()->unique();
             $table->date('tgl_surat')->nullable();
             $table->string('perihal', 255)->required();
-            $table->string('asal_surat', 255)->nullable();
+            $table->string('tujuan_surat', 255)->nullable();
             $table->string('file_surat', 255)->nullable();
             $table->enum('status', ['diterima', 'diproses', 'selesai'])->default('diterima');
-            $table->foreignId('created_by')->nullable()->constrained('pegawai')->nullOnDelete();
-            $table->foreign_id('updated_by')->nullable()->constrained('pegawai')->nullOnDelete();
+            $table->foreignId('semester_id')->nullable()->constrained('semester')->nullOnDelete();
+            $table->foreignId('th_ajaran_id')->nullable()->constrained('tahun_ajaran')->nullOnDelete();
             $table->timestamps();
         });
     }

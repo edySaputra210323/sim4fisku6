@@ -42,7 +42,7 @@ class PegawaiResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make()
+            Forms\Components\Section::make()
                     ->schema([
             Forms\Components\TextInput::make('nik')
                     ->label('NIK')
