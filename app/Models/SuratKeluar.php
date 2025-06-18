@@ -7,6 +7,7 @@ use App\Models\Semester;
 use App\Models\TahunAjaran;
 use App\Models\KategoriSurat;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SuratKeluar extends Model
@@ -27,6 +28,23 @@ class SuratKeluar extends Model
         'th_ajaran_id',
         'nomor_urut',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Event deleting
+        static::deleting(function ($suratKeluar) {
+            if ($suratKeluar->dokumen) {
+                try {
+                    Storage::disk('public')->delete($suratKeluar->dokumen);
+                    \Log::info("File surat keluar dihapus: {$suratKeluar->dokumen}");
+                } catch (\Exception $e) {
+                    \Log::error("Gagal menghapus file surat keluar: {$suratKeluar->dokumen}, Error: {$e->getMessage()}");
+                }
+            }
+        });
+    }
 
     public function kategoriSurat()
     {

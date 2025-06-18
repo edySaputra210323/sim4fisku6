@@ -290,7 +290,7 @@ class PegawaiResource extends Resource
                     ->iconButton()
                     ->color('danger')
                     ->icon('heroicon-m-trash')
-                    ->modalHeading('Hapus Bank'),
+                    ->modalHeading('Hapus Pegawai'),
                 Tables\Actions\ViewAction::make()
                 ->iconButton()
                     ->color('primary')

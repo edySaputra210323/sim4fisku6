@@ -201,6 +201,7 @@ class SuratKeluarResource extends Resource
                             ->required()
                             ->columnSpanFull()
                             ->disabled()
+                            ->hidden()
                             ->placeholder('Nomor surat akan otomatis terisi setelah memilih tanggal dan kategori')
                             ->unique(table: SuratKeluar::class, ignoreRecord: true),
                     ])->columns(2)
@@ -247,6 +248,8 @@ class SuratKeluarResource extends Resource
                 TextColumn::make('No')
                     ->rowIndex(),
                 TextColumn::make('no_surat')
+                    ->copyable()
+                    ->copyMessage('Copy no surat keluar berhasil')
                     ->searchable(),
                 TextColumn::make('perihal'),
                 TextColumn::make('kategoriSurat.kategori')

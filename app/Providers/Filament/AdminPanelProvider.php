@@ -6,9 +6,11 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\Widgets;
 use Filament\PanelProvider;
+use App\Helpers\InspiringID;
 use Filament\Enums\ThemeMode;
 use Filament\Support\Colors\Color;
 use App\Filament\Admin\Pages\Auth\Login;
+use Orion\FilamentGreeter\GreeterPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -34,8 +36,12 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Blue,
             ])
+            ->breadcrumbs(false)
+            ->maxContentWidth('full')
             ->plugin(SimpleLightBoxPlugin::make())
             ->brandName(env('APP_NAME'))
+            ->maxContentWidth('full')
+            ->sidebarCollapsibleOnDesktop()
             ->brandLogo(asset('images/logo.png'))
             ->favicon(asset('favicons/android-chrome-192x192.png'))
             ->brandLogoHeight(fn() => request()->route()->getName() == 'filament.admin.auth.login' ? '7rem' : '3rem')
@@ -47,8 +53,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\\Filament\\Admin\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                // Widgets\AccountWidget::class,
+                // Widgets\FilamentInfoWidget::class,
             ])
             ->discoverClusters(in: app_path('Filament/Admin/Clusters'), for: 'App\\Filament\\Admin\\Clusters')
             ->plugins([
@@ -68,7 +74,27 @@ class AdminPanelProvider extends PanelProvider
                         'default' => 1,
                         'sm' => 2,
                     ]),
+                GreeterPlugin::make()
+                    ->message('Welcome,')
+                    ->name(function () {
+                        $data = '';
+                        $data .= auth()->user()->name;
+                        if (!auth()->user()->hasRole(['superadmin', 'admin'])) {
+                            $roleSlug = auth()->user()->getRoleNames()->first();
+                            $formattedRoleName = strtoupper(str_replace('-', ' ', $roleSlug));
+                            $data .= ' [' . $formattedRoleName . ']';
+                        }
+                        return $data;
+                    })
+                    ->title(function () {
+                        $data = InspiringID::quote();
+                        return strip_tags($data);
+                    })
+                    ->avatar(size: 'w-16 h-16', url: 'https://avatarfiles.alphacoders.com/236/236674.jpg')
+                    ->sort(-1)
+                    ->columnSpan('full'),
             ])
+            
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->middleware([
                 EncryptCookies::class,

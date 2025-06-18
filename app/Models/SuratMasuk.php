@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Semester;
 use App\Models\TahunAjaran;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class SuratMasuk extends Model
 {
@@ -28,6 +29,24 @@ class SuratMasuk extends Model
         'tgl_terima' => 'date',
         'tgl_surat' => 'date',
     ];
+
+    // Boot method untuk handle event
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Event deleting
+        static::deleting(function ($suratMasuk) {
+            if ($suratMasuk->file_surat) {
+                try {
+                    Storage::disk('public')->delete($suratMasuk->file_surat);
+                    \Log::info("File surat masuk dihapus: {$suratMasuk->file_surat}");
+                } catch (\Exception $e) {
+                    \Log::error("Gagal menghapus file surat masuk: {$suratMasuk->file_surat}, Error: {$e->getMessage()}");
+                }
+            }
+        });
+    }
 
     public function user()
     {

@@ -12,6 +12,7 @@ use Illuminate\Support\HtmlString;
 use Filament\Forms\Components\Section;
 use Filament\Support\Enums\FontWeight;
 use Filament\Notifications\Notification;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Admin\Resources\SuratMasukResource\Pages;
@@ -240,7 +241,18 @@ class SuratMasukResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+            SelectFilter::make('th_ajaran_id')
+                ->label('Tahun Ajaran')
+                ->relationship('tahunAjaran', 'th_ajaran')
+                ->searchable()
+                ->preload()
+                ->default($activeTahunAjaran ? $activeTahunAjaran->id : null),
+            SelectFilter::make('semester_id')
+                ->label('Semester')
+                ->relationship('semester', 'nm_semester')
+                ->searchable()
+                ->preload()
+                ->default($activeSemester ? $activeSemester->id : null),
             ])
             ->actions([
             Tables\Actions\Action::make('lihat_dokumen')
