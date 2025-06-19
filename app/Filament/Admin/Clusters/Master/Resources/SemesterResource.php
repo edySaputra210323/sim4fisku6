@@ -67,12 +67,18 @@ class SemesterResource extends Resource
                             })
                             ->disabled(!$isTahunAjaranActive)
                             ->rules(['exists:tahun_ajaran,id']),
-                        Forms\Components\TextInput::make('nm_semester')
+                        Forms\Components\Select::make('nm_semester')
+                            ->placeholder('Pilih Semester')
                             ->label('Nama Semester')
+                            ->options([
+                                'Ganjil' => 'Ganjil',
+                                'Genap' => 'Genap',
+                            ])
                             ->required()
-                            ->maxLength(255)
-                            ->placeholder('Contoh: Ganjil atau Genap')
-                            ->disabled(!$isTahunAjaranActive),
+                            ->disabled(!$isTahunAjaranActive)
+                            ->validationMessages([
+                                'required' => 'Nama semester wajib diisi',
+                                ]),
                         Forms\Components\DatePicker::make('periode_mulai')
                             ->label('Periode Mulai')
                             ->nullable()

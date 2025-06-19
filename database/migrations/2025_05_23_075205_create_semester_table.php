@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('semester', function (Blueprint $table) {
             $table->id();
             $table->foreignId('th_ajaran_id')->nullable()->constrained('tahun_ajaran')->nullOnDelete();
-            $table->string('nm_semester',10);
+            $table->enum('nm_semester',['Ganjil','Genap']);
             $table->date('periode_mulai')->nullable();
             $table->date('periode_akhir')->nullable();
             $table->boolean('status')->default(false);
