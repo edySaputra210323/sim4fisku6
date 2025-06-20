@@ -7,6 +7,7 @@ use Filament\Tables;
 use Filament\Forms\Form;
 use App\Models\SuratMasuk;
 use Filament\Tables\Table;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Resources\Resource;
 use Illuminate\Support\HtmlString;
 use Filament\Forms\Components\Section;
@@ -280,7 +281,71 @@ class SuratMasukResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->headerActions([
+                Tables\Actions\Action::make('export_pdf')
+                    ->label('Export Agenda PDF')
+                    ->icon('heroicon-o-document-text')
+                    ->action(function ($livewire) use ($activeTahunAjaran, $activeSemester) {
+                        if (!$activeTahunAjaran || !$activeSemester) {
+                            Notification::make()
+                                ->title('Error')
+                                ->body('Tidak ada tahun ajaran atau semester aktif.')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
+                        $tahunAjaranId = $livewire->tableFilters['th_ajaran_id']['value'] ?? $activeTahunAjaran->id;
+                        $semesterId = $livewire->tableFilters['semester_id']['value'] ?? $activeSemester->id;
+
+                        $tahunAjaran = \App\Models\TahunAjaran::find($tahunAjaranId);
+                        if (!$tahunAjaran) {
+                            Notification::make()
+                                ->title('Error')
+                                ->body('Tahun ajaran tidak ditemukan.')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
+                        $semester = \App\Models\Semester::find($semesterId);
+                        if (!$semester) {
+                            Notification::make()
+                                ->title('Error')
+                                ->body('Semester tidak ditemukan.')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
+                        $suratMasuks = SuratMasuk::where('th_ajaran_id', $tahunAjaranId)
+                            ->where('semester_id', $semesterId)
+                            ->with(['user.pegawai', 'semester', 'tahunAjaran'])
+                            ->orderBy('tgl_terima')
+                            ->get();
+
+                        if ($suratMasuks->isEmpty()) {
+                            Notification::make()
+                                ->title('Peringatan')
+                                ->body('Tidak ada surat masuk untuk periode ini.')
+                                ->warning()
+                                ->send();
+                            return;
+                        }
+
+                        $pdf = Pdf::loadView('pdf.agenda-surat-masuk', [
+                            'suratMasuks' => $suratMasuks,
+                            'semester' => $semester,
+                            'tahunAjaran' => $tahunAjaran,
+                        ])->setPaper('a4', 'landscape');
+
+                        return response()->streamDownload(
+                            fn () => print($pdf->output()),
+                            'agenda-surat-masuk-' . str_replace('/', '-', $tahunAjaran->th_ajaran) . '.pdf'
+                        );
+                    }),
+                ]);
     }
 
     public static function getRelations(): array
