@@ -427,7 +427,7 @@ class SuratKeluarResource extends Resource
                         // Generate PDF
                         $pdf = Pdf::loadView('pdf.agenda-surat-keluar', [
                             'suratKeluars' => $suratKeluars,
-                            'semester' => $semester, // Kirim objek semester
+                            'semester' => $semester,
                             'tahunAjaran' => $tahunAjaran,
                         ])->setPaper('a4', 'landscape');
             
