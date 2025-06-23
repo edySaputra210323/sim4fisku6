@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Agenda Surat Keluar</title>
+    <title>Agenda Surat masuk</title>
     <style>
         body {
         font-family: Arial, sans-serif;
@@ -99,7 +99,7 @@
         <img src="{{ public_path('images/logoSMPIT.jpg') }}" alt="Logo SMPIT AFISKU">
 
         <div class="header-text">
-            <h1>AGENDA SURAT KELUAR</h1>
+            <h1>AGENDA SURAT MASUK</h1>
             <h1>UNIT SMPIT AL-FITYAN CABANG KUBU RAYA</h1>
             <h2>Tahun Ajaran: {{ $tahunAjaran->th_ajaran ?? 'Tidak Diketahui' }} - Semester {{ $semester->nm_semester ?? 'Tidak Diketahui' }}</h2>
         </div>
@@ -113,22 +113,22 @@
         <thead>
             <tr>
                 <th width="5%">No</th>
-                <th width="20%">Nomor Surat</th>
-                <th width="10%">Tanggal</th>
+                <th width="25%">Data Pengirim</th>
+                <th width="10%">Tgl Terima</th>
+                <th width="25%">No. Surat</th>
+                <th width="10%">Tgl Surat</th>
                 <th width="25%">Perihal</th>
-                <th width="20%">Tujuan</th>
-                <th width="20%">Kategori</th>
             </tr>
         </thead>
         <tbody>
-            @forelse ($suratKeluars as $index => $surat)
+            @forelse ($suratMasuks as $index => $surat)
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
-                    <td>{{ $surat->no_surat }}</td>
-                    <td>{{ \Carbon\Carbon::parse($surat->tgl_surat_keluar)->format('d/m/Y') }}</td>
-                    <td>{{ $surat->perihal }}</td>
-                    <td>{{ $surat->tujuan_pengiriman }}</td>
-                    <td>{{ $surat->kategoriSurat->kategori ?? '-' }}</td>
+                    <td>{{ $surat->nm_pengirim ?? '-' }}</td>
+                    <td>{{ \Carbon\Carbon::parse($surat->tgl_terima)->format('d/m/Y') ?? '-' }}</td>
+                    <td>{{ $surat->no_surat ?? '-' }}</td>
+                    <td>{{ \Carbon\Carbon::parse($surat->tgl_surat)->format('d/m/Y') ?? '-' }}</td>
+                    <td>{{ $surat->perihal ?? '-' }}</td>
                 </tr>
             @empty
                 <tr>
