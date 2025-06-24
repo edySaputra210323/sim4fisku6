@@ -39,7 +39,12 @@ return new class extends Migration
             $table->foreignId('jarak_tempuh_id')->constrained('jarak_tempuh')->nullOnDelete();
             $table->foreignId('transport_id')->constrained('transport')->nullOnDelete();
             $table->string('angkatan', 50);
-            $table->date('tanggal_masuk');
+            $table->date('tanggal_masuk')->nullable();
+            $table->date('tanggal_keluar')->nullable();
+            $table->string('lanjut_sma_dimana', 255)->nullable();
+            $table->foreignId('status_id')->constrained('status_siswa')->default(1); // Default: Aktif
+            $table->foreignId('pindah_id')->constrained('mutasi_siswa')->nullable();
+            $table->string('upload_ijazah_sd')->nullable();
             $table->string('foto_siswa', 100)->nullable();
             $table->foreignId('status_siswa_id')->constrained('status_siswa')->nullOnDelete();
             $table->string('nm_ayah', 100)->nullable();
@@ -57,7 +62,9 @@ return new class extends Migration
             $table->foreignId('pekerjaan_wali_id')->constrained('pekerjaan_ortu')->nullOnDelete();
             $table->foreignId('penghasilan_wali_id')->constrained('penghasilan_ortu')->nullOnDelete();
             $table->string('no_hp_wali', 20)->nullable();
+            $table->foreignId('user_id')->constrained('users')->nullable()->cascadeOnDelete();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

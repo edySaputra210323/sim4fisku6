@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('status_siswa', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_status_siswa', 100);
+            $table->string('status', 100);
+            $table->string('deskripsi', 100)->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
