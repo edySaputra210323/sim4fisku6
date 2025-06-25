@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\SuratKeluar;
+use App\Models\SuratMasuk;
 use App\Models\TahunAjaran;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,4 +30,33 @@ class Semester extends Model
     {
         return $this->hasMany(SuratKeluar::class, 'semester_id');
     }
+
+    public function suratMasuk()
+    {
+        return $this->hasMany(SuratMasuk::class, 'semester_id');
+    }
+
+      // Relasi ke MutasiSiswa
+      public function mutasiSiswa()
+      {
+          return $this->hasMany(MutasiSiswa::class, 'semester_id');
+      }
+  
+      // Relasi ke RiwayatKelas
+      public function riwayatKelas()
+      {
+          return $this->hasMany(RiwayatKelas::class, 'semester_id');
+      }
+  
+      // Relasi ke PrestasiPelanggaran
+      public function prestasiPelanggaran()
+      {
+          return $this->hasMany(PrestasiPelanggaran::class, 'semester_id');
+      }
+  
+      // Relasi ke NilaiSiswa
+      public function nilaiSiswa()
+      {
+          return $this->hasMany(NilaiSiswa::class, 'semester_id');
+      }
 }

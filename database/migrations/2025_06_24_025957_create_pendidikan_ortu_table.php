@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('pendidikan_ortu', function (Blueprint $table) {
             $table->id();
             $table->string('jenjang_pendidikan', 100);
-            $table->string('kode_jenjang_pendidikan', 50);
+            $table->string('kode_jenjang_pendidikan', 50)->unique();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

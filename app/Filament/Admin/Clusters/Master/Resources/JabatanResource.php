@@ -24,6 +24,8 @@ class JabatanResource extends Resource
 
     protected static ?string $cluster = Master::class;
 
+    // protected static ?string $navigationGroup = 'Pegawai';
+
     protected static ?int $navigationSort = 5;
 
     protected static ?string $navigationLabel = 'Jabatan';

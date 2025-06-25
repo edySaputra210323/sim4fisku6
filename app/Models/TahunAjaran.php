@@ -48,4 +48,24 @@ class TahunAjaran extends Model
     {
         return $this->hasMany(SuratKeluar::class, 'th_ajaran_id');
     }
+
+    public function mutasiSiswa()
+    {
+        return $this->hasMany(MutasiSiswa::class, 'tahun_ajaran_id');
+    }
+
+    public function riwayatKelas()
+    {
+        return $this->hasMany(RiwayatKelas::class, 'tahun_ajaran_id');
+    }
+
+    public function prestasiPelanggaran()
+    {
+        return $this->hasMany(PrestasiPelanggaran::class, 'tahun_ajaran_id');
+    }
+
+    public function nilaiSiswa()
+    {
+        return $this->hasMany(NilaiSiswa::class, 'tahun_ajaran_id');
+    }
 }

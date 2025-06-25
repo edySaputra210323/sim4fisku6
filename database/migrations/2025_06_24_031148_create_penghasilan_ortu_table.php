@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('penghasilan_ortu', function (Blueprint $table) {
             $table->id();
+            $table->string('penghasilan', 100);
+            $table->string('kode_penghasilan', 50)->unique();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

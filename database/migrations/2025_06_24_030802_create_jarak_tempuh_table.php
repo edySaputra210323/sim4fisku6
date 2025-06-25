@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('jarak_tempuh', function (Blueprint $table) {
             $table->id();
             $table->string('nama_jarak_tempuh', 100);
-            $table->string('kode_jarak_tempuh', 50);
+            $table->string('kode_jarak_tempuh', 50)->unique();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

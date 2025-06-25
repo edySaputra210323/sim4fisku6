@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('kelas', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_kelas', 50); // Contoh: "10A", "11B"
+            $table->string('nama_kelas', 50)->unique(); // Contoh: "10A", "11B"
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
