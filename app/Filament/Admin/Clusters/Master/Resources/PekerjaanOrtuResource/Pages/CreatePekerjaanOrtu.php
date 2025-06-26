@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Admin\Clusters\Master\Resources\JarakTempuhResource\Pages;
+namespace App\Filament\Admin\Clusters\Master\Resources\PekerjaanOrtuResource\Pages;
 
-use App\Filament\Admin\Clusters\Master\Resources\JarakTempuhResource;
+use App\Filament\Admin\Clusters\Master\Resources\PekerjaanOrtuResource;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
-class CreateJarakTempuh extends CreateRecord
+class CreatePekerjaanOrtu extends CreateRecord
 {
-    protected static string $resource = JarakTempuhResource::class;
+    protected static string $resource = PekerjaanOrtuResource::class;
 
     protected function getRedirectUrl(): string
     {

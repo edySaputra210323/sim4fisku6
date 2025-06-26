@@ -11,7 +11,7 @@ class Mapel extends Model
     protected $table = 'mapel';
     protected $fillable = [
         'nama_mapel',
-        'kode_mapel',
+        'excel_column',
     ];
 
     public function nilai_siswa()

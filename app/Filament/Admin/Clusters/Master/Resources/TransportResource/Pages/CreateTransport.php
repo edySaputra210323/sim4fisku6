@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Admin\Clusters\Master\Resources\JarakTempuhResource\Pages;
+namespace App\Filament\Admin\Clusters\Master\Resources\TransportResource\Pages;
 
-use App\Filament\Admin\Clusters\Master\Resources\JarakTempuhResource;
+use App\Filament\Admin\Clusters\Master\Resources\TransportResource;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
-class CreateJarakTempuh extends CreateRecord
+class CreateTransport extends CreateRecord
 {
-    protected static string $resource = JarakTempuhResource::class;
+    protected static string $resource = TransportResource::class;
 
     protected function getRedirectUrl(): string
     {

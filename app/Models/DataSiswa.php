@@ -2,7 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\User;
+use App\Models\Transport;
+use App\Models\NilaiSiswa;
+use App\Models\JarakTempuh;
+use App\Models\MutasiSiswa;
+use App\Models\StatusSiswa;
+use App\Models\RiwayatKelas;
+use App\Models\PekerjaanOrtu;
+use App\Models\PendidikanOrtu;
+use App\Models\PenghasilanOrtu;
+use App\Models\PrestasiPelanggaran;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DataSiswa extends Model
 {

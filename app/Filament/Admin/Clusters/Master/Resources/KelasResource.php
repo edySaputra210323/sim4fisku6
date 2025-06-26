@@ -2,65 +2,61 @@
 
 namespace App\Filament\Admin\Clusters\Master\Resources;
 
-use App\Filament\Admin\Clusters\Master;
-use App\Filament\Admin\Clusters\Master\Resources\JarakTempuhResource\Pages;
-use App\Filament\Admin\Clusters\Master\Resources\JarakTempuhResource\RelationManagers;
-use App\Models\JarakTempuh;
+use stdClass;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Kelas;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use App\Filament\Admin\Clusters\Master;
+use Filament\Tables\Contracts\HasTable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Admin\Clusters\Master\Resources\KelasResource\Pages;
+use App\Filament\Admin\Clusters\Master\Resources\KelasResource\RelationManagers;
 
-class JarakTempuhResource extends Resource
+class KelasResource extends Resource
 {
-    protected static ?string $model = JarakTempuh::class;
+    protected static ?string $model = Kelas::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-arrow-trending-up';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $cluster = Master::class;
 
     protected static ?string $navigationGroup = 'Master Siswa';
 
-    protected static ?string $navigationLabel = 'Jarak Tempuh';
+    protected static ?string $navigationLabel = 'Kelas';
 
-    protected static ?string $modelLabel = 'Jarak Tempuh';
+    protected static ?string $modelLabel = 'Kelas';
 
-    protected static ?string $pluralModelLabel = 'Jarak Tempuh';
+    protected static ?string $pluralModelLabel = 'Kelas';
 
-    protected static ?string $slug = 'jarak-tempuh';
+    protected static ?string $slug = 'kelas';
 
     public static function form(Form $form): Form
     {
+        $form->inlineLabel();
         return $form
             ->schema([
-                Forms\Components\Section::make()
+                Forms\Components\Section::make('Data Kelas')
                     ->schema([
-                Forms\Components\TextInput::make('nama_jarak_tempuh')
-                    ->required()
-                    ->placeholder('Contoh: 10 km')
-                    ->label('Jarak Tempuh')
-                    ->validationMessages([
-                        'required' => 'Jarak Tempuh tidak boleh kosong',
+                        Forms\Components\TextInput::make('nama_kelas')
+                            ->required()
+                            ->maxLength(50)
+                            ->unique(ignoreRecord: true)
+                            ->validationMessages([
+                                'unique' => 'Kelas sudah ada, gunakan nama kelas yang lain',
+                                'required' => 'Nama Kelas tidak boleh kosong',
+                            ]),
                     ]),
-                Forms\Components\TextInput::make('kode_jarak_tempuh')
-                    ->required()
-                    ->label('Kode Jarak Tempuh')
-                    ->validationMessages([
-                        'required' => 'Kode Jarak Tempuh tidak boleh kosong',
-                    ]),
-                ])
             ]);
     }
 
     public static function table(Table $table): Table
     {
-        return $table
-        ->modifyQueryUsing(function (Builder $query) {
-            return $query
-                ->orderBy('nama_jarak_tempuh', 'asc');
+        $table->modifyQueryUsing(function (Builder $query) {
+            return $query->orderBy('nama_kelas', 'asc');
         })
         ->recordAction(null)
         ->recordUrl(null)
@@ -71,11 +67,24 @@ class JarakTempuhResource extends Resource
         ->recordClasses(function () {
             $classes = 'table-vertical-align-top ';
             return $classes;
-        })
+        });
+        return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nama_jarak_tempuh')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('kode_jarak_tempuh')
+                Tables\Columns\TextColumn::make('index')
+                ->label('No')
+                ->width('1%')
+                ->alignCenter()
+                ->state(
+                    static function (HasTable $livewire, stdClass $rowLoop): string {
+                        return (string) (
+                            $rowLoop->iteration +
+                            (intval($livewire->getTableRecordsPerPage()) * (
+                                intval($livewire->getTablePage()) - 1
+                            ))
+                        );
+                    }
+                ),
+                Tables\Columns\TextColumn::make('nama_kelas')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -94,15 +103,8 @@ class JarakTempuhResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
-                    ->iconButton()
-                    ->color('warning')
-                    ->icon('heroicon-m-pencil-square'),
-                Tables\Actions\DeleteAction::make()
-                    ->iconButton()
-                    ->color('danger')
-                    ->icon('heroicon-m-trash')
-                    ->modalHeading('Hapus Jarak Tempuh'),
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -123,10 +125,10 @@ class JarakTempuhResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListJarakTempuhs::route('/'),
-            'create' => Pages\CreateJarakTempuh::route('/create'),
-            'view' => Pages\ViewJarakTempuh::route('/{record}'),
-            'edit' => Pages\EditJarakTempuh::route('/{record}/edit'),
+            'index' => Pages\ListKelas::route('/'),
+            'create' => Pages\CreateKelas::route('/create'),
+            'view' => Pages\ViewKelas::route('/{record}'),
+            'edit' => Pages\EditKelas::route('/{record}/edit'),
         ];
     }
 

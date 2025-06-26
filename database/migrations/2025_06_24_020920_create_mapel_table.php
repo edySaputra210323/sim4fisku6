@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('mapel', function (Blueprint $table) {
             $table->id();
             $table->string('nama_mapel', 100);
-            $table->string('kode_mapel', 20)->unique();
+            $table->string('excel_column', 20)->unique();
             $table->timestamps();
             $table->softDeletes();
         });

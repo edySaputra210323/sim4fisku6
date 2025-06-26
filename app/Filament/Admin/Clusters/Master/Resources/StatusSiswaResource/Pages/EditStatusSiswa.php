@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Filament\Admin\Clusters\Master\Resources\JarakTempuhResource\Pages;
+namespace App\Filament\Admin\Clusters\Master\Resources\StatusSiswaResource\Pages;
 
-use App\Filament\Admin\Clusters\Master\Resources\JarakTempuhResource;
+use App\Filament\Admin\Clusters\Master\Resources\StatusSiswaResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditJarakTempuh extends EditRecord
+class EditStatusSiswa extends EditRecord
 {
-    protected static string $resource = JarakTempuhResource::class;
+    protected static string $resource = StatusSiswaResource::class;
 
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
     }
-    
+
     public function getSubNavigation(): array
     {
         if (filled($cluster = static::getCluster())) {
@@ -23,6 +23,7 @@ class EditJarakTempuh extends EditRecord
 
         return [];
     }
+
     protected function getHeaderActions(): array
     {
         return [

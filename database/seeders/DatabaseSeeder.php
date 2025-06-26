@@ -42,6 +42,12 @@ class DatabaseSeeder extends Seeder
             TahunAjaranSeeder::class,
             UnitSeeder::class,
             JabatanSeeder::class,
+            JarakTempuhSeeder::class,
+            PekerjaanOrtuSeeder::class,
+            PendidikanOrtuSeeder::class,
+            PenghasilanOrtuSeeder::class,
+            TransportSeeder::class,
+            KelasSeeder::class,
         ]);
     }
 
