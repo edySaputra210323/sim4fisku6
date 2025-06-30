@@ -2,16 +2,19 @@
 
 namespace App\Filament\Admin\Resources;
 
+use Filament\Forms;
+use Filament\Tables;
+use Filament\Forms\Form;
+use App\Models\DataSiswa;
+use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use App\Imports\SiswaImportProcessor;
+use Filament\Forms\Components\Section;
+use Illuminate\Database\Eloquent\Builder;
+use EightyNine\ExcelImport\ExcelImportAction;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Admin\Resources\DataSiswaResource\Pages;
 use App\Filament\Admin\Resources\DataSiswaResource\RelationManagers;
-use App\Models\DataSiswa;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class DataSiswaResource extends Resource
 {
@@ -19,13 +22,27 @@ class DataSiswaResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $navigationLabel = 'Data Siswa';
+
+    protected static ?string $modelLabel = 'Data Siswa';
+
+    protected static ?string $pluralModelLabel = 'Data Siswa';
+
+    protected static ?string $slug = 'data-siswa';
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('nama_siswa')
+                    Section::make()
+                        ->schema([
+                            Forms\Components\TextInput::make('nama_siswa')
                     ->required()
-                    ->maxLength(100),
+                    ->maxLength(100)
+                    ->validationMessages([
+                        'required' => 'Nama siswa wajib diisi',
+                    ])
+                    ->columnSpan('full'),
                 Forms\Components\TextInput::make('nis')
                     ->required()
                     ->maxLength(20),
@@ -84,10 +101,6 @@ class DataSiswaResource extends Resource
                 Forms\Components\DatePicker::make('tanggal_keluar'),
                 Forms\Components\TextInput::make('lanjut_sma_dimana')
                     ->maxLength(255),
-                Forms\Components\TextInput::make('upload_ijazah_sd')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('foto_siswa')
-                    ->maxLength(100),
                 Forms\Components\TextInput::make('status_siswa_id')
                     ->required()
                     ->numeric(),
@@ -123,9 +136,26 @@ class DataSiswaResource extends Resource
                     ->maxLength(15),
                 Forms\Components\TextInput::make('user_id')
                     ->numeric(),
-            ]);
+                        ])->columnSpan(2)->columns(2),
+                Section::make()
+                    ->schema([
+                        Forms\Components\FileUpload::make('foto_siswa')
+                            ->label('Foto Siswa')
+                            ->disk('public')
+                            ->directory('siswa')
+                            ->acceptedFileTypes(['image/jpeg', 'image/png']),
+                        Forms\Components\FileUpload::make('upload_ijazah_sd')
+                            ->label('Ijazah SD')
+                            ->disk('public')
+                            ->required()
+                            ->directory('ijazah_sd')
+                            ->acceptedFileTypes(['application/pdf'])
+                            ->validationMessages([
+                                'required' => 'Ijazah SD wajib diisi',
+                            ])
+                    ])->columnSpan(1)->columns(1),
+            ])->columns(3);
     }
-
     public static function table(Table $table): Table
     {
         return $table
@@ -267,6 +297,7 @@ class DataSiswaResource extends Resource
                     Tables\Actions\RestoreBulkAction::make(),
                 ]),
             ]);
+            
     }
 
     public static function getRelations(): array

@@ -44,7 +44,7 @@ return new class extends Migration
             $table->string('lanjut_sma_dimana', 255)->nullable();
             $table->string('upload_ijazah_sd')->nullable();
             $table->string('foto_siswa', 100)->nullable();
-            $table->foreignId('status_siswa_id')->constrained('status_siswa')->default(1); // Default: Aktif;
+            $table->foreignId('status_id')->nullable()->constrained('status_siswa')->default(1)->nullOnDelete(); // Default: Aktif;
             $table->string('nm_ayah', 100)->nullable();
             $table->foreignId('pendidikan_ayah_id')->nullable()->constrained('pendidikan_ortu')->nullOnDelete();
             $table->foreignId('pekerjaan_ayah_id')->nullable()->constrained('pekerjaan_ortu')->nullOnDelete();

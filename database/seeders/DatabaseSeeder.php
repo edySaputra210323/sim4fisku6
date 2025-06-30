@@ -48,6 +48,7 @@ class DatabaseSeeder extends Seeder
             PenghasilanOrtuSeeder::class,
             TransportSeeder::class,
             KelasSeeder::class,
+            StatusSiswaSeeder::class,
         ]);
     }
 
