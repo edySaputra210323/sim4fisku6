@@ -12,14 +12,14 @@ class TransportSeeder extends Seeder
     public function run(): void
     {
         $data = [
-            ['kode' => 'A', 'kendaraan' => 'Jalan Kaki'],
-            ['kode' => 'B', 'kendaraan' => 'Perahu'],
-            ['kode' => 'C', 'kendaraan' => 'Sepeda'],
-            ['kode' => 'D', 'kendaraan' => 'Motor'],
-            ['kode' => 'E', 'kendaraan' => 'Mobil'],
-            ['kode' => 'F', 'kendaraan' => 'Antar-Jemput'],
-            ['kode' => 'G', 'kendaraan' => 'Angkutan Umum'],
-            ['kode' => 'H', 'kendaraan' => 'Lainnya'],
+            ['kode' => 'A', 'kendaraan' => 'JALAN KAKI'],
+            ['kode' => 'B', 'kendaraan' => 'PERAHU'],
+            ['kode' => 'C', 'kendaraan' => 'SEPEDA'],
+            ['kode' => 'D', 'kendaraan' => 'MOTOR'],
+            ['kode' => 'E', 'kendaraan' => 'MOBIL'],
+            ['kode' => 'F', 'kendaraan' => 'ANTAR-JEMPUT'],
+            ['kode' => 'G', 'kendaraan' => 'ANGKUTAN UMUM'],
+            ['kode' => 'H', 'kendaraan' => 'LAINNYA'],
         ];
 
         foreach ($data as $item) {

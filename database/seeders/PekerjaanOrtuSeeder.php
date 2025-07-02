@@ -13,16 +13,16 @@ class PekerjaanOrtuSeeder extends Seeder
     {
         $data = [
             ['kode' => 'A', 'pekerjaan' => 'PNS'],
-            ['kode' => 'B', 'pekerjaan' => 'TNI/Polri'],
-            ['kode' => 'C', 'pekerjaan' => 'Guru/Dosen'],
-            ['kode' => 'D', 'pekerjaan' => 'Dokter'],
-            ['kode' => 'E', 'pekerjaan' => 'Politikus'],
-            ['kode' => 'F', 'pekerjaan' => 'Pegawai Swasta'],
-            ['kode' => 'G', 'pekerjaan' => 'Pedagang/Wiraswasta'],
-            ['kode' => 'H', 'pekerjaan' => 'Petani/Peternak'],
-            ['kode' => 'I', 'pekerjaan' => 'Seniman'],
-            ['kode' => 'J', 'pekerjaan' => 'Buruh'],
-            ['kode' => 'K', 'pekerjaan' => 'Dirumah'],
+            ['kode' => 'B', 'pekerjaan' => 'TNI/POLRI'],
+            ['kode' => 'C', 'pekerjaan' => 'GURU/DOSEN'],
+            ['kode' => 'D', 'pekerjaan' => 'DOKTER'],
+            ['kode' => 'E', 'pekerjaan' => 'POLITIKUS'],
+            ['kode' => 'F', 'pekerjaan' => 'PEGAWAI SWASTA'],
+            ['kode' => 'G', 'pekerjaan' => 'PEDAGANG/WIRASWASTA'],
+            ['kode' => 'H', 'pekerjaan' => 'PETANI/PETERNAK'],
+            ['kode' => 'I', 'pekerjaan' => 'SENIMAN'],
+            ['kode' => 'J', 'pekerjaan' => 'BURUH'],
+            ['kode' => 'K', 'pekerjaan' => 'DIRUMAH'],
         ];
 
         foreach ($data as $item) {

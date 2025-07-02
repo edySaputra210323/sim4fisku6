@@ -24,6 +24,8 @@ class DataSiswa extends Model
         'nama_siswa',
         'nis',
         'nisn',
+        'nik',
+        'virtual_account',
         'no_hp',
         'email',
         'agama',
@@ -70,6 +72,7 @@ class DataSiswa extends Model
         'penghasilan_wali_id',
         'no_hp_wali',
         'user_id',
+        'unit_id',
     ];
 
     protected $casts = [

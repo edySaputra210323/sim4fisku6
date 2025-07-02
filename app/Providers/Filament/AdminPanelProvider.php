@@ -74,12 +74,13 @@ class AdminPanelProvider extends PanelProvider
                         'default' => 1,
                         'sm' => 2,
                     ]),
-                GreeterPlugin::make()
-                    ->message('Welcome,')
+                    
+                    \Orion\FilamentGreeter\GreeterPlugin::make()
+                    ->message('Selamat datang,')
                     ->name(function () {
                         $data = '';
                         $data .= auth()->user()->name;
-                        if (!auth()->user()->hasRole(['superadmin', 'admin'])) {
+                        if (!auth()->user()->hasRole(['superadmin'])) {
                             $roleSlug = auth()->user()->getRoleNames()->first();
                             $formattedRoleName = strtoupper(str_replace('-', ' ', $roleSlug));
                             $data .= ' [' . $formattedRoleName . ']';
@@ -87,12 +88,12 @@ class AdminPanelProvider extends PanelProvider
                         return $data;
                     })
                     ->title(function () {
-                        $data = InspiringID::quote();
+                        $data = \App\Helpers\InspiringID::quote();
                         return strip_tags($data);
                     })
-                    ->avatar(size: 'w-16 h-16', url: 'https://avatarfiles.alphacoders.com/236/236674.jpg')
+                    ->avatar(size: 'w-16 h-16', url: asset('images/no_pic.jpg'))
+                    ->timeSensitive(morningStart: 3, afternoonStart: 12, eveningStart: 15, nightStart: 18)
                     ->sort(-1)
-                    ->columnSpan('full'),
             ])
             
             ->viteTheme('resources/css/filament/admin/theme.css')

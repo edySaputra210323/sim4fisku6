@@ -11,6 +11,7 @@ class Unit extends Model
     protected $fillable = [
         'nm_unit',
         'kode_unit',
+        'deskripsi',
     ];
 
     public function posisiKepegawaian()

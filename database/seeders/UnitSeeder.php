@@ -14,11 +14,11 @@ class UnitSeeder extends Seeder
     public function run(): void
     {
         $units = [
-            ['nm_unit' => 'Taman Kanak-Kanak Islam Terpadu', 'kode_unit' => 'TKIT'],
-            ['nm_unit' => 'Sekolah Dasar Islam Terpadu', 'kode_unit' => 'SDIT'],
-            ['nm_unit' => 'Sekolah Menengah Pertama Islam Terpadu', 'kode_unit' => 'SMPIT'],
-            ['nm_unit' => 'Sekolah Menengah Atas Islam Terpadu', 'kode_unit' => 'SMAIT'],
-            ['nm_unit' => 'Yayasan', 'kode_unit' => 'YYS'],
+            ['nm_unit' => 'TKIT', 'kode_unit' => '01', 'deskripsi' => 'Taman Kanak-Kanak Islam Terpadu'],
+            ['nm_unit' => 'SDIT', 'kode_unit' => '02', 'deskripsi' => 'Sekolah Dasar Islam Terpadu'],
+            ['nm_unit' => 'SMPIT', 'kode_unit' => '03', 'deskripsi' => 'Sekolah Menengah Pertama Islam Terpadu'],
+            ['nm_unit' => 'SMAIT', 'kode_unit' => '04', 'deskripsi' => 'Sekolah Menengah Atas Islam Terpadu'],
+            ['nm_unit' => 'Yayasan', 'kode_unit' => '05', 'deskripsi' => 'Yayasan Al-Fityan Kubu Raya'],
         ];
 
         Unit::insert($units);

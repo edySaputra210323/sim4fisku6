@@ -12,16 +12,16 @@ class PendidikanOrtuSeeder extends Seeder
     public function run(): void
     {
         $data = [
-            ['kode' => 'A', 'pendidikan' => 'Tidak Tamat SD/MI/Paket A'],
-            ['kode' => 'B', 'pendidikan' => 'SD/MI/Paket A'],
-            ['kode' => 'C', 'pendidikan' => 'SMP/MTs/Paket B'],
-            ['kode' => 'D', 'pendidikan' => 'SMA/MA/Paket C'],
-            ['kode' => 'E', 'pendidikan' => 'Diploma 1 & 2'],
-            ['kode' => 'F', 'pendidikan' => 'Diploma 3 & 4'],
-            ['kode' => 'G', 'pendidikan' => 'S.1 (Sarjana)'],
-            ['kode' => 'H', 'pendidikan' => 'S.2 (Magister)'],
-            ['kode' => 'I', 'pendidikan' => 'S.3 (Doktor)'],
-            ['kode' => 'J', 'pendidikan' => 'Lainnya'],
+            ['kode' => 'A', 'pendidikan' => 'TIDAK TAMAT SD/MI/PAKET A'],
+            ['kode' => 'B', 'pendidikan' => 'SD/MI/PAKET A'],
+            ['kode' => 'C', 'pendidikan' => 'SMP/MTS/PAKET B'],
+            ['kode' => 'D', 'pendidikan' => 'SMA/MA/PAKET C'],
+            ['kode' => 'E', 'pendidikan' => 'DIPLOMA 1 & 2'],
+            ['kode' => 'F', 'pendidikan' => 'DIPLOMA 3 & 4'],
+            ['kode' => 'G', 'pendidikan' => 'S.1 (SARJANA)'],
+            ['kode' => 'H', 'pendidikan' => 'S.2 (MAGISTER)'],
+            ['kode' => 'I', 'pendidikan' => 'S.3 (DOKTOR)'],
+            ['kode' => 'J', 'pendidikan' => 'LAINNYA'],
         ];
 
         foreach ($data as $item) {

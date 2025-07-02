@@ -8,8 +8,11 @@ use Filament\Forms\Form;
 use App\Models\DataSiswa;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Illuminate\Support\HtmlString;
 use App\Imports\SiswaImportProcessor;
 use Filament\Forms\Components\Section;
+use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Columns\Layout\Grid;
 use Illuminate\Database\Eloquent\Builder;
 use EightyNine\ExcelImport\ExcelImportAction;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -20,7 +23,7 @@ class DataSiswaResource extends Resource
 {
     protected static ?string $model = DataSiswa::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
     protected static ?string $navigationLabel = 'Data Siswa';
 
@@ -159,20 +162,53 @@ class DataSiswaResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->extremePaginationLinks()
+        ->recordUrl(null)
+        ->paginated([5, 10, 20, 50])
+        ->defaultPaginationPageOption(10)
+        ->striped()
+        ->recordClasses(function () {
+            $classes = 'table-vertical-align-top ';
+            return $classes;
+        })
             ->columns([
-                Tables\Columns\TextColumn::make('nama_siswa')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('nis')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('nisn')
-                    ->searchable(),
+                Tables\Columns\ImageColumn::make('foto_siswa')
+                    ->simpleLightbox()
+                    ->label('Foto')
+                    ->circular()
+                    ->size(60)
+                    ->grow(false)
+                    ->defaultImageUrl(asset('images/no_pic.jpg')),
+                    Tables\Columns\TextColumn::make('nama_siswa')
+                    ->searchable()
+                    ->weight(FontWeight::Bold)
+                    ->label('Nama Siswa')
+                    ->description(function ($record) {
+                        $data = '';
+                        if (!empty($record->nis)) {
+                            $data .= '<small>NIS : ' . $record->nis . '</small>';
+                        }
+                        if (!empty($record->nisn)) {
+                            if ($data != '')
+                                $data .= '<br>';
+                            $data .= '<small>NISN : ' . $record->nisn . '</small>';
+                        }
+                        if (!empty($record->nik)) {
+                            if ($data != '')
+                                $data .= '<br>';
+                            $data .= '<small>NIK : ' . $record->nik . '</small>';
+                        }
+                        return new HtmlString($data);
+                    }),
                 Tables\Columns\TextColumn::make('no_hp')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('agama')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('jenis_kelamin'),
+                Tables\Columns\TextColumn::make('jenis_kelamin')
+                    ->searchable()
+                    ->label('JK'),
                 Tables\Columns\TextColumn::make('tempat_lahir')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('tanggal_lahir')

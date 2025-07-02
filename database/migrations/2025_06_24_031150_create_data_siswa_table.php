@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('data_siswa', function (Blueprint $table) {
             $table->id();
             $table->string('nama_siswa', 100);
-            $table->string('nis', 20)->unique();
-            $table->string('nisn', 20)->unique();
+            $table->string('nis', 20)->unique()->nullable();
+            $table->string('nisn', 20)->unique()->nullable();
+            $table->string('nik', 20)->unique();
+            $table->string('virtual_account', 20)->unique();
             $table->string('no_hp', 15)->nullable();
             $table->string('email', 100)->nullable()->unique();
             $table->string('agama', 50)->nullable();
@@ -27,7 +29,7 @@ return new class extends Migration
             $table->string('kabupaten', 50)->nullable();
             $table->string('kecamatan', 50)->nullable();
             $table->string('kelurahan', 50)->nullable();
-            $table->string('alamat', 100)->nullable();
+            $table->text('alamat')->nullable();
             $table->string('rt', 10)->nullable();
             $table->string('rw', 10)->nullable();
             $table->string('kode_pos', 10)->nullable();
@@ -59,6 +61,7 @@ return new class extends Migration
             $table->foreignId('pendidikan_wali_id')->nullable()->constrained('pendidikan_ortu')->nullOnDelete();
             $table->foreignId('pekerjaan_wali_id')->nullable()->constrained('pekerjaan_ortu')->nullOnDelete();
             $table->foreignId('penghasilan_wali_id')->nullable()->constrained('penghasilan_ortu')->nullOnDelete();
+            $table->foreignId('unit_id')->nullable()->constrained('unit')->nullOnDelete();
             $table->string('no_hp_wali', 15)->nullable();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();

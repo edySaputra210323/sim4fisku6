@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nm_unit')->nullable();
             $table->string('kode_unit')->nullable();
+            $table->text('deskripsi')->nullable();
             $table->timestamps();
         });
     }

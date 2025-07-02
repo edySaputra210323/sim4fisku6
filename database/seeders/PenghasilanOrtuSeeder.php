@@ -12,13 +12,13 @@ class PenghasilanOrtuSeeder extends Seeder
     public function run(): void
     {
         $data = [
-            ['kode' => 'A', 'penghasilan' => '< Rp. 500.000,-'],
-            ['kode' => 'B', 'penghasilan' => 'Rp. 500.000,- s.d Rp. 999.999,-'],
-            ['kode' => 'C', 'penghasilan' => 'Rp. 1.000.000,- s.d Rp. 1.999.999,-'],
-            ['kode' => 'D', 'penghasilan' => 'Rp. 2.000.000,- s.d Rp. 4.999.999,-'],
-            ['kode' => 'E', 'penghasilan' => 'Rp. 5.000.000 s.d Rp. 20.000.000'],
-            ['kode' => 'F', 'penghasilan' => '> Rp. 20.000.000'],
-            ['kode' => 'G', 'penghasilan' => 'Tidak Berpenghasilan'],
+            ['kode' => 'A', 'penghasilan' => '< RP. 500.000,-'],
+            ['kode' => 'B', 'penghasilan' => 'RP. 500.000,- S.D RP. 999.999,-'],
+            ['kode' => 'C', 'penghasilan' => 'RP. 1.000.000,- S.D RP. 1.999.999,-'],
+            ['kode' => 'D', 'penghasilan' => 'RP. 2.000.000,- S.D RP. 4.999.999,-'],
+            ['kode' => 'E', 'penghasilan' => 'RP. 5.000.000 S.D RP. 20.000.000'],
+            ['kode' => 'F', 'penghasilan' => '> RP. 20.000.000'],
+            ['kode' => 'G', 'penghasilan' => 'TIDAK BERPENGHASILAN'],
         ];
 
         foreach ($data as $item) {

@@ -12,11 +12,11 @@ class JarakTempuhSeeder extends Seeder
    public function run(): void
     {
         $data = [
-            ['kode' => 'A', 'jarak' => '0 s.d. 1 Km'],
-            ['kode' => 'B', 'jarak' => '1 s.d. 3 Km'],
-            ['kode' => 'C', 'jarak' => '3 s.d. 5 Km'],
-            ['kode' => 'D', 'jarak' => '5 s.d. 10 Km'],
-            ['kode' => 'E', 'jarak' => 'Lebih dari 10 Km']
+            ['kode' => 'A', 'jarak' => '0 S.D. 1 KM'],
+            ['kode' => 'B', 'jarak' => '1 S.D. 3 KM'],
+            ['kode' => 'C', 'jarak' => '3 S.D. 5 KM'],
+            ['kode' => 'D', 'jarak' => '5 S.D. 10 KM'],
+            ['kode' => 'E', 'jarak' => 'LEBIH DARI 10 KM']
         ];
 
         foreach ($data as $item) {

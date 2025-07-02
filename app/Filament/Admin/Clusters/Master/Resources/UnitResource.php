@@ -65,6 +65,14 @@ class UnitResource extends Resource
                 ->validationMessages([
                     'required' => 'Kode unit tidak boleh kosong',
                     ]),
+                Forms\Components\Textarea::make('deskripsi')
+                    ->rows(3)
+                    ->label('Deskripsi')
+                    ->placeholder('Deskripsi unit')
+                    ->required()
+                    ->validationMessages([
+                        'required' => 'Deskripsi unit tidak boleh kosong',
+                    ]),
                     ])
             ]);
     }
@@ -113,6 +121,10 @@ class UnitResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->label('Kode Unit'),
+                Tables\Columns\TextColumn::make('deskripsi')
+                    ->searchable()
+                    ->sortable()
+                    ->label('Deskripsi'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
