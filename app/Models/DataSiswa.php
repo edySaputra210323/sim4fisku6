@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Transport;
 use App\Models\NilaiSiswa;
@@ -14,6 +15,7 @@ use App\Models\PendidikanOrtu;
 use App\Models\PenghasilanOrtu;
 use App\Models\PrestasiPelanggaran;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DataSiswa extends Model
@@ -80,8 +82,91 @@ class DataSiswa extends Model
         'tanggal_masuk' => 'date',
         'tanggal_keluar' => 'date',
         'jenis_kelamin' => 'string',
-        'yatim_piatu' => 'string',
     ];
+
+    public function getTempatTanggalLahirAttribute()
+    {
+    // Atur locale Carbon ke Indonesia
+    Carbon::setLocale('id');
+
+    // Format tanggal dengan bulan penuh
+    $formattedDate = $this->tanggal_lahir ? $this->tanggal_lahir->translatedFormat('d F Y') : '';
+    $tempatLahir = $this->tempat_lahir ? ucfirst(strtolower($this->tempat_lahir)) : ''; // Ubah tempat_lahir ke lowercase
+
+    return $tempatLahir && $formattedDate ? $tempatLahir . ', ' . $formattedDate : ($tempatLahir ?: $formattedDate);
+    }
+
+    public function getKontakAttribute()
+    {
+        $email = $this->email ?? '';
+        $noHp = $this->no_hp ?? '';
+        
+        // Gabungkan email dan no_hp dengan pemisah baris baru untuk tampilan vertikal
+        return $email && $noHp ? "$email\n$noHp" : ($email ?: $noHp);
+    }
+
+    public function getStatusAttribute(): string
+    {
+        return $this->statussiswa?->aktif  ? 'Aktif'  :
+               ($this->statussiswa?->pindah ? 'Lulus' :
+               ($this->statussiswa?->pindah ? 'Pindah' :
+               ($this->statussiswa?->pindah ? 'Cuti' :
+               ($this->statussiswa?->lulus  ? 'Drop Out'  : '-'))));
+    }
+
+    // Accessor untuk alamat
+    public function getAlamatLengkapAttribute()
+    {
+        $parts = [];
+
+        // Tambahkan alamat (jalan)
+        if (!empty($this->alamat)) {
+            $parts[] = strtolower($this->alamat);
+        }
+
+        // Tambahkan RT dan RW
+        if (!empty($this->rt) && !empty($this->rw)) {
+            $parts[] = strtolower("rt {$this->rt}. rw {$this->rw}");
+        } elseif (!empty($this->rt)) {
+            $parts[] = strtolower("rt {$this->rt}");
+        } elseif (!empty($this->rw)) {
+            $parts[] = strtolower("rw {$this->rw}");
+        }
+
+        // Tambahkan kelurahan
+        if (!empty($this->kelurahan)) {
+            $parts[] = strtolower($this->kelurahan);
+        }
+
+        // Tambahkan kecamatan
+        if (!empty($this->kecamatan)) {
+            $parts[] = strtolower("kec. {$this->kecamatan}");
+        }
+
+        // Tambahkan kabupaten
+        if (!empty($this->kabupaten)) {
+            $parts[] = strtolower(" {$this->kabupaten}");
+        }
+
+        // Tambahkan provinsi
+        if (!empty($this->provinsi)) {
+            $parts[] = strtolower($this->provinsi);
+        }
+
+        // Tambahkan kode pos
+        if (!empty($this->kode_pos)) {
+            $parts[] = strtolower("kode pos: {$this->kode_pos}");
+        }
+
+        // Gabungkan semua bagian dengan koma dan spasi
+        return !empty($parts) ? implode(', ', $parts) : '-';
+    }
+
+    // Accessor untuk foto_siswa
+    public function getFotoSiswaUrlAttribute()
+    {
+        return $this->foto_siswa ? Storage::url($this->foto_siswa) : asset('images/no_pic.jpg');
+    }
 
     // Relasi ke JarakTempuh
     public function jarakTempuh()
@@ -96,7 +181,7 @@ class DataSiswa extends Model
     }
 
     // Relasi ke StatusSiswa
-    public function status()
+    public function statussiswa()
     {
         return $this->belongsTo(StatusSiswa::class, 'status_id');
     }

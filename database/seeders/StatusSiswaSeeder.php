@@ -33,6 +33,18 @@ class StatusSiswaSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'status' => 'Cuti',
+                'deskripsi' => 'Siswa yang mengambil jeda sementara dari studi mereka dengan izin resmi dari sekolah. Mereka berencana untuk kembali melanjutkan pendidikan setelah periode cuti berakhir.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'status' => 'Drop Out',
+                'deskripsi' => 'siswa yang diberhentikan dari sekolah dikarenakan melanggar aturan sekolah atau pelanggaran     kasus besar',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ];
 
         // Masukkan data ke tabel status_siswa

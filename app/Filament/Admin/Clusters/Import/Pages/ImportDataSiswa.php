@@ -71,11 +71,11 @@ class ImportDataSiswa extends Page implements HasTable
                             );
                         }
                     ),
-                Tables\Columns\TextColumn::make('nm_lengkap')
+                Tables\Columns\TextColumn::make('nama_siswa')
                     ->label('Nama Lengkap')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('nip_nup')
-                    ->label('NIP/NUP')
+                Tables\Columns\TextColumn::make('virtual_account')
+                    ->label('No. Virtual Account')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('catatan_gagal')
                     ->label('Catatan')

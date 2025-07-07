@@ -285,7 +285,7 @@ class SiswaImportProcessor implements ToCollection, WithHeadingRow
             }
 
             // Validasi yatim_piatu
-            if (!in_array($row['yatim_piatu'], ['Ya', 'Tidak', null, '', '-', '#N/A'])) {
+            if (!in_array($row['yatim_piatu'], ['Yatim', 'Piatu', 'Yatim Piatu', null, '', '-', '#N/A'])) {
                 if ($errorMessage) $errorMessage .= ", ";
                 $errorMessage .= 'Yatim piatu [' . $row['yatim_piatu'] . '] tidak valid, harus Ya atau Tidak';
             }

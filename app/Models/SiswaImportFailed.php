@@ -13,6 +13,7 @@ class SiswaImportFailed extends Model
         'nama_siswa',
         'nis',
         'nisn',
+        'virtual_account',
         'no_hp',
         'email',
         'agama',

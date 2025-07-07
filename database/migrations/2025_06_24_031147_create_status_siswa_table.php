@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('status_siswa', function (Blueprint $table) {
             $table->id();
             $table->string('status', 100);
-            $table->string('deskripsi', 100)->nullable();
+            $table->text('deskripsi')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nama_siswa', 100);
             $table->string('nis', 20)->unique()->nullable();
             $table->string('nisn', 20)->unique()->nullable();
-            $table->string('nik', 20)->unique();
+            $table->string('nik', 20)->unique()->nullable();
             $table->string('virtual_account', 20)->unique();
             $table->string('no_hp', 15)->nullable();
             $table->string('email', 100)->nullable()->unique();
@@ -33,7 +33,7 @@ return new class extends Migration
             $table->string('rt', 10)->nullable();
             $table->string('rw', 10)->nullable();
             $table->string('kode_pos', 10)->nullable();
-            $table->enum('yatim_piatu', ['Ya', 'Tidak'])->nullable();
+            $table->enum('yatim_piatu', ['Yatim', 'Piatu', 'Yatim Piatu'])->nullable();
             $table->string('penyakit', 100)->nullable();
             $table->string('jumlah_saudara', 10)->nullable();
             $table->string('anak_ke', 10)->nullable();

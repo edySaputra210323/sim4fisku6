@@ -167,172 +167,132 @@ class DataSiswaResource extends Resource
         ->paginated([5, 10, 20, 50])
         ->defaultPaginationPageOption(10)
         ->striped()
+        ->recordAction(null)
         ->recordClasses(function () {
             $classes = 'table-vertical-align-top ';
             return $classes;
         })
             ->columns([
-                Tables\Columns\ImageColumn::make('foto_siswa')
-                    ->simpleLightbox()
-                    ->label('Foto')
-                    ->circular()
-                    ->size(60)
-                    ->grow(false)
-                    ->defaultImageUrl(asset('images/no_pic.jpg')),
-                    Tables\Columns\TextColumn::make('nama_siswa')
-                    ->searchable()
-                    ->weight(FontWeight::Bold)
-                    ->label('Nama Siswa')
-                    ->description(function ($record) {
-                        $data = '';
-                        if (!empty($record->nis)) {
-                            $data .= '<small>NIS : ' . $record->nis . '</small>';
-                        }
-                        if (!empty($record->nisn)) {
-                            if ($data != '')
-                                $data .= '<br>';
-                            $data .= '<small>NISN : ' . $record->nisn . '</small>';
-                        }
-                        if (!empty($record->nik)) {
-                            if ($data != '')
-                                $data .= '<br>';
-                            $data .= '<small>NIK : ' . $record->nik . '</small>';
-                        }
-                        return new HtmlString($data);
-                    }),
-                Tables\Columns\TextColumn::make('no_hp')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('agama')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('jenis_kelamin')
-                    ->searchable()
-                    ->label('JK'),
-                Tables\Columns\TextColumn::make('tempat_lahir')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('tanggal_lahir')
-                    ->date()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('negara')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('provinsi')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('kabupaten')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('kecamatan')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('kelurahan')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('alamat')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('rt')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('rw')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('kode_pos')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('yatim_piatu'),
-                Tables\Columns\TextColumn::make('penyakit')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('jumlah_saudara')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('anak_ke')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('dari_bersaudara')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('jarak_tempuh_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('transport_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('angkatan')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('tanggal_masuk')
-                    ->date()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('tanggal_keluar')
-                    ->date()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('lanjut_sma_dimana')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('upload_ijazah_sd')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('foto_siswa')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('status_siswa_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('nm_ayah')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('pendidikan_ayah_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('pekerjaan_ayah_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('penghasilan_ayah_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('no_hp_ayah')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('nm_ibu')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('pendidikan_ibu_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('pekerjaan_ibu_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('penghasilan_ibu_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('no_hp_ibu')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('nm_wali')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('pendidikan_wali_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('pekerjaan_wali_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('penghasilan_wali_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('no_hp_wali')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('user_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
+        Tables\Columns\Layout\Panel::make([       
+            Tables\Columns\Layout\Split::make([
+                    Tables\Columns\Layout\Split::make([
+                        Tables\Columns\ImageColumn::make('foto_siswa')
+                            ->simpleLightbox()
+                            ->label('Foto')
+                            ->circular()
+                            ->size(100)
+                            ->grow(false)
+                            ->defaultImageUrl(asset('images/no_pic.jpg')),
+                            Tables\Columns\Layout\Split::make([
+                                Tables\Columns\Layout\Stack::make([
+                                    Tables\Columns\TextColumn::make('nama_siswa')
+                                        ->searchable()
+                                        ->sortable()
+                                        ->weight(FontWeight::Bold),
+                                    Tables\Columns\TextColumn::make('virtual_account')
+                                        ->searchable()
+                                        ->formatStateUsing(fn (?string $state): HtmlString => new HtmlString("<small>VA: " . ($state ?? '-') . "</small>")),
+                                    Tables\Columns\TextColumn::make('nis')
+                                        ->searchable()
+                                        ->formatStateUsing(fn (?string $state): HtmlString => new HtmlString("<small>NIS: " . ($state ?? '-') . "</small>")),
+                                    Tables\Columns\TextColumn::make('nisn')
+                                        ->searchable()
+                                        ->formatStateUsing(fn (?string $state): HtmlString => new HtmlString("<small>NISN: " . ($state ?? '-') . "</small>")),
+                                    Tables\Columns\TextColumn::make('nik')
+                                        ->searchable()
+                                        ->formatStateUsing(fn (?string $state): HtmlString => new HtmlString("<small>NIK: " . ($state ?? '-') . "</small>")),
+                                    Tables\Columns\Layout\Split::make([
+                                    Tables\Columns\TextColumn::make('statussiswa.status')
+                                        ->searchable()
+                                        ->sortable()
+                                        ->badge()
+                                        ->alignLeft()
+                                        ->color(fn ($state) => match ($state) {
+                                            'Aktif' => 'success',
+                                            'Pindah' => 'warning',
+                                            'Lulus' => 'info',
+                                            'Cuti' => 'gray',
+                                            'Drop Out' => 'danger',
+                                            default => 'secondary',
+                                        })
+                                        ->formatStateUsing(fn (?string $state): HtmlString => new HtmlString("<small>" . ($state ?? '-') . "</small>")),
+                                        Tables\Columns\TextColumn::make('yatim_piatu')
+                                            ->searchable()
+                                            ->badge()
+                                            ->alignLeft()
+                                            ->color(fn ($state) => match ($state) {
+                                                'Yatim' => 'info',
+                                                'Piatu' => 'info',
+                                                'Yatim Piatu' => 'warning',
+                                                'Bukan Yatim' => 'success',
+                                                default => 'secondary',
+                                            })
+                                            ->formatStateUsing(fn (?string $state): HtmlString => new HtmlString("<small>Yatim: " . ($state ?? '-') . "</small>")),
+                                        Tables\Columns\TextColumn::make('angkatan')
+                                            ->searchable()
+                                            ->badge()
+                                            ->alignLeft()
+                                            ->color('primary')
+                                            ->formatStateUsing(fn (?string $state): HtmlString => new HtmlString("<small>Angkatan: " . ($state ?? '-') . "</small>")),
+                                            ])->grow(false),
+                                ])
+                            ]),
+                        ]),
+                    Tables\Columns\Layout\Split::make([
+                        Tables\Columns\Layout\Stack::make([
+                            Tables\Columns\TextColumn::make('alamat_lengkap')
+                            ->label('Alamat')
+                            ->searchable(query: fn ($query, $search) => $query->where(function ($query) use ($search) {
+                                $query->where('alamat', 'like', "%{$search}%")
+                                      ->orWhere('rt', 'like', "%{$search}%")
+                                      ->orWhere('rw', 'like', "%{$search}%")
+                                      ->orWhere('kelurahan', 'like', "%{$search}%")
+                                      ->orWhere('kecamatan', 'like', "%{$search}%")
+                                      ->orWhere('kabupaten', 'like', "%{$search}%")
+                                      ->orWhere('provinsi', 'like', "%{$search}%")
+                                      ->orWhere('kode_pos', 'like', "%{$search}%");
+                            }))
+                            ->description('Alamat:', position: 'above'),
+                        Tables\Columns\TextColumn::make('email')
+                            ->searchable()
+                            ->icon('heroicon-m-envelope')
+                            ->formatStateUsing(fn (?string $state): string => $state ?? '-'),
+                        Tables\Columns\TextColumn::make('no_hp')
+                            ->searchable()
+                            ->icon('heroicon-m-phone')
+                            ->formatStateUsing(fn (?string $state): string => $state ?? '-'),
+                        ])
+                    ])->visibleFrom('md'),
+                 ])
+                    
+                ])                   
+                            
+                ])
+
             ->filters([
-                Tables\Filters\TrashedFilter::make(),
-            ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
-                ]),
-            ]);
+                    Tables\Filters\TrashedFilter::make(),
+                ])
+                ->actions([
+                Tables\Actions\ViewAction::make()
+                    ->iconButton()
+                    ->color('primary')
+                    ->icon('heroicon-m-eye'),
+                Tables\Actions\EditAction::make()
+                ->iconButton()
+                ->color('warning')
+                ->icon('heroicon-m-pencil-square'),
+            Tables\Actions\DeleteAction::make()
+                ->iconButton()
+                ->color('danger')
+                ->icon('heroicon-m-trash'),
+                ])
+                ->bulkActions([
+                    Tables\Actions\BulkActionGroup::make([
+                        Tables\Actions\DeleteBulkAction::make(),
+                        Tables\Actions\ForceDeleteBulkAction::make(),
+                        Tables\Actions\RestoreBulkAction::make(),
+                    ]),
+                ]);
             
     }
 
