@@ -4,10 +4,10 @@ namespace App\Filament\Admin\Pages;
 
 use Filament\Pages\Page;
 use Orion\FilamentGreeter\GreeterWidget;
-use App\Filament\Admin\Widgets\SiswaPerAngkatanChart;
+use App\Filament\Admin\Widgets\PekerjaanOrtuChart;
 // use App\Filament\Admin\Widgets\StatistikSiswaTable;
 use App\Filament\Admin\Widgets\KabupatenSiswaChart;
-use App\Filament\Admin\Widgets\PekerjaanOrtuChart;
+use App\Filament\Admin\Widgets\SiswaPerAngkatanChart;
 
 class Dashboard extends Page
 {

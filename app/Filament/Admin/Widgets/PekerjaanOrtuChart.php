@@ -8,9 +8,15 @@ use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 
 class PekerjaanOrtuChart extends ApexChartWidget
 {
-    
+    /**
+     * Chart Id
+     */
     protected static ?string $chartId = 'pekerjaanOrtuChart';
-    protected static ?string $heading = 'Pekerjaan Orang Tua (Ayah + Ibu)';
+
+    /**
+     * Widget Title
+     */
+    protected static ?string $heading = 'Pekerjaan Orang Tua/Wali';
 
     /**
      * Dropdown filter angkatan
@@ -25,12 +31,15 @@ class PekerjaanOrtuChart extends ApexChartWidget
             ->toArray();
     }
 
+    /**
+     * Chart options
+     */
     protected function getOptions(): array
     {
-        // Ambil filter angkatan yang dipilih, default ke terbaru
+        // Ambil filter angkatan yg dipilih (kalau tidak pilih pakai angkatan terbaru)
         $angkatan = $this->filter ?? DataSiswa::max('angkatan');
 
-        // Gabungkan pekerjaan ayah + ibu pakai union
+        // Gabungkan pekerjaan ayah + ibu
         $data = DataSiswa::query()
             ->where('angkatan', $angkatan)
             ->select('pekerjaan_ayah_id as pekerjaan_id')
@@ -41,20 +50,47 @@ class PekerjaanOrtuChart extends ApexChartWidget
             );
 
         $result = DB::table(DB::raw("({$data->toSql()}) as u"))
-            ->mergeBindings($data->getQuery()) // penting biar binding where() ikut
+            ->mergeBindings($data->getQuery())
             ->join('pekerjaan_ortu as p', 'p.id', '=', 'u.pekerjaan_id')
             ->select('p.nama_pekerjaan', DB::raw('COUNT(*) as total'))
             ->groupBy('p.nama_pekerjaan')
+            ->orderByDesc('total')
             ->pluck('total', 'p.nama_pekerjaan')
             ->toArray();
 
         return [
             'chart' => [
-                'type' => 'pie',
+                'type' => 'bar',
                 'height' => 350,
             ],
-            'series' => array_values($result), // jumlah pekerjaan
-            'labels' => array_keys($result),   // nama pekerjaan
+            'series' => [
+                [
+                    'name' => 'Jumlah',
+                    'data' => array_values($result),
+                ],
+            ],
+            'xaxis' => [
+                'categories' => array_keys($result),
+                'labels' => [
+                    'style' => [
+                        'fontFamily' => 'inherit',
+                    ],
+                ],
+            ],
+            'yaxis' => [
+                'labels' => [
+                    'style' => [
+                        'fontFamily' => 'inherit',
+                    ],
+                ],
+            ],
+            'colors' => ['#f59e0b'],
+            'plotOptions' => [
+                'bar' => [
+                    'borderRadius' => 4,
+                    'horizontal' => true,
+                ],
+            ],
         ];
     }
 }
