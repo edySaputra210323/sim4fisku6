@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Carbon\Carbon;
 use Illuminate\Support\ServiceProvider;
 // use Filament\Support\Facades\FilamentAsset;
 // use Filament\Support\Assets\Js;
@@ -27,5 +28,7 @@ class AppServiceProvider extends ServiceProvider
         //     Css::make('custom-styles', asset('css/custom.css')),
         //     Js::make('custom-scripts', asset('js/custom.js')),
         // ]);
+        Carbon::setLocale('id');
     }
+
 }

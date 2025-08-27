@@ -15,6 +15,7 @@ class KategoriSuratSeeder extends Seeder
     {
         $kategoriSurat = [
             ['kode_kategori' => 'ST', 'kategori' => 'SURAT TUGAS', 'deskripsi' => NULL, 'created_at' => now(), 'updated_at' => now()],
+            ['kode_kategori' => 'S.KA', 'kategori' => 'SURAT KUASA', 'deskripsi' => NULL, 'created_at' => now(), 'updated_at' => now()],
             ['kode_kategori' => 'SR', 'kategori' => 'SURAT REKOMENDASI', 'deskripsi' => NULL, 'created_at' => now(), 'updated_at' => now()],
             ['kode_kategori' => 'P', 'kategori' => 'PEMBERITAHUAN', 'deskripsi' => NULL, 'created_at' => now(), 'updated_at' => now()],
             ['kode_kategori' => 'U', 'kategori' => 'SURAT UNDANGAN', 'deskripsi' => NULL, 'created_at' => now(), 'updated_at' => now()],
@@ -37,6 +38,7 @@ class KategoriSuratSeeder extends Seeder
             ['kode_kategori' => 'SE', 'kategori' => 'SURAT EDARAN', 'deskripsi' => NULL, 'created_at' => now(), 'updated_at' => now()],
             ['kode_kategori' => 'SK-GTK', 'kategori' => 'SURAT KEPUTUSAN (PENEMPATAN DAN PENGANGKATAN)', 'deskripsi' => NULL, 'created_at' => now(), 'updated_at' => now()],
             ['kode_kategori' => 'SK-Pan', 'kategori' => 'SURAT KEPUTUSAN (PANITIA KEGIATAN)', 'deskripsi' => NULL, 'created_at' => now(), 'updated_at' => now()],
+            ['kode_kategori' => 'SPR', 'kategori' => 'SURAT PERNYATAAN', 'deskripsi' => NULL, 'created_at' => now(), 'updated_at' => now()],
         ];
 
         foreach ($kategoriSurat as $kategori) {

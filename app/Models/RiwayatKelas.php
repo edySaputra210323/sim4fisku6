@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class RiwayatKelas extends Model
 {
@@ -11,10 +12,9 @@ class RiwayatKelas extends Model
     protected $fillable = [
         'data_siswa_id',
         'kelas_id',
-        'guru_id',
+        'pegawai_id',
         'tahun_ajaran_id',
         'semester_id',
-        'status_id',
     ];
 
     // Relasi ke DataSiswa
@@ -32,7 +32,7 @@ class RiwayatKelas extends Model
     // Relasi ke Guru
     public function guru()
     {
-        return $this->belongsTo(Guru::class, 'guru_id');
+        return $this->belongsTo(Pegawai::class, 'pegawai_id');
     }
 
     // Relasi ke TahunAjaran
@@ -45,11 +45,5 @@ class RiwayatKelas extends Model
     public function semester()
     {
         return $this->belongsTo(Semester::class, 'semester_id');
-    }
-
-    // Relasi ke StatusSiswa
-    public function status()
-    {
-        return $this->belongsTo(StatusSiswa::class, 'status_id');
     }
 }

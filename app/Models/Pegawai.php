@@ -19,7 +19,7 @@ class Pegawai extends Model
         'jenis_kelamin',
         'alamat',
         'phone',
-        // 'email_pegawai',
+        'tgl_mulai_bekerja',
         'nuptk',
         'npy',
         'status',
@@ -112,5 +112,10 @@ protected static function boot()
     public function training()
     {
         return $this->hasMany(TrainingPegawai::class);
+    }
+
+    public function inventaris()
+    {
+        return $this->hasMany(TransaksionalInventaris::class);
     }
 }

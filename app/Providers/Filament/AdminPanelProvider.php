@@ -14,6 +14,7 @@ use Orion\FilamentGreeter\GreeterPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
+use App\Filament\Admin\Widgets\SiswaAktifGenderChart;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
@@ -21,6 +22,8 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use App\Filament\Admin\Widgets\JumlahSiswaPerAngkatanChart;
+use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use SolutionForest\FilamentSimpleLightBox\SimpleLightBoxPlugin;
 
@@ -42,14 +45,14 @@ class AdminPanelProvider extends PanelProvider
             ->brandName(env('APP_NAME'))
             ->maxContentWidth('full')
             ->sidebarCollapsibleOnDesktop()
-            ->brandLogo(asset('images/logo.png'))
+            ->brandLogo(asset('images/logoSMPIT.png'))
             ->favicon(asset('favicons/android-chrome-192x192.png'))
-            ->brandLogoHeight(fn() => request()->route()->getName() == 'filament.admin.auth.login' ? '7rem' : '3rem')
+            ->brandLogoHeight(fn() => request()->route()->getName() == 'filament.admin.auth.login' ? '10rem' : '5rem')
             ->defaultThemeMode(ThemeMode::Light)
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\\Filament\\Admin\\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\\Filament\\Admin\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                \App\Filament\Admin\Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\\Filament\\Admin\\Widgets')
             ->widgets([
@@ -58,6 +61,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverClusters(in: app_path('Filament/Admin/Clusters'), for: 'App\\Filament\\Admin\\Clusters')
             ->plugins([
+                FilamentApexChartsPlugin::make(),
                 FilamentShieldPlugin::make()
                     ->gridColumns([
                         'default' => 1,
@@ -94,8 +98,8 @@ class AdminPanelProvider extends PanelProvider
                     ->avatar(size: 'w-16 h-16', url: asset('images/no_pic.jpg'))
                     ->timeSensitive(morningStart: 3, afternoonStart: 12, eveningStart: 15, nightStart: 18)
                     ->sort(-1)
+                    ->columnSpan('full')
             ])
-            
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->middleware([
                 EncryptCookies::class,

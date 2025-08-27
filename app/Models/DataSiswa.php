@@ -9,6 +9,7 @@ use App\Models\NilaiSiswa;
 use App\Models\JarakTempuh;
 use App\Models\MutasiSiswa;
 use App\Models\StatusSiswa;
+use Illuminate\Support\Str;
 use App\Models\RiwayatKelas;
 use App\Models\PekerjaanOrtu;
 use App\Models\PendidikanOrtu;
@@ -50,12 +51,15 @@ class DataSiswa extends Model
         'dari_bersaudara',
         'jarak_tempuh_id',
         'transport_id',
+        'asal_sekolah',
+        'npsn',
         'angkatan',
         'tanggal_masuk',
         'tanggal_keluar',
         'lanjut_sma_dimana',
         'status_id',
         'pindah_id',
+        'dokumen_pendukung',
         'upload_ijazah_sd',
         'foto_siswa',
         'nm_ayah',
@@ -107,11 +111,11 @@ class DataSiswa extends Model
 
     public function getStatusAttribute(): string
     {
-        return $this->statussiswa?->aktif  ? 'Aktif'  :
-               ($this->statussiswa?->pindah ? 'Lulus' :
-               ($this->statussiswa?->pindah ? 'Pindah' :
-               ($this->statussiswa?->pindah ? 'Cuti' :
-               ($this->statussiswa?->lulus  ? 'Drop Out'  : '-'))));
+        return $this->UpdateStatusSiswa?->aktif  ? 'Aktif'  :
+               ($this->UpdateStatusSiswa?->pindah ? 'Lulus' :
+               ($this->UpdateStatusSiswa?->pindah ? 'Pindah' :
+               ($this->UpdateStatusSiswa?->pindah ? 'Cuti' :
+               ($this->UpdateStatusSiswa?->lulus  ? 'Drop Out'  : '-'))));
     }
 
     // Accessor untuk alamat
@@ -162,11 +166,66 @@ class DataSiswa extends Model
         return !empty($parts) ? implode(', ', $parts) : '-';
     }
 
-    // Accessor untuk foto_siswa
-    public function getFotoSiswaUrlAttribute()
+    public function getStatusJumlahSaudaraAttribute()
     {
-        return $this->foto_siswa ? Storage::url($this->foto_siswa) : asset('images/no_pic.jpg');
+        $parts = [];
+
+        if (!empty($this->anak_ke)) {
+            $parts[] = "Anak ke {$this->anak_ke}";
+        }
+
+        if (!empty($this->jumlah_saudara)) {
+            $parts[] = "dari {$this->jumlah_saudara} bersaudara";
+        }
+
+        return !empty($parts) ? implode(', ', $parts) : '-';
     }
+
+    public function getAsalSekolahNpsnAttribute()
+    {
+        $parts = [];
+
+        if (!empty($this->asal_sekolah)) {
+            $parts[] = "{$this->asal_sekolah}";
+        }
+
+        if (!empty($this->npsn)) {
+            $parts[] = "- {$this->npsn}";
+        }
+
+        return !empty($parts) ? implode(', ', $parts) : '-';
+    }
+
+    // Boot method untuk handle event
+    protected static function boot()
+    {
+        parent::boot();
+
+         // Saat membuat siswa baru, generate token unik
+         static::creating(function ($siswa) {
+            if (empty($siswa->token)) {
+                $siswa->token = Str::uuid(); // bisa juga Str::random(12)
+            }
+        });
+        
+        // Event deleting
+        static::deleting(function ($data_siswa) {
+        // Hapus file foto dari storage
+        if ($data_siswa->foto_siswa) {
+            try {
+                Storage::disk('public')->delete($data_siswa->foto_siswa);
+                \Log::info("File foto pegawai dihapus: {$data_siswa->foto_siswa}");
+            } catch (\Exception $e) {
+                \Log::warning("Gagal menghapus file foto pegawai: {$data_siswa->foto_siswa}, Error: {$e->getMessage()}");
+            }
+        }
+
+        // Hapus user terkait (jika ada)
+        if ($data_siswa->user) {
+            $data_siswa->user->delete();
+        }
+    });
+}
 
     // Relasi ke JarakTempuh
     public function jarakTempuh()
@@ -181,7 +240,7 @@ class DataSiswa extends Model
     }
 
     // Relasi ke StatusSiswa
-    public function statussiswa()
+    public function UpdateStatusSiswa()
     {
         return $this->belongsTo(StatusSiswa::class, 'status_id');
     }
@@ -274,6 +333,28 @@ class DataSiswa extends Model
     public function nilaiSiswa()
     {
         return $this->hasMany(NilaiSiswa::class, 'data_siswa_id');
+    }
+
+    public function getNamaNisAttribute()
+    {
+        return "{$this->nama_siswa} - {$this->nis}";
+    }
+
+    public function scopeAktif($q)
+    {
+        return $q->whereHas('UpdateStatusSiswa', fn ($s) =>
+            $s->whereRaw('LOWER(status) = ?', ['aktif'])
+        );
+    }
+
+    public function scopePerempuan($q)
+    {
+        return $q->whereIn('jenis_kelamin', ['P', 'Perempuan']);
+    }
+
+    public function scopeLaki($q)
+    {
+        return $q->whereIn('jenis_kelamin', ['L', 'Laki-laki']);
     }
 }
     
