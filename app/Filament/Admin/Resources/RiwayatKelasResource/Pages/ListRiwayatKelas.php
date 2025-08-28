@@ -6,7 +6,10 @@ use App\Models\Kelas;
 use Filament\Actions;
 use App\Models\Semester;
 use App\Models\TahunAjaran;
+use Illuminate\Support\Str;
 use App\Models\RiwayatKelas;
+use App\Exports\RiwayatKelasExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,6 +24,48 @@ class ListRiwayatKelas extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('export')
+                ->label('Ekspor Excel')
+                ->color('success')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->action(function () {
+                    $activeTahunAjaran = TahunAjaran::where('status', true)->first();
+                    $activeSemester = $activeTahunAjaran
+                        ? Semester::where('th_ajaran_id', $activeTahunAjaran->id)->where('status', true)->first()
+                        : null;
+
+                    if (!$activeTahunAjaran || !$activeSemester) {
+                        Notification::make()
+                            ->title('Peringatan')
+                            ->body('Tahun ajaran atau semester aktif tidak ditemukan.')
+                            ->warning()
+                            ->send();
+                        return;
+                    }
+
+                    $activeTab = $this->activeTab ?? 'all';
+                    $kelasId = $activeTab !== 'all' ? $activeTab : null;
+
+                    $tahunAjaran = TahunAjaran::where('status', true)->first();
+                    $semester = Semester::where('th_ajaran_id', $tahunAjaran->id)->where('status', true)->first();
+
+                     // Sanitasi nama file
+                     $tahunAjaranSafe = Str::slug($tahunAjaran->th_ajaran, '-'); // Mengganti / atau spasi dengan -
+                     $semesterSafe = Str::slug($semester->nm_semester, '-'); // Mengganti spasi atau karakter lain dengan -
+
+                     $fileName = $activeTab === 'all'
+                        ? "Data_Siswa_Semua_Kelas_{$tahunAjaranSafe}_{$semesterSafe}.xlsx"
+                        : "Data_Siswa_Kelas_" . Str::slug(Kelas::find($activeTab)->nama_kelas, '-') . "_{$tahunAjaranSafe}_{$semesterSafe}.xlsx";
+
+                    // $fileName = $activeTab === 'all'
+                    //     ? "Data_Siswa_Semua_Kelas_{$tahunAjaran->th_ajaran}_{$semester->nm_semester}.xlsx"
+                    //     : "Data_Siswa_Kelas_" . Kelas::find($activeTab)->nama_kelas . "_{$tahunAjaran->th_ajaran}_{$semester->nm_semester}.xlsx";
+
+                    return Excel::download(
+                        new RiwayatKelasExport($kelasId, $tahunAjaran->id, $semester->id),
+                        $fileName
+                    );
+                }),
             Actions\CreateAction::make(),
         ];
     }
