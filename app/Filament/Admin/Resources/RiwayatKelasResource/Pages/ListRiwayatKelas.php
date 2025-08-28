@@ -25,7 +25,7 @@ class ListRiwayatKelas extends ListRecords
     {
         return [
             Actions\Action::make('export')
-                ->label('Ekspor Excel')
+                ->label('Ekspor 8355')
                 ->color('success')
                 ->icon('heroicon-o-arrow-down-tray')
                 ->action(function () {

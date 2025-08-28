@@ -49,14 +49,14 @@ class PegawaiResource extends Resource
                     ->placeholder('Nomor Induk Kependudukan')
                     ->numeric()
                     ->unique(table: Pegawai::class, ignoreRecord: true)
-                    ->required()
+                    // ->required()
                     ->maxLength(16)
                     ->minLength(16)
                     ->extraInputAttributes([
                         'oninput' => "this.value = this.value.replace(/[^0-9]/g, '')",
                         ])
                     ->validationMessages([
-                        'required' => 'NIK tidak boleh kosong',
+                        // 'required' => 'NIK tidak boleh kosong',
                         'max' => 'NIK tidak boleh lebih dari 16 angka',
                         'numeric' => 'NIK harus angka',
                         'unique' => 'NIK sudah ada',
@@ -108,7 +108,7 @@ class PegawaiResource extends Resource
                 ]),
             Forms\Components\TextInput::make('nuptk')
                 ->label('NUPTK')
-                ->required()
+                // ->required()
                 ->numeric()
                 ->unique(table: Pegawai::class, ignoreRecord: true)
                 ->placeholder('Masukkan Nomor Unik Pendidik dan Tenaga Kependidikan')
@@ -119,24 +119,24 @@ class PegawaiResource extends Resource
                 ])
                 ->validationMessages([
                     'max' => 'NUPTK tidak boleh lebih dari 16 karakter',
-                    'required' => 'NUPTK tidak boleh kosong',
+                    // 'required' => 'NUPTK tidak boleh kosong',
                     'unique' => 'NUPTK sudah ada',
                     'numeric' => 'NUPTK harus angka',
                 ]),
                 Forms\Components\TextInput::make('npy')
                 ->label('NPY')
-                ->required()
+                // ->required()
                 ->numeric()
                 ->unique(table: Pegawai::class, ignoreRecord: true)
                 ->placeholder('Masukkan Nomor Pegawai Yayasan')
-                ->maxLength(7)
-                ->minLength(7)
+                ->maxLength(10)
+                ->minLength(10)
                 ->extraInputAttributes([
                     'oninput' => "this.value = this.value.replace(/[^0-9]/g, '')",
                 ])
                 ->validationMessages([
-                    'max' => 'NPY tidak boleh lebih dari 7 angka',
-                    'required' => 'NPY tidak boleh kosong',
+                    'max' => 'NPY tidak boleh lebih dari 10 angka',
+                    // 'required' => 'NPY tidak boleh kosong',
                     'unique' => 'NPY sudah ada',
                     'numeric' => 'NPY harus angka',
                 ]),
