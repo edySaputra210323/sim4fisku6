@@ -17,8 +17,11 @@ return new class extends Migration
             $table->string('nama_atk');
             $table->foreignId('categori_atk_id')->nullable()->constrained('kategori_atk')->onDelete('set null');
             $table->string('satuan');
+            $table->string('keterangan')->nullable();
             $table->integer('stock')->default(0);
+            $table->string('foto_atk')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
