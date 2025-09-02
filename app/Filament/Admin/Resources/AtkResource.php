@@ -42,33 +42,49 @@ class AtkResource extends Resource
                     Forms\Components\TextInput::make('nama_atk')
                         ->required()
                         ->maxLength(255),
-                    Forms\Components\Select::make('categori_atk_id')
+                    Forms\Components\Select::make('kategori_atk_id')
                         ->label('Kategori ATK')
                         ->placeholder('Pilih Kategori ATK')
                         ->required()
                         ->searchable()
                         ->options(KategoriAtk::orderBy('nama_kategori')->get()->pluck('nama_kategori', 'id')),
-                    Forms\Components\TextInput::make('satuan')
-                        ->required()
-                        ->maxLength(255),
+                    Forms\Components\Select::make('satuan')
+                    ->label('Satuan')
+                    ->required()
+                    ->options([
+                        'pcs' => 'Pcs',
+                        'buah' => 'Buah', 
+                        'pack' => 'Pack',
+                        'rim' => 'Rim',
+                        'box' => 'Box',
+                        'lusin' => 'Lusin',
+                        'set' => 'Set',
+                        'botol' => 'Botol',
+                        'tube' => 'Tube',
+                        'roll' => 'Roll',
+                        'lembar' => 'Lembar',
+                        'kg' => 'Kilogram',
+                        'liter' => 'Liter',
+                    ])
+                    ->searchable()
+                    ->placeholder('Pilih Satuan'),
                     Forms\Components\Textarea::make('keterangan')
                         ->rows(3)
                         ->maxLength(255),
                     Forms\Components\TextInput::make('stock')
                         ->numeric()
                         ->default(0)
+                        ->minValue(0)
                         ->disabled(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord),                    
                     ])->columns(1)->columnSpan('1'),
                     FormSection::make('Upload Foto ATK')
                     ->description('format: JPEG, JPG, atau PNG')
                     ->schema([
                         Forms\Components\FileUpload::make('foto_atk')
-                                ->disk('public')
-                                ->label(false)
-                                ->directory('atk')
-                                ->image(['jpeg', 'jpg', 'png'])
-                                ->maxSize(2048)
-                                ->visibility('public')
+                            ->disk('public')
+                            ->directory('atk')
+                            ->image()
+                            ->maxSize(2048),
                     ])->columns(1)->columnSpan('1'),
             ])->columns(2);
     }
@@ -89,13 +105,14 @@ class AtkResource extends Resource
                 Tables\Columns\TextColumn::make('nama_atk')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('kategori_atk.nama_kategori')
+                Tables\Columns\TextColumn::make('kategoriAtk.nama_kategori')
                     ->label('Kategori ATK')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('satuan')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('keterangan')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('stock')
                     ->numeric()
                     ->sortable(),
@@ -148,6 +165,7 @@ class AtkResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->with(['kategoriAtk'])
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);

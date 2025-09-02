@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('code')->unique()->nullable();
             $table->string('nama_atk');
-            $table->foreignId('categori_atk_id')->nullable()->constrained('kategori_atk')->onDelete('set null');
+            $table->foreignId('kategori_atk_id')->nullable()->constrained('kategori_atk')->onDelete('set null');
             $table->string('satuan');
             $table->string('keterangan')->nullable();
             $table->integer('stock')->default(0);
