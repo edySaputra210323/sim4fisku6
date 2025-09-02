@@ -9,6 +9,7 @@ use Database\Seeders\GedungSeeder;
 use Database\Seeders\PegawaiSeeder;
 use Database\Seeders\RuanganSeeder;
 use Database\Seeders\SuplayerSeeder;
+use Database\Seeders\KategoriAtkseeder;
 use Illuminate\Support\Facades\Artisan;
 use Database\Seeders\KategoriBarangSeeder;
 use Database\Seeders\SumberAnggaranSeeder;
@@ -63,6 +64,7 @@ class DatabaseSeeder extends Seeder
             KategoriInventarisSeeder::class,
             RuanganSeeder::class,
             SuplayerSeeder::class,
+            KategoriAtkseeder::class,
         ]);
     }
 
