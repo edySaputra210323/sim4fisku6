@@ -21,7 +21,9 @@ class AtkResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationLabel = 'ATK';
+    protected static ?string $navigationGroup = 'ATK';
+
+    protected static ?string $navigationLabel = 'Daftar Barang ATK';
 
     protected static ?string $modelLabel = 'ATK';
 
@@ -82,9 +84,15 @@ class AtkResource extends Resource
                     ->schema([
                         Forms\Components\FileUpload::make('foto_atk')
                             ->disk('public')
+                            ->label(false)
                             ->directory('atk')
                             ->image()
-                            ->maxSize(2048),
+                            ->maxSize(2048)
+                            ->acceptedFileTypes(['image/jpeg', 'image/jpg', 'image/png'])
+                            ->rules(['mimes:jpeg,jpg,png'])
+                            ->validationMessages([
+                                'mimes' => 'Format file harus JPEG, JPG, atau PNG.',
+                            ]),
                     ])->columns(1)->columnSpan('1'),
             ])->columns(2);
     }
@@ -92,11 +100,25 @@ class AtkResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->modifyQueryUsing(function (Builder $query) {
+            return $query->orderBy('id', 'desc');
+        })
+        ->recordAction(null)
+        ->recordUrl(null)
+        ->extremePaginationLinks()
+        ->paginated([5, 10, 20, 50])
+        ->defaultPaginationPageOption(10)
+        ->striped()
+        ->poll('5s')
+        ->recordClasses(function () {
+            $classes = 'table-vertical-align-top ';
+            return $classes;
+        })
             ->columns([
                 Tables\Columns\ImageColumn::make('foto_atk')
                     ->label('Foto ATK')
                     ->disk('public')
-                    ->height(40)
+                    ->height(60)
                     ->grow(false)
                     ->simpleLightbox(),
                 Tables\Columns\TextColumn::make('code')
@@ -133,8 +155,19 @@ class AtkResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                ->iconButton()
+                ->color('warning')
+                ->icon('heroicon-m-pencil-square'),
+            Tables\Actions\DeleteAction::make()
+                ->iconButton()
+                ->color('danger')
+                ->icon('heroicon-m-trash')
+                ->modalHeading('Hapus ATK'),
+            Tables\Actions\ViewAction::make()
+            ->iconButton()
+                ->color('primary')
+                ->icon('heroicon-m-eye'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

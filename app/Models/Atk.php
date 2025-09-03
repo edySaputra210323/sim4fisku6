@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\KategoriAtk;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Atk extends Model
@@ -53,6 +54,35 @@ class Atk extends Model
                         $model->code = 'ATK-' . str_pad(Atk::count() + 1, 4, '0', STR_PAD_LEFT);
                     }
                 }
+            });
+
+            // hapus file saat record dihapus soft delete
+            static::deleting(function($model){
+                if($model->foto_atk && Storage::disk('public')->exists($model->foto_atk)){
+                    Storage::disk('public')->delete($model->foto_atk);
+                    \Log::info('deleted file on soft delete: ' . $model->foto_atk);
+                }
+            });
+            // saat record dihapus permanen (force delete)
+            static::forceDeleted(function ($model){
+                if($model->foto_atk && Storage::disk('public')->exists($model->foto_atk)){
+                    Storage::disk('public')->delete($model->foto_atk);
+                    \Log::info('deleted file on force delete: ' . $model->foto_atk);
+                }
+            });
+            // saat record di edit dan foto_atk di ganti
+            static::updating(function ($model) {
+                if ($model->isDirty('foto_atk') && $model->getOriginal('foto_atk')) {
+                    $oldFile = $model->getOriginal('foto_atk');
+                    if (Storage::disk('public')->exists($oldFile)) {
+                        Storage::disk('public')->delete($oldFile);
+                        \Log::info('Deleted old file on update: ' . $oldFile);
+                    }
+                }
+            });
+            // Logging saat menyimpan record
+            static::saving(function ($model) {
+                \Log::info('Saving Atk model with foto_atk: ' . ($model->foto_atk ?? 'No file'));
             });
         }
 }
