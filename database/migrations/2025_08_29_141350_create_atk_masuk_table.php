@@ -13,16 +13,14 @@ return new class extends Migration
     {
         Schema::create('atk_masuk', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('atk_id')->constrained('atk')->onDelete('cascade');
-            $table->integer('qty')->unsigned()->default(0);
-            $table->decimal('harga_satuan', 10, 2)->notNullable(); // Harga satuan, misalnya Rp 5000.00
-            $table->decimal('total_harga', 10, 2)->notNullable(); // Total bayar, misalnya Rp 50000.00
+            $table->string('nomor_nota')->unique(); // Bisa dari supplier atau auto-generate
+            $table->string('file_nota')->nullable(); // Upload arsip nota
             $table->date('tanggal');
-            $table->string('nota')->nullable();
             $table->foreignId('tahun_ajaran_id')->nullable()->constrained('tahun_ajaran')->nullOnDelete();
             $table->foreignId('semester_id')->nullable()->constrained('semester')->nullOnDelete();
             $table->foreignId('ditambah_oleh_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

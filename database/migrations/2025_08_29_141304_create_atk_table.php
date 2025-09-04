@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('atk', function (Blueprint $table) {
             $table->id();
-            $table->string('code')->unique()->nullable();
+            $table->string('code')->unique()->nullable(); // kode barang, misal A001
             $table->string('nama_atk');
-            $table->foreignId('kategori_atk_id')->nullable()->constrained('kategori_atk')->onDelete('set null');
-            $table->string('satuan');
+            $table->foreignId('kategori_atk_id')->nullable()->constrained('kategori_atk')->cascadeOnDelete();
+            $table->string('satuan'); // pcs, rim, box, dll
             $table->string('keterangan')->nullable();
-            $table->integer('stock')->default(0);
+            $table->integer('stock_awal')->default(0); // stok awal saat sistem mulai
+            $table->integer('stock')->default(0);      // stok berjalan
             $table->string('foto_atk')->nullable();
             $table->timestamps();
             $table->softDeletes();
