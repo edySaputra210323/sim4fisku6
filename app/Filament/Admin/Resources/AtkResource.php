@@ -2,21 +2,26 @@
 
 namespace App\Filament\Admin\Resources;
 
-use stdClass;
 use App\Models\Atk;
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
 use App\Models\KategoriAtk;
+use Filament\Forms;
+use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\Layout\Split;
+use Filament\Tables\Columns\Layout\Stack;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Actions\Action as TableAction;
 use Filament\Forms\Components\Grid;
-use Filament\Tables\Contracts\HasTable;
-use Illuminate\Database\Eloquent\Builder;
-use App\Filament\Admin\Resources\AtkResource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Section as FormSection;
-use App\Filament\Admin\Resources\AtkResource\RelationManagers;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Admin\Resources\AtkResource\Pages;
 
 class AtkResource extends Resource
 {
@@ -51,49 +56,44 @@ class AtkResource extends Resource
                             ->searchable()
                             ->options(KategoriAtk::orderBy('nama_kategori')->get()->pluck('nama_kategori', 'id')),
 
-                            Grid::make([
-                                'md' => 3,
-                            ])
-                                ->schema([
-                                    Forms\Components\Select::make('satuan')
-                            ->label('Satuan')
-                            ->required()
-                            ->options([
-                                'pcs' => 'Pcs',
-                                'buah' => 'Buah',
-                                'pack' => 'Pack',
-                                'rim' => 'Rim',
-                                'box' => 'Box',
-                                'lusin' => 'Lusin',
-                                'set' => 'Set',
-                                'botol' => 'Botol',
-                                'tube' => 'Tube',
-                                'roll' => 'Roll',
-                                'lembar' => 'Lembar',
-                                'kg' => 'Kilogram',
-                                'liter' => 'Liter',
-                            ])
-                            ->searchable()
-                            ->placeholder('Pilih Satuan'),
-                            // ->columnSpan('full'),
+                        Grid::make(['md' => 3])
+                            ->schema([
+                                Forms\Components\Select::make('satuan')
+                                    ->label('Satuan')
+                                    ->required()
+                                    ->options([
+                                        'pcs' => 'Pcs',
+                                        'buah' => 'Buah',
+                                        'pack' => 'Pack',
+                                        'rim' => 'Rim',
+                                        'box' => 'Box',
+                                        'lusin' => 'Lusin',
+                                        'set' => 'Set',
+                                        'botol' => 'Botol',
+                                        'tube' => 'Tube',
+                                        'roll' => 'Roll',
+                                        'lembar' => 'Lembar',
+                                        'kg' => 'Kilogram',
+                                        'liter' => 'Liter',
+                                    ])
+                                    ->searchable()
+                                    ->placeholder('Pilih Satuan'),
 
-                        Forms\Components\TextInput::make('stock_awal')
-                            ->label('Stok Awal')
-                            ->numeric()
-                            ->default(0)
-                            ->minValue(0)
-                            ->visible(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord)
-                            ->disabled(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\EditRecord),
+                                Forms\Components\TextInput::make('stock_awal')
+                                    ->label('Stok Awal')
+                                    ->numeric()
+                                    ->default(0)
+                                    ->minValue(0)
+                                    ->visible(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord)
+                                    ->disabled(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\EditRecord),
 
-                        Forms\Components\TextInput::make('stock')
-                            ->label('Stok Berjalan')
-                            ->numeric()
-                            ->default(0)
-                            ->minValue(0)
-                            ->disabled(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord),
+                                Forms\Components\TextInput::make('stock')
+                                    ->label('Stok Berjalan')
+                                    ->numeric()
+                                    ->default(0)
+                                    ->minValue(0)
+                                    ->disabled(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord),
                             ]),
-
-                        
 
                         Forms\Components\Textarea::make('keterangan')
                             ->rows(3)
@@ -127,110 +127,136 @@ class AtkResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->orderBy('stock', 'asc'))
-            ->recordAction(null)
-            ->recordUrl(null)
-            ->extremePaginationLinks()
-            ->paginated([5, 10, 20, 50])
-            ->defaultPaginationPageOption(10)
-            ->striped()
-            ->poll('5s')
-            ->recordClasses(fn () => 'table-vertical-align-top ')
+            ->contentGrid([
+                'md' => 2,
+                'xl' => 3,
+            ])
             ->columns([
-                Tables\Columns\TextColumn::make('No')
-                    ->state(
-                        static function (HasTable $livewire, stdClass $rowLoop): string {
-                            return (string) (
-                                $rowLoop->iteration +
-                                ($livewire->getTableRecordsPerPage() * (
-                                    $livewire->getTablePage() - 1
-                            ))
-                        );
-                    }
-                ),
-                Tables\Columns\ImageColumn::make('foto_atk')
-                    ->label('Foto ATK')
-                    ->disk('public')
-                    ->height(60)
-                    ->grow(false)
-                    ->simpleLightbox(),
+                Split::make([
+                    ImageColumn::make('foto_atk')
+                        ->label('Foto')
+                        ->disk('public')
+                        ->height(50)
+                        ->circular()
+                        ->grow(false)
+                        ->simpleLightbox(),
 
-                Tables\Columns\TextColumn::make('code')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    TextColumn::make('nama_atk')
+                        ->weight(FontWeight::Bold)
+                        ->searchable()
+                        ->sortable(),
 
-                Tables\Columns\TextColumn::make('nama_atk')
-                    ->searchable()
-                    ->sortable(),
+                    Stack::make([
+                        TextColumn::make('kategoriAtk.nama_kategori')
+                            ->label('Kategori')
+                            ->icon('heroicon-m-rectangle-stack'),
 
-                Tables\Columns\TextColumn::make('kategoriAtk.nama_kategori')
-                    ->label('Kategori ATK')
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('satuan')
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('keterangan')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                Tables\Columns\TextColumn::make('stock_awal')
-                    ->label('Stok Awal')
-                    ->numeric()
-                    ->sortable(),
-
-                    Tables\Columns\TextColumn::make('stock')
-                    ->label('Stok Berjalan')
-                    ->numeric()
-                    ->sortable()
-                    ->badge()
-                    ->color(fn (int $state): string => match (true) {
-                        $state < 3 => 'danger',   // stok kritis
-                        $state < 10 => 'warning', // stok menipis
-                        default => 'success',     // stok aman
-                    }),
-
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                Tables\Filters\TrashedFilter::make(),
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make()
-                    ->iconButton()
-                    ->color('warning')
-                    ->icon('heroicon-m-pencil-square'),
-
-                Tables\Actions\DeleteAction::make()
-                    ->iconButton()
-                    ->color('danger')
-                    ->icon('heroicon-m-trash')
-                    ->modalHeading('Hapus ATK'),
-
-                Tables\Actions\ViewAction::make()
-                    ->iconButton()
-                    ->color('primary')
-                    ->icon('heroicon-m-eye'),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
+                        TextColumn::make('stok_dengan_satuan')
+                            ->label('Stok')
+                            ->state(fn ($record) => "{$record->stock} {$record->satuan}")
+                            ->badge()
+                            ->color(fn ($record): string => match (true) {
+                                $record->stock < 3 => 'danger',
+                                $record->stock < 10 => 'warning',
+                                default => 'success',
+                            }),
+                    ]),
                 ]),
+            ])
+            ->headerActions([
+                TableAction::make('ambil_atk')
+                    ->label('Transaksi Pengambilan ATK')
+                    ->icon('heroicon-o-shopping-cart')
+                    ->form([
+                        Forms\Components\Repeater::make('details')
+                            ->label('Barang ATK')
+                            ->schema([
+                                Forms\Components\Select::make('atk_id')
+                                    ->label('Pilih Barang')
+                                    ->options(\App\Models\Atk::orderBy('nama_atk')->pluck('nama_atk', 'id'))
+                                    ->searchable()
+                                    ->reactive()
+                                    ->required(),
+
+                                Forms\Components\TextInput::make('qty')
+                                    ->label('Jumlah')
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->required()
+                                    ->reactive()
+                                    ->rule(function ($get) {
+                                        return function (string $attribute, $value, \Closure $fail) use ($get) {
+                                            $atkId = $get('atk_id');
+                                            if ($atkId) {
+                                                $stok = \App\Models\Atk::find($atkId)?->stock ?? 0;
+                                                if ($value > $stok) {
+                                                    $fail("Jumlah melebihi stok yang tersedia ($stok).");
+                                                }
+                                            }
+                                        };
+                                    }),
+                            ])
+                            ->columns(2)
+                            ->defaultItems(1)
+                            ->createItemButtonLabel('Tambah Barang'),
+                    ])
+                    ->action(function (array $data) {
+                        $tahunAjaran = \App\Models\TahunAjaran::where('status', true)->first();
+                        $semester = \App\Models\Semester::where('status', true)->first();
+                        $pegawaiId = auth()->user()->pegawai_id ?? null;
+
+                        try {
+                            $keluar = DB::transaction(function () use ($data, $tahunAjaran, $semester, $pegawaiId) {
+                                $keluar = \App\Models\AtkKeluar::create([
+                                    'tanggal' => now(),
+                                    'pegawai_id' => $pegawaiId,
+                                    'tahun_ajaran_id' => $tahunAjaran?->id,
+                                    'semester_id' => $semester?->id,
+                                    'ditambah_oleh_id' => auth()->id(),
+                                    'status' => 'draft',
+                                ]);
+
+                                foreach ($data['details'] as $item) {
+                                    $atk = \App\Models\Atk::lockForUpdate()->find($item['atk_id']);
+                                    if (! $atk) {
+                                        throw new \Exception("Barang (ID {$item['atk_id']}) tidak ditemukan.");
+                                    }
+
+                                    if ($atk->stock < $item['qty']) {
+                                        throw new \Exception("Stok {$atk->nama_atk} tidak cukup (tersisa {$atk->stock}).");
+                                    }
+
+                                    $atk->decrement('stock', $item['qty']);
+
+                                    \App\Models\DetailAtkKeluar::create([
+                                        'atk_keluar_id' => $keluar->id,
+                                        'atk_id' => $item['atk_id'],
+                                        'qty' => $item['qty'],
+                                    ]);
+                                }
+
+                                return $keluar;
+                            });
+
+                            Notification::make()
+                                ->title('Transaksi berhasil')
+                                ->body('Transaksi pengambilan ATK telah disimpan.')
+                                ->success()
+                                ->send();
+
+                            return redirect()->route('filament.admin.resources.atk-keluars.view', $keluar);
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Gagal menyimpan')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+                    })
+                    ->modalHeading('Transaksi Pengambilan ATK')
+                    ->modalSubmitActionLabel('Simpan Transaksi')
+                    ->modalWidth('3xl') 
             ]);
     }
 

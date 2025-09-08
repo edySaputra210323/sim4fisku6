@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Admin\Resources\AtkMasukResource\Pages;
+namespace App\Filament\Admin\Resources\AtkKeluarResource\Pages;
 
-use App\Filament\Admin\Resources\AtkMasukResource;
+use App\Filament\Admin\Resources\AtkKeluarResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditAtkMasuk extends EditRecord
+class EditAtkKeluar extends EditRecord
 {
-    protected static string $resource = AtkMasukResource::class;
+    protected static string $resource = AtkKeluarResource::class;
 
     protected function getHeaderActions(): array
     {

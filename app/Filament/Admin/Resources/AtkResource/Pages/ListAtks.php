@@ -10,6 +10,9 @@ class ListAtks extends ListRecords
 {
     protected static string $resource = AtkResource::class;
 
+    // protected $viewMode = 'grid';
+    // public string $viewMode = 'grid';
+
     protected function getHeaderActions(): array
     {
         return [
