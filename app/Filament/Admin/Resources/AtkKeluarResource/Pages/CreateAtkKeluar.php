@@ -41,4 +41,10 @@ class CreateAtkKeluar extends CreateRecord
 
         return $data;
     }
+
+    protected function getRedirectUrl(): string
+    {
+        // setelah berhasil simpan transaksi → redirect ke invoice (ViewAtkKeluar)
+        return $this->getResource()::getUrl('view', ['record' => $this->record]);
+    }
 }
