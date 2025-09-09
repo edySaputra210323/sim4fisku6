@@ -42,6 +42,21 @@ class CreateAtkKeluar extends CreateRecord
         return $data;
     }
 
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if ($data['status'] === 'verified') {
+            $data['verified_by_id'] = auth()->id();
+            $data['verified_at'] = now();
+        }
+
+        if ($data['status'] === 'canceled') {
+            $data['canceled_by_id'] = auth()->id();
+            $data['canceled_at'] = now();
+        }
+
+        return $data;
+    }
+
     protected function getRedirectUrl(): string
     {
         // setelah berhasil simpan transaksi → redirect ke invoice (ViewAtkKeluar)

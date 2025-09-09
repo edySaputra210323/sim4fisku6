@@ -104,6 +104,11 @@ class AtkKeluarResource extends Resource
     {
         return $table
         ->modifyQueryUsing(function (Builder $query) {
+            // Filter data berdasarkan user yang login
+            // Superadmin bisa melihat semua data, user biasa hanya melihat data mereka sendiri
+            if (!auth()->user()->hasRole('superadmin')) {
+                $query->where('ditambah_oleh_id', auth()->id());
+            }
             return $query->orderBy('id', 'desc');
         })
             ->recordAction(null)
@@ -137,13 +142,13 @@ class AtkKeluarResource extends Resource
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status'),
-                Tables\Columns\TextColumn::make('verified_by_id')
+                Tables\Columns\TextColumn::make('verifiedBy.email')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('verified_at')
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('canceled_by_id')
+                Tables\Columns\TextColumn::make('canceledBy.email')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('canceled_at')

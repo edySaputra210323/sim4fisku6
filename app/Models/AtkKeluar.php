@@ -3,6 +3,11 @@
 namespace App\Models;
 
 use App\Models\DetailAtkKeluar;
+use App\Models\Pegawai;
+use App\Models\User;
+use App\Models\TahunAjaran;
+use App\Models\Semester;
+use App\Models\AtkPengembalian;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -18,10 +23,18 @@ class AtkKeluar extends Model
         'tahun_ajaran_id',
         'semester_id',
         'ditambah_oleh_id',
+        'status',        
+        'verified_by_id',
+        'verified_at',   
+        'canceled_by_id',
+        'canceled_at',   
+        'alasan_batal',  
     ];
 
     protected $casts = [
         'tanggal' => 'datetime',
+        'verified_at' => 'datetime',
+        'canceled_at' => 'datetime',
     ];
 
     // 🔹 Relasi ke detail
@@ -58,6 +71,21 @@ class AtkKeluar extends Model
         return $this->hasMany(AtkPengembalian::class, 'atk_keluar_id');
     }
 
+    public function verifiedBy()
+    {
+        return $this->belongsTo(User::class, 'verified_by_id');
+    }
+
+    public function canceledBy()  
+    {
+        return $this->belongsTo(User::class, 'canceled_by_id');
+    }
+
+    public function ditambahOleh()
+    {
+        return $this->belongsTo(User::class, 'ditambah_oleh_id');
+    }
+
 
     public function verify()
     {
@@ -70,21 +98,44 @@ class AtkKeluar extends Model
         ]);
     }
 
-public function cancel($alasan = null)
+    public function cancel($alasan = null)
     {
-        if ($this->status !== 'draft') return;
+        // Kalau sudah canceled, skip
+        if ($this->status === 'canceled') {
+            return;
+        }
 
-        foreach ($this->details as $detail) {
-            if ($detail->atk) {
-                $detail->atk->increment('stock', $detail->qty);
+        // 🔹 Batasan role
+        $user = auth()->user();
+        if ($this->status === 'draft') {
+            // draft boleh dibatalkan oleh pemilik atau admin
+            if ($user->id !== $this->ditambah_oleh_id && !$user->hasRole('superadmin')) {
+                throw new \Exception("Anda tidak berhak membatalkan transaksi ini.");
             }
         }
 
+        if ($this->status === 'verified') {
+            // hanya admin/superadmin boleh cancel transaksi yang sudah diverifikasi
+            if (!$user->hasRole('superadmin')) {
+                throw new \Exception("Hanya superadmin yang dapat membatalkan transaksi terverifikasi.");
+            }
+
+            // rollback stok
+            foreach ($this->details as $detail) {
+                if ($detail->atk) {
+                    $detail->atk->increment('stock', $detail->qty);
+                }
+            }
+        }
+
+        // update status canceled
         $this->update([
             'status' => 'canceled',
-            'canceled_by_id' => auth()->id(),
+            'canceled_by_id' => $user->id,
             'canceled_at' => now(),
             'alasan_batal' => $alasan,
         ]);
     }
+
+
 }
