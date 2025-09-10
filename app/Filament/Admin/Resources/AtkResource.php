@@ -163,6 +163,33 @@ class AtkResource extends Resource
                     ]),
                 ]),
             ])
+            ->filters([
+                Tables\Filters\TrashedFilter::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
+                ]),
+            ])
+            ->actions([
+                Tables\Actions\ViewAction::make()
+                    ->iconButton()
+                    ->color('primary')
+                    ->icon('heroicon-m-eye'),
+    
+                Tables\Actions\EditAction::make()
+                    ->iconButton()
+                    ->color('warning')
+                    ->icon('heroicon-m-pencil-square'),
+    
+                Tables\Actions\DeleteAction::make()
+                    ->iconButton()
+                    ->color('danger')
+                    ->icon('heroicon-m-trash')
+                    ->modalHeading('Hapus ATK'),
+            ])
             ->headerActions([
                 //
             ]);

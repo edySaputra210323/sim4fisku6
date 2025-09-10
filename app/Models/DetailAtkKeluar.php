@@ -37,28 +37,50 @@ class DetailAtkKeluar extends Model
     {
         // Saat menambah detail → kurangi stok
         static::created(function ($detail) {
-            if ($detail->atk) {
+            if ($detail->atk && $detail->atkKeluar->status !== 'canceled') {
                 $detail->atk->decrement('stock', $detail->qty);
             }
         });
 
-        // Saat update detail (misal qty berubah)
+        // Saat update detail
         static::updated(function ($detail) {
-            if ($detail->isDirty('qty')) {
+            // Kalau atk_id berubah → rollback stok lama, kurangi stok baru
+            if ($detail->isDirty('atk_id')) {
+                $oldAtkId = $detail->getOriginal('atk_id');
+                $oldQty = $detail->getOriginal('qty');
+                $newQty = $detail->qty;
+
+                $oldAtk = Atk::find($oldAtkId);
+                if ($oldAtk && $detail->atkKeluar->status !== 'canceled') {
+                    $oldAtk->increment('stock', $oldQty);
+                }
+
+                if ($detail->atk && $detail->atkKeluar->status !== 'canceled') {
+                    $detail->atk->decrement('stock', $newQty);
+                }
+
+                return;
+            }
+
+            // Kalau hanya qty yang berubah
+            if ($detail->isDirty('qty') && $detail->atkKeluar->status !== 'canceled') {
                 $oldQty = $detail->getOriginal('qty');
                 $newQty = $detail->qty;
                 $selisih = $newQty - $oldQty;
 
                 if ($detail->atk) {
-                    // kalau selisih positif berarti stok keluar tambahan
-                    $detail->atk->decrement('stock', $selisih);
+                    if ($selisih > 0) {
+                        $detail->atk->decrement('stock', $selisih);
+                    } elseif ($selisih < 0) {
+                        $detail->atk->increment('stock', abs($selisih));
+                    }
                 }
             }
         });
 
-        // Saat menghapus detail → kembalikan stok
+        // Saat menghapus detail → kembalikan stok (kecuali transaksi sudah canceled)
         static::deleted(function ($detail) {
-            if ($detail->atk) {
+            if ($detail->atk && $detail->atkKeluar->status !== 'canceled') {
                 $detail->atk->increment('stock', $detail->qty);
             }
         });

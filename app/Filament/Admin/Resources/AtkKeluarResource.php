@@ -10,6 +10,8 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Forms\Get;
+use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -79,17 +81,17 @@ class AtkKeluarResource extends Resource
                         ->minValue(1)
                         ->required()
                         ->reactive()
-                        ->rule(function ($get) {
-                            return function (string $attribute, $value, \Closure $fail) use ($get) {
-                                $atkId = $get('atk_id');
-                                if ($atkId) {
-                                    $stok = \App\Models\Atk::find($atkId)?->stock ?? 0;
-                                    if ($value > $stok) {
-                                        $fail("Jumlah melebihi stok yang tersedia ($stok).");
-                                    }
+                        ->rule(
+                            fn (Get $get) => function (string $attribute, $value, \Closure $fail) use ($get) {
+                                $status = $get('../../status'); // ambil status parent
+                                $stok   = \App\Models\Atk::find($get('atk_id'))?->stock ?? 0;
+                        
+                                // ✅ Validasi hanya kalau status = draft
+                                if ($status === 'draft' && $value > $stok) {
+                                    $fail("Jumlah melebihi stok yang tersedia ($stok).");
                                 }
-                            };
-                        }),
+                            }
+                        ),
                 ])
                 ->columns(2)
                 ->defaultItems(1)

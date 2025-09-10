@@ -2,12 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\DetailAtkKeluar;
-use App\Models\Pegawai;
-use App\Models\User;
-use App\Models\TahunAjaran;
-use App\Models\Semester;
-use App\Models\AtkPengembalian;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -23,39 +17,40 @@ class AtkKeluar extends Model
         'tahun_ajaran_id',
         'semester_id',
         'ditambah_oleh_id',
-        'status',        
+        'status',
         'verified_by_id',
-        'verified_at',   
+        'verified_at',
         'canceled_by_id',
-        'canceled_at',   
-        'alasan_batal',  
+        'canceled_at',
+        'alasan_batal',
     ];
 
     protected $casts = [
-        'tanggal' => 'datetime',
+        'tanggal'     => 'datetime',
         'verified_at' => 'datetime',
         'canceled_at' => 'datetime',
     ];
 
-    // 🔹 Relasi ke detail
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONSHIPS
+    |--------------------------------------------------------------------------
+    */
     public function details()
     {
         return $this->hasMany(DetailAtkKeluar::class, 'atk_keluar_id');
     }
 
-    // 🔹 Relasi ke pegawai
     public function pegawai()
     {
         return $this->belongsTo(Pegawai::class, 'pegawai_id');
     }
 
-    // 🔹 Relasi ke user
     public function user()
     {
         return $this->belongsTo(User::class, 'ditambah_oleh_id');
     }
 
-    // 🔹 Relasi ke tahun ajaran & semester
     public function tahunAjaran()
     {
         return $this->belongsTo(TahunAjaran::class, 'tahun_ajaran_id');
@@ -76,7 +71,7 @@ class AtkKeluar extends Model
         return $this->belongsTo(User::class, 'verified_by_id');
     }
 
-    public function canceledBy()  
+    public function canceledBy()
     {
         return $this->belongsTo(User::class, 'canceled_by_id');
     }
@@ -86,41 +81,47 @@ class AtkKeluar extends Model
         return $this->belongsTo(User::class, 'ditambah_oleh_id');
     }
 
-
-    public function verify()
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS HANDLERS
+    |--------------------------------------------------------------------------
+    */
+    public function verify(): void
     {
-        if ($this->status !== 'draft') return;
+        if ($this->status === 'verified') {
+            return; // sudah diverifikasi
+        }
 
         $this->update([
-            'status' => 'verified',
+            'status'         => 'verified',
             'verified_by_id' => auth()->id(),
-            'verified_at' => now(),
+            'verified_at'    => now(),
         ]);
     }
 
-    public function cancel($alasan = null)
+    public function cancel(?string $alasan = null): void
     {
-        // Kalau sudah canceled, skip
         if ($this->status === 'canceled') {
-            return;
+            return; // sudah dibatalkan
         }
 
-        // 🔹 Batasan role
         $user = auth()->user();
+
+        // kalau draft → hanya pemilik / superadmin boleh cancel
         if ($this->status === 'draft') {
-            // draft boleh dibatalkan oleh pemilik atau admin
             if ($user->id !== $this->ditambah_oleh_id && !$user->hasRole('superadmin')) {
                 throw new \Exception("Anda tidak berhak membatalkan transaksi ini.");
             }
         }
 
+        // kalau verified → hanya superadmin boleh cancel & rollback stok
         if ($this->status === 'verified') {
-            // hanya admin/superadmin boleh cancel transaksi yang sudah diverifikasi
             if (!$user->hasRole('superadmin')) {
                 throw new \Exception("Hanya superadmin yang dapat membatalkan transaksi terverifikasi.");
             }
 
             // rollback stok
+            $this->loadMissing('details.atk');
             foreach ($this->details as $detail) {
                 if ($detail->atk) {
                     $detail->atk->increment('stock', $detail->qty);
@@ -128,14 +129,22 @@ class AtkKeluar extends Model
             }
         }
 
-        // update status canceled
         $this->update([
-            'status' => 'canceled',
+            'status'         => 'canceled',
             'canceled_by_id' => $user->id,
-            'canceled_at' => now(),
-            'alasan_batal' => $alasan,
+            'canceled_at'    => now(),
+            'alasan_batal'   => $alasan,
         ]);
     }
 
+    public function applyStatus(string $status, ?string $alasan = null): void
+    {
+        if ($status === 'verified') {
+            $this->verify();
+        }
 
+        if ($status === 'canceled') {
+            $this->cancel($alasan);
+        }
+    }
 }

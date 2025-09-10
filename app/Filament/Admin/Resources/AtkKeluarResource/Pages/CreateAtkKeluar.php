@@ -8,6 +8,7 @@ use App\Models\TahunAjaran;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Filament\Notifications\Notification;
+use Illuminate\Validation\ValidationException;
 
 class CreateAtkKeluar extends CreateRecord
 {
@@ -27,7 +28,10 @@ class CreateAtkKeluar extends CreateRecord
                 ->send();
 
             // Ini akan menghentikan proses simpan
-            throw new \Exception('Tahun Ajaran atau Semester aktif tidak ditemukan.');
+            throw ValidationException::withMessages([
+                'tahun_ajaran_id' => 'Tahun ajaran belum aktif',
+                'semester_id' => 'Semester belum aktif',
+            ]);
         }
 
         $data['tahun_ajaran_id'] = $activeTahunAjaran->id;
@@ -44,16 +48,8 @@ class CreateAtkKeluar extends CreateRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        if ($data['status'] === 'verified') {
-            $data['verified_by_id'] = auth()->id();
-            $data['verified_at'] = now();
-        }
-
-        if ($data['status'] === 'canceled') {
-            $data['canceled_by_id'] = auth()->id();
-            $data['canceled_at'] = now();
-        }
-
+        $this->record->applyStatus($data['status'], $data['alasan_batal'] ?? null);
+    
         return $data;
     }
 
