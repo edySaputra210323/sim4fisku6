@@ -112,6 +112,14 @@ class AtkKeluar extends Model
             if ($user->id !== $this->ditambah_oleh_id && !$user->hasRole('superadmin')) {
                 throw new \Exception("Anda tidak berhak membatalkan transaksi ini.");
             }
+
+            // rollback stok juga
+            $this->loadMissing('details.atk');
+            foreach ($this->details as $detail) {
+                if ($detail->atk) {
+                    $detail->atk->increment('stock', $detail->qty);
+                }
+            }
         }
 
         // kalau verified → hanya superadmin boleh cancel & rollback stok
