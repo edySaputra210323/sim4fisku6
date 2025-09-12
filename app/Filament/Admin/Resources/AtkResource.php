@@ -29,7 +29,8 @@ class AtkResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'ATK';
-    protected static ?string $navigationLabel = 'Daftar Barang ATK';
+    protected static ?int $navigationSort = 1;
+    protected static ?string $navigationLabel = 'Stock ATK';
     protected static ?string $modelLabel = 'ATK';
     protected static ?string $pluralModelLabel = 'ATK';
     protected static ?string $slug = 'atk';

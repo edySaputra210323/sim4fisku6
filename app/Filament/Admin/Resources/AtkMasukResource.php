@@ -18,7 +18,8 @@ class AtkMasukResource extends Resource
     protected static ?string $model = AtkMasuk::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'ATK';
-    protected static ?string $navigationLabel = 'Daftar ATK Masuk';
+    protected static ?int $navigationSort = 2;
+    protected static ?string $navigationLabel = 'ATK Masuk';
     protected static ?string $modelLabel = 'ATK Masuk';
     protected static ?string $pluralModelLabel = 'ATK Masuk';
     protected static ?string $slug = 'atk-masuk';

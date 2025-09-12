@@ -21,7 +21,8 @@ class AtkKeluarResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'ATK';
-    protected static ?string $navigationLabel = 'Pengambilan Atk';
+    protected static ?string $navigationLabel = 'Pengambilan ATK';
+    protected static ?int $navigationSort = 3;
     protected static ?string $modelLabel = 'ATK Keluar';
     protected static ?string $pluralModelLabel = 'ATK Keluar';
     protected static ?string $slug = 'atk-keluar';
@@ -70,7 +71,14 @@ class AtkKeluarResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('atk_id')
                         ->label('Barang ATK')
-                        ->options(\App\Models\Atk::orderBy('nama_atk')->pluck('nama_atk', 'id'))
+                        ->options(
+                            \App\Models\Atk::where('stock', '>', 0)
+                                ->orderBy('nama_atk')
+                                ->get()
+                                ->mapWithKeys(fn ($atk) => [
+                                    $atk->id => "{$atk->nama_atk} (Stok: {$atk->stock}" . ($atk->satuan ? " {$atk->satuan}" : "") . ")"
+                                ])
+                        )
                         ->searchable()
                         ->required()
                         ->reactive(), // supaya qty bisa tahu stok saat atk diganti
