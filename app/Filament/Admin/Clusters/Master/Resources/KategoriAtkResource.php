@@ -48,6 +48,20 @@ class KategoriAtkResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->modifyQueryUsing(function (Builder $query) {
+            return $query->orderBy('id', 'desc');
+        })
+        ->recordAction(null)
+        ->recordUrl(null)
+        ->extremePaginationLinks()
+        ->paginated([5, 10, 20, 50])
+        ->defaultPaginationPageOption(10)
+        ->striped()
+        ->poll('5s')
+        ->recordClasses(function () {
+            $classes = 'table-vertical-align-top ';
+            return $classes;
+        })
             ->columns([
                 TextColumn::make('No.')->state(
                     static function (HasTable $livewire, stdClass $rowLoop): string {
