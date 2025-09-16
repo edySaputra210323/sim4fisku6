@@ -12,10 +12,12 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Concerns\InteractsWithTable;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class ListInventaris extends Page implements HasTable
 {
     use InteractsWithTable;
+    use HasPageShield;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 

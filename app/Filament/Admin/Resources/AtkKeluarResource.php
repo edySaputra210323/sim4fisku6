@@ -2,18 +2,21 @@
 
 namespace App\Filament\Admin\Resources;
 
-use App\Filament\Admin\Resources\AtkKeluarResource\Pages;
-use App\Filament\Admin\Resources\AtkKeluarResource\RelationManagers;
-use App\Models\AtkKeluar;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Forms\Get;
 use Closure;
+use Filament\Forms;
+use Filament\Tables;
+use Filament\Forms\Get;
+use App\Models\Semester;
+use Filament\Forms\Form;
+use App\Models\AtkKeluar;
+use Filament\Tables\Table;
+use App\Models\TahunAjaran;
+use Filament\Resources\Resource;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Admin\Resources\AtkKeluarResource\Pages;
+use App\Filament\Admin\Resources\AtkKeluarResource\RelationManagers;
 
 class AtkKeluarResource extends Resource
 {
@@ -43,6 +46,7 @@ class AtkKeluarResource extends Resource
                 ->label('Pegawai / Guru Penerima')
                 ->relationship('pegawai', 'nm_pegawai')
                 ->searchable()
+                ->preload()
                 ->visible(fn () => auth()->user()->hasRole('superadmin')),
 
                 Forms\Components\Select::make('status')
@@ -80,6 +84,7 @@ class AtkKeluarResource extends Resource
                                 ])
                         )
                         ->searchable()
+                        ->preload()
                         ->required()
                         ->reactive(), // supaya qty bisa tahu stok saat atk diganti
 
@@ -112,15 +117,48 @@ class AtkKeluarResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $activeTahunAjaran = cache()->remember(
+            'active_th_ajaran',
+            now()->addMinutes(1),
+            fn () => TahunAjaran::where('status', true)->first()
+        );
+    
+        $activeSemester = cache()->remember(
+            'active_semester',
+            now()->addMinutes(1),
+            fn () => Semester::where('status', true)->first()
+        );
+    
         return $table
-        ->modifyQueryUsing(function (Builder $query) {
-            // Filter data berdasarkan user yang login
-            // Superadmin bisa melihat semua data, user biasa hanya melihat data mereka sendiri
-            if (!auth()->user()->hasRole('superadmin')) {
+        ->modifyQueryUsing(function (Builder $query) use ($activeTahunAjaran, $activeSemester) {
+            if (! auth()->user()->hasRole('superadmin')) {
                 $query->where('ditambah_oleh_id', auth()->id());
             }
-            return $query->orderBy('id', 'desc');
+        
+            // ambil filter dari request
+            $filters = request()->input('tableFilters', []);
+        
+            $filterTahun = $filters['tahun_ajaran_id']['value'] ?? null;
+            $filterSemester = $filters['semester_id']['value'] ?? null;
+        
+            if ($filterTahun || $filterSemester) {
+                // ✅ kalau user pilih filter manual → pakai filter itu
+                return $query->when($filterTahun, fn($q) => $q->where('tahun_ajaran_id', $filterTahun))
+                             ->when($filterSemester, fn($q) => $q->where('semester_id', $filterSemester))
+                             ->orderByDesc('id');
+            }
+        
+            if ($activeTahunAjaran && $activeSemester) {
+                // ✅ default → periode aktif
+                return $query->where('tahun_ajaran_id', $activeTahunAjaran->id)
+                             ->where('semester_id', $activeSemester->id)
+                             ->orderByDesc('id');
+            }
+        
+            // ❌ tidak ada periode aktif → kosong
+            return $query->whereRaw('0 = 1');
         })
+        
             ->recordAction(null)
             ->recordUrl(null)
             ->extremePaginationLinks()
@@ -128,10 +166,7 @@ class AtkKeluarResource extends Resource
             ->defaultPaginationPageOption(10)
             ->striped()
             ->poll('5s')
-            ->recordClasses(function () {
-                $classes = 'table-vertical-align-top ';
-                return $classes;
-            })
+            ->recordClasses(fn () => 'table-vertical-align-top')
             ->columns([
                 Tables\Columns\TextColumn::make('tanggal')
                     ->label('Tanggal Transaksi')
@@ -140,44 +175,66 @@ class AtkKeluarResource extends Resource
                         \Carbon\Carbon::parse($state)->translatedFormat('d F Y H:i')
                     ),
                 Tables\Columns\TextColumn::make('pegawai.nm_pegawai')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('tahunAjaran.th_ajaran')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('semester.nm_semester')
-                    ->numeric()
-                    ->sortable(),
+                    ->label('Pegawai / Guru')
+                    ->sortable()
+                    ->searchable(),
+                    Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->colors([
+                        'secondary' => 'draft',     // abu-abu untuk draft
+                        'success'   => 'verified',  // hijau untuk terverifikasi
+                        'danger'    => 'canceled',  // merah untuk dibatalkan
+                    ])
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'draft'    => 'Draft',
+                        'verified' => 'Terverifikasi',
+                        'canceled' => 'Dibatalkan',
+                        default    => ucfirst($state),
+                    }),
                 Tables\Columns\TextColumn::make('user.email')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('status'),
-                Tables\Columns\TextColumn::make('verifiedBy.email')
-                    ->numeric()
-                    ->sortable(),
+                    ->label('Ditambah Oleh')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('verifiedBy.email')->label('Verifikator')
+                ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('verified_at')
-                    ->dateTime()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('canceledBy.email')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('canceled_at')
-                    ->dateTime()
-                    ->sortable(),
+                ->dateTime()
+                ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('canceledBy.email')->label('Pembatal')
+                ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('canceled_at')->dateTime()
+                ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('deleted_at')
                     ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('tahun_ajaran_id')
+                    ->label('Tahun Ajaran')
+                    ->relationship('tahunAjaran', 'th_ajaran')
+                    ->default($activeTahunAjaran?->id)
+                    ->preload(),
+            
+                    Tables\Filters\SelectFilter::make('semester_id')
+                    ->label('Semester')
+                    ->options(
+                        \App\Models\Semester::with('tahunAjaran')
+                            ->get()
+                            ->mapWithKeys(fn ($semester) => [
+                                $semester->id => $semester->nm_semester . ' - ' . ($semester->tahunAjaran?->th_ajaran ?? '-'),
+                            ])
+                    )
+                    ->searchable()
+                    ->preload()
+                    ->default($activeSemester?->id),
+            
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
@@ -189,9 +246,9 @@ class AtkKeluarResource extends Resource
                     ->iconButton()
                     ->color('danger')
                     ->icon('heroicon-m-trash')
-                    ->modalHeading('Hapus Transaksi Atk'),
+                    ->modalHeading('Hapus Transaksi ATK'),
                 Tables\Actions\ViewAction::make()
-                ->iconButton()
+                    ->iconButton()
                     ->color('primary')
                     ->icon('heroicon-m-eye'),
             ])

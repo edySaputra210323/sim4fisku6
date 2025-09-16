@@ -316,8 +316,19 @@ class MutasiSiswaResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                ->iconButton()
+                ->color('warning')
+                ->icon('heroicon-m-pencil-square'),
+            Tables\Actions\DeleteAction::make()
+                ->iconButton()
+                ->color('danger')
+                ->icon('heroicon-m-trash')
+                ->modalHeading('Hapus Mutasi Siswa'),
+            Tables\Actions\ViewAction::make()
+            ->iconButton()
+                ->color('primary')
+                ->icon('heroicon-m-eye'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

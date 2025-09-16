@@ -19,7 +19,7 @@ class TopAtkChart extends ApexChartWidget
             ->with('atk')
             ->groupBy('atk_id')
             ->orderByDesc('total_keluar')
-            ->limit(5)
+            ->limit(10)
             ->get();
 
         $labels = $topAtk->pluck('atk.nama_atk')->toArray();
@@ -28,7 +28,7 @@ class TopAtkChart extends ApexChartWidget
         return [
             'chart' => [
                 'type'   => 'bar',
-                'height' => 300,
+                'height' => 150,
             ],
             'series' => [
                 [
