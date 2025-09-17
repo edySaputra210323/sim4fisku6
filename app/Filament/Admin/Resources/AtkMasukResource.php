@@ -58,6 +58,7 @@ class AtkMasukResource extends Resource
                                 ->label('Barang ATK')
                                 ->relationship('atk', 'nama_atk')
                                 ->searchable()
+                                ->preload()
                                 ->required(),
 
                             Forms\Components\TextInput::make('qty')

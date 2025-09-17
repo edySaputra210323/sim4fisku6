@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateAtk extends CreateRecord
 {
     protected static string $resource = AtkResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

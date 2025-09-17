@@ -29,7 +29,7 @@ class ViewAtkKeluar extends ViewRecord
     {
         return $infolist
             ->schema([
-                Section::make('🧾 Nota Transaksi ATK')
+                Section::make('Nota Transaksi ATK')
                     ->description('Detail informasi transaksi pengambilan ATK')
                     ->schema([
                         TextEntry::make('id')
@@ -48,9 +48,6 @@ class ViewAtkKeluar extends ViewRecord
                         TextEntry::make('tahunAjaran.th_ajaran')
                             ->label('Tahun Ajaran'),
 
-                        TextEntry::make('semester.nm_semester')
-                            ->label('Semester'),
-
                         TextEntry::make('status')
                             ->badge()
                             ->color(fn (string $state): string => match ($state) {
@@ -59,11 +56,16 @@ class ViewAtkKeluar extends ViewRecord
                                 'canceled' => 'danger',
                                 default => 'secondary',
                             }),
+
+                        TextEntry::make('semester.nm_semester')
+                            ->label('Semester'),
+
+                        
                     ])
                     ->columns(2)
                     ->collapsible(),
 
-                Section::make('📦 Detail Barang')
+                Section::make('Detail Barang')
                     ->schema([
                         RepeatableEntry::make('details')
                             ->schema([

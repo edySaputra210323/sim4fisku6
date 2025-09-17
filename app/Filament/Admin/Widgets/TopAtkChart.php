@@ -28,7 +28,7 @@ class TopAtkChart extends ApexChartWidget
         return [
             'chart' => [
                 'type'   => 'bar',
-                'height' => 150,
+                'height' => 300,
             ],
             'series' => [
                 [
