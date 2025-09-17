@@ -132,6 +132,14 @@ class AtkResource extends Resource
                 'md' => 2,
                 'xl' => 3,
             ])
+            ->recordAction(null)
+            ->recordUrl(null)
+            ->extremePaginationLinks()
+            ->paginated([5, 10, 20, 50])
+            ->defaultPaginationPageOption(10)
+            ->striped()
+            ->poll('5s')
+            ->recordClasses(fn () => 'table-vertical-align-top')
             ->columns([
                 Split::make([
                     ImageColumn::make('foto_atk')

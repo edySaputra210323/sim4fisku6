@@ -82,6 +82,14 @@ class AtkMasukResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->recordAction(null)
+        ->recordUrl(null)
+        ->extremePaginationLinks()
+        ->paginated([5, 10, 20, 50])
+        ->defaultPaginationPageOption(10)
+        ->striped()
+        ->poll('5s')
+        ->recordClasses(fn () => 'table-vertical-align-top')
             ->columns([
                 Tables\Columns\TextColumn::make('nomor_nota')
                     ->label('Nomor Nota')
