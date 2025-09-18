@@ -11,7 +11,12 @@ use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Illuminate\Support\HtmlString;
 use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Storage;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\Layout\View;
+use Filament\Tables\Columns\Layout\Split;
+use Filament\Tables\Columns\Layout\Stack;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Placeholder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -223,61 +228,76 @@ class PegawaiResource extends Resource
                 return $classes;
             })
             ->columns([
-                Tables\Columns\ImageColumn::make('foto_pegawai')
-                    ->simpleLightbox()
-                    ->label('Foto')
-                    ->circular()
-                    ->size(60)
-                    ->grow(false)
-                    ->defaultImageUrl(asset('images/no_pic.jpg')),
-                // Tables\Columns\ImageColumn::make('foto_pegawai')    
-                //     ->label('Foto')
-                //     ->circular()
-                //     ->size(80)
-                //     ->grow(false)
-                //     ->defaultImageUrl(asset('storage/images/no_pic.png')),
-                Tables\Columns\TextColumn::make('nm_pegawai')
-                    ->searchable()
-                    ->weight(FontWeight::Bold)
-                    ->label('Nama Pegawai')
-                    ->description(function ($record) {
-                        $data = '';
-                        if (!empty($record->nik)) {
-                            $data .= '<small>NIK : ' . $record->nik . '</small>';
-                        }
-                        if (!empty($record->npy)) {
-                            if ($data != '')
-                                $data .= '<br>';
-                            $data .= '<small>NPY : ' . $record->npy . '</small>';
-                        }
-                        if (!empty($record->nuptk)) {
-                            if ($data != '')
-                                $data .= '<br>';
-                            $data .= '<small>Nuptk : ' . $record->nuptk . '</small>';
-                        }
-                        return new HtmlString($data);
-                    }),
-                Tables\Columns\TextColumn::make('tempat_tanggal_lahir')
-                    ->label('Tempat, Tanggal Lahir'),
-                Tables\Columns\TextColumn::make('jenis_kelamin')
-                    ->label('JK'),
-                Tables\Columns\TextColumn::make('phone')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('user.email')
-                    ->searchable()
-                    ->label('Email'),
-                Tables\Columns\IconColumn::make('status')
-                    ->boolean()
-                    ->label('Status'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                // Tables\Columns\Layout\Panel::make([
+                    Tables\Columns\Layout\Split::make([
+            
+                        // Bagian kiri: Foto Pegawai
+                        Tables\Columns\ImageColumn::make('foto_pegawai')
+                            ->simpleLightbox()
+                            ->label('Foto')
+                            ->circular()
+                            ->size(100)
+                            ->grow(false)
+                            ->defaultImageUrl(asset('images/no_pic.jpg')),
+            
+                        // Bagian tengah: Identitas & Status
+                        Tables\Columns\Layout\Stack::make([
+                            Tables\Columns\TextColumn::make('nm_pegawai')
+                                ->label('Nama Pegawai')
+                                ->weight(FontWeight::Bold)
+                                ->searchable()
+                                ->sortable(),
+            
+                            Tables\Columns\TextColumn::make('nik')
+                                ->searchable()
+                                ->color('gray')
+                                ->formatStateUsing(fn (?string $state): HtmlString => new HtmlString("<small>NIK: " . ($state ?? '-') . "</small>")),
+            
+                            Tables\Columns\TextColumn::make('npy')
+                                ->searchable()
+                                ->color('gray')
+                                ->formatStateUsing(fn (?string $state): HtmlString => new HtmlString("<small>NPY: " . ($state ?? '-') . "</small>")),
+            
+                            Tables\Columns\TextColumn::make('nuptk')
+                                ->searchable()
+                                ->color('gray')
+                                ->formatStateUsing(fn (?string $state): HtmlString => new HtmlString("<small>NUPTK: " . ($state ?? '-') . "</small>")),
+            
+                            // Badge Status
+                            Tables\Columns\TextColumn::make('status')
+                                ->label('Status')
+                                ->badge()
+                                ->color(fn ($state) => $state ? 'success' : 'danger')
+                                ->formatStateUsing(fn ($state) => $state ? 'Aktif' : 'Nonaktif'),
+                        ]),
+            
+                        // Bagian kanan: Kontak & Alamat
+                        Tables\Columns\Layout\Stack::make([
+                            Tables\Columns\TextColumn::make('alamat')
+                                ->label('Alamat')
+                                ->color('gray')
+                                ->searchable()
+                                ->formatStateUsing(fn (?string $state): string => $state ?? '-'),
+            
+                            Tables\Columns\TextColumn::make('user.email')
+                                ->icon('heroicon-m-envelope')
+                                ->label('Email')
+                                ->color('gray')
+                                ->searchable()
+                                ->formatStateUsing(fn (?string $state): string => $state ?? '-'),
+            
+                            Tables\Columns\TextColumn::make('phone')
+                                ->icon('heroicon-m-phone')
+                                ->label('Telepon')
+                                ->color('gray')
+                                ->searchable()
+                                ->formatStateUsing(fn (?string $state): string => $state ?? '-'),
+                        ])->visibleFrom('md'),
+            
+                    ]),
+                // ]),
             ])
+            
             ->filters([
                 //
             ])
@@ -309,6 +329,22 @@ class PegawaiResource extends Resource
             //
         ];
     }
+
+    public static function getNavigationItems(): array
+{
+    if (auth()->user()?->pegawai) {
+        $pegawaiId = auth()->user()->pegawai->id;
+
+        return [
+            \Filament\Navigation\NavigationItem::make()
+                ->label('Data Diri')
+                ->icon('heroicon-o-user')
+                ->url(static::getUrl('view', ['record' => $pegawaiId])),
+        ];
+    }
+
+    return parent::getNavigationItems();
+}
 
     public static function getPages(): array
     {
