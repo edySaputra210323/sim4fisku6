@@ -26,6 +26,9 @@ use App\Filament\Admin\Widgets\JumlahSiswaPerAngkatanChart;
 use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use SolutionForest\FilamentSimpleLightBox\SimpleLightBoxPlugin;
+use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
+use Filament\Navigation\MenuItem;
+use Joaopaulolndev\FilamentEditProfile\Pages\EditProfilePage;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -61,6 +64,13 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverClusters(in: app_path('Filament/Admin/Clusters'), for: 'App\\Filament\\Admin\\Clusters')
             ->plugins([
+                FilamentEditProfilePlugin::make()
+                ->setNavigationLabel(false)
+                ->shouldRegisterNavigation(false)
+                ->shouldShowDeleteAccountForm(false)
+                ->shouldShowAvatarForm(false),
+                // ->setIcon('heroicon-o-cog-8-tooth')
+                // ->shouldShowAvatarForm(),
                 FilamentApexChartsPlugin::make(),
                 FilamentShieldPlugin::make()
                     ->gridColumns([
@@ -114,6 +124,14 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->userMenuItems([
+                MenuItem::make()
+                    ->label("Pengaturan Akun")
+                    ->url(fn (): string => EditProfilePage::getUrl())
+                    ->icon('heroicon-o-cog-8-tooth')
+                ]);
     }
+
+    
 }

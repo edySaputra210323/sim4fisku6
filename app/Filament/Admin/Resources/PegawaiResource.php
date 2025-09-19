@@ -134,17 +134,15 @@ class PegawaiResource extends Resource
                 ->numeric()
                 ->unique(table: Pegawai::class, ignoreRecord: true)
                 ->placeholder('Masukkan Nomor Pegawai Yayasan')
-                ->maxLength(10)
-                ->minLength(10)
                 ->extraInputAttributes([
                     'oninput' => "this.value = this.value.replace(/[^0-9]/g, '')",
-                ])
-                ->validationMessages([
-                    'max' => 'NPY tidak boleh lebih dari 10 angka',
-                    // 'required' => 'NPY tidak boleh kosong',
-                    'unique' => 'NPY sudah ada',
-                    'numeric' => 'NPY harus angka',
                 ]),
+                // ->validationMessages([
+                //     'max' => 'NPY tidak boleh lebih dari 10 angka',
+                //     // 'required' => 'NPY tidak boleh kosong',
+                //     'unique' => 'NPY sudah ada',
+                //     'numeric' => 'NPY harus angka',
+                // ]),
             Forms\Components\Select::make('status')
                 ->options([
                     true => 'Aktif',
