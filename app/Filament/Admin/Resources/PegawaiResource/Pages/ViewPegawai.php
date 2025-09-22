@@ -83,13 +83,29 @@ class ViewPegawai extends ViewRecord
                     'md' => 2,      // mulai layar medium (tablet ke atas) → 2 kolom
                 ])
                 ->schema([
-                    \Filament\Infolists\Components\TextEntry::make('nik')->label('NIK'),
-                    \Filament\Infolists\Components\TextEntry::make('npy')->label('Nomor Pegawai Yayasan'),
-                    \Filament\Infolists\Components\TextEntry::make('nuptk')->label('NUPTK'),
-                    \Filament\Infolists\Components\TextEntry::make('jenis_kelamin')->label('Jenis Kelamin'),
-                    \Filament\Infolists\Components\TextEntry::make('tempat_tanggal_lahir')->label('Tempat, Tanggal Lahir'),
+                    \Filament\Infolists\Components\TextEntry::make('nik')
+                    ->label('NIK')
+                    ->color('gray'),
+                    \Filament\Infolists\Components\TextEntry::make('npy')
+                    ->label('Nomor Pegawai Yayasan')
+                    ->color('gray'),
+                    \Filament\Infolists\Components\TextEntry::make('nuptk')
+                    ->label('NUPTK')
+                    ->color('gray'),
+                    \Filament\Infolists\Components\TextEntry::make('jenis_kelamin')
+                    ->label('Jenis Kelamin')
+                    ->formatStateUsing(fn ($state) => match ($state) {
+                        'L' => 'Laki-laki',
+                        'P' => 'Perempuan',
+                        default => '-',
+                    })
+                    ->color('gray'),
+                    \Filament\Infolists\Components\TextEntry::make('tempat_tanggal_lahir')
+                    ->label('Tempat, Tanggal Lahir')
+                    ->color('gray'),
                     \Filament\Infolists\Components\TextEntry::make('alamat')
                         ->label('Alamat')
+                        ->color('gray')
                         ->columnSpanFull(), // otomatis full width di grid
                 ]),
             ])
