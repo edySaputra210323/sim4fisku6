@@ -24,7 +24,6 @@ return new class extends Migration
             $table->date('tgl_mulai_bekerja')->nullable();
             $table->string('nuptk', 16)->unique()->nullable()->comment('Nomor Unik Pendidik dan Tenaga Kependidikan');
             $table->string('npy', 10)->unique()->nullable()->comment('Nomor Pegawai Yayasan');
-            $table->boolean('status')->default(false)->nullable();
             $table->string('foto_pegawai')->nullable();
             $table->timestamps();
         });

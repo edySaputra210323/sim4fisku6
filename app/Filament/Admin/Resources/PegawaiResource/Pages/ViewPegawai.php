@@ -35,11 +35,11 @@ class ViewPegawai extends ViewRecord
                                 ->circular()
                                 ->size(150)
                                 ->defaultImageUrl(asset('images/no_pic.jpg')),
-                                TextEntry::make('status')
+                                TextEntry::make('status_pegawai.nama_status')
                                 ->badge()
-                                ->label(false)
-                                ->formatStateUsing(fn ($state) => $state ? 'Aktif' : 'Nonaktif')
-                                ->color(fn ($state) => $state ? 'success' : 'danger'),
+                                ->label('Status')
+                                ->color(fn ($record) => $record->status_pegawai?->warna ?? 'gray')
+                                ->formatStateUsing(fn ($record) => $record->status_pegawai?->nama_status ?? '-'),
                         ])
                         ->grow(false)
                         ->extraAttributes([

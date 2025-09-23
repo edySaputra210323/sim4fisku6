@@ -2,12 +2,14 @@
 
 namespace App\Filament\Admin\Resources;
 
+use Carbon\Carbon;
 use Filament\Forms;
 use App\Models\User;
 use Filament\Tables;
 use App\Models\Pegawai;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Models\Statuspegawai;
 use Filament\Resources\Resource;
 use Illuminate\Support\HtmlString;
 use Filament\Support\Enums\FontWeight;
@@ -66,6 +68,14 @@ class PegawaiResource extends Resource
                         'numeric' => 'NIK harus angka',
                         'unique' => 'NIK sudah ada',
                         ]),
+            Forms\Components\DatePicker::make('tgl_mulai_bekerja')
+                ->label('Tanggal Mulai Terhitung')
+                ->required()
+                ->native(false)
+                ->displayFormat('d/m/Y')
+                ->validationMessages([
+                    'required' => 'Tanggal Mulai Terhitung tidak boleh kosong',
+                        ]),
             Forms\Components\TextInput::make('nm_pegawai')
                 ->label('Nama')
                 ->placeholder('masukkan nama lengkap dan gelar')
@@ -96,8 +106,9 @@ class PegawaiResource extends Resource
                 ->options(['L' => 'Laki-laki', 'P' => 'Perempuan'])
                 ->label('JK')
                 ->required(),
-            Forms\Components\TextInput::make('alamat')
-                ->label('Alamat'),
+            Forms\Components\Textarea::make('alamat')
+                ->label('Alamat')
+                ->rows(3),
             Forms\Components\TextInput::make('phone')
                 ->label('Nomor Telepon')
                 ->maxLength(15)
@@ -143,13 +154,12 @@ class PegawaiResource extends Resource
                 //     'unique' => 'NPY sudah ada',
                 //     'numeric' => 'NPY harus angka',
                 // ]),
-            Forms\Components\Select::make('status')
-                ->options([
-                    true => 'Aktif',
-                    false => 'Nonaktif',
-                ])
-                ->label('Status')
-                ->required(),
+            Forms\Components\Select::make('status_pegawai_id')
+                ->relationship('status_pegawai', 'nama_status')
+                ->label('Status Pegawai')
+                ->required()
+                ->searchable()
+                ->preload(),
             Forms\Components\FileUpload::make('foto_pegawai')
                 ->image(['jpg', 'png'])
                 ->label('Foto Pegawai')
@@ -256,17 +266,38 @@ class PegawaiResource extends Resource
                                 ->color('gray')
                                 ->formatStateUsing(fn (?string $state): HtmlString => new HtmlString("<small>NPY: " . ($state ?? '-') . "</small>")),
             
-                            Tables\Columns\TextColumn::make('nuptk')
-                                ->searchable()
+                            // Tables\Columns\TextColumn::make('nuptk')
+                            //     ->searchable()
+                            //     ->color('gray')
+                            //     ->formatStateUsing(fn (?string $state): HtmlString => new HtmlString("<small>NUPTK: " . ($state ?? '-') . "</small>")),
+
+                            Tables\Columns\TextColumn::make('tgl_mulai_bekerja')
+                                ->label('Tanggal Mulai Bekerja')
                                 ->color('gray')
-                                ->formatStateUsing(fn (?string $state): HtmlString => new HtmlString("<small>NUPTK: " . ($state ?? '-') . "</small>")),
+                                ->formatStateUsing(function ($state) {
+                                    if (!$state) {
+                                        return new HtmlString('<small>Tanggal Mulai Bekerja: -</small>');
+                                    }
+
+                                    $tgl = Carbon::parse($state);
+                                    $lama = $tgl->diff(Carbon::now());
+
+                                    // Format tanggal dalam bahasa Indonesia
+                                    $tanggal = $tgl->translatedFormat('d F Y'); // contoh: 13 Juli 2013
+
+                                    // Hitung lama bekerja (tahun, bulan opsional)
+                                    $durasi = $lama->y > 0 
+                                        ? $lama->y . ' th'
+                                        : ($lama->m > 0 ? $lama->m . ' bln' : $lama->d . ' hr');
+
+                                    return new HtmlString("<small>TMT: {$tanggal} ({$durasi})</small>");
+                                }),
             
                             // Badge Status
-                            Tables\Columns\TextColumn::make('status')
+                            Tables\Columns\TextColumn::make('status_pegawai.nama_status')
                                 ->label('Status')
                                 ->badge()
-                                ->color(fn ($state) => $state ? 'success' : 'danger')
-                                ->formatStateUsing(fn ($state) => $state ? 'Aktif' : 'Nonaktif'),
+                                ->color(fn ($record) => $record->status_pegawai?->warna ?? 'gray'),
                         ]),
             
                         // Bagian kanan: Kontak & Alamat

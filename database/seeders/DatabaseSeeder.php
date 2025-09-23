@@ -11,6 +11,7 @@ use Database\Seeders\RuanganSeeder;
 use Database\Seeders\SuplayerSeeder;
 use Database\Seeders\KategoriAtkseeder;
 use Illuminate\Support\Facades\Artisan;
+use Database\Seeders\statusPegawaiSeeder;
 use Database\Seeders\KategoriBarangSeeder;
 use Database\Seeders\SumberAnggaranSeeder;
 use Illuminate\Database\Eloquent\Collection;
@@ -65,6 +66,7 @@ class DatabaseSeeder extends Seeder
             RuanganSeeder::class,
             SuplayerSeeder::class,
             KategoriAtkseeder::class,
+            statusPegawaiSeeder::class,
         ]);
     }
 

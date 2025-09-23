@@ -22,7 +22,8 @@ class Pegawai extends Model
         'tgl_mulai_bekerja',
         'nuptk',
         'npy',
-        'status',
+        'status_pegawai_id',
+        'bidang_studi',
         'foto_pegawai',
     ];
 
@@ -117,5 +118,10 @@ protected static function boot()
     public function inventaris()
     {
         return $this->hasMany(TransaksionalInventaris::class);
+    }
+
+    public function status_pegawai()
+    {
+        return $this->belongsTo(StatusPegawai::class);
     }
 }
