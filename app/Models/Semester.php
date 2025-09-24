@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use App\Models\SuratKeluar;
 use App\Models\SuratMasuk;
+use App\Enums\SemesterEnum;
+use App\Models\SuratKeluar;
 use App\Models\TahunAjaran;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Semester extends Model
 {
@@ -19,6 +20,12 @@ class Semester extends Model
         'periode_mulai',
         'periode_akhir',
         'status',
+    ];
+
+    protected $casts = [
+        'status' => SemesterEnum::class,
+        'periode_mulai' => 'date',
+        'periode_akhir' => 'date',
     ];
 
     public function tahunAjaran()

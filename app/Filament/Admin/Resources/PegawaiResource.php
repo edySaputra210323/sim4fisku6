@@ -68,14 +68,6 @@ class PegawaiResource extends Resource
                         'numeric' => 'NIK harus angka',
                         'unique' => 'NIK sudah ada',
                         ]),
-            Forms\Components\DatePicker::make('tgl_mulai_bekerja')
-                ->label('Tanggal Mulai Terhitung')
-                ->required()
-                ->native(false)
-                ->displayFormat('d/m/Y')
-                ->validationMessages([
-                    'required' => 'Tanggal Mulai Terhitung tidak boleh kosong',
-                        ]),
             Forms\Components\TextInput::make('nm_pegawai')
                 ->label('Nama')
                 ->placeholder('masukkan nama lengkap dan gelar')
@@ -84,6 +76,15 @@ class PegawaiResource extends Resource
                 ->validationMessages([
                     'required' => 'Nama Lengkap tidak boleh kosong',
                     'max' => 'Nama Lengkap tidak boleh lebih dari 100 karakter',
+                ]),
+            Forms\Components\TextInput::make('bidang_studi')
+                ->label('Bidang Studi')
+                ->placeholder('contoh : Sistem Informasi')
+                ->maxLength(100)
+                ->required()
+                ->validationMessages([
+                    'required' => 'Bidang Studi tidak boleh kosong',
+                    'max' => 'Bidang Studi tidak boleh lebih dari 100 karakter',
                 ]),
             Forms\Components\TextInput::make('tempat_lahir')
                 ->label('Tempat Lahir')
@@ -186,39 +187,46 @@ class PegawaiResource extends Resource
                         $record->save();
                     }
                 }),
+            Forms\Components\DatePicker::make('tgl_mulai_bekerja')
+                ->label('Tanggal Mulai Terhitung')
+                ->required()
+                ->native(false)
+                ->displayFormat('d/m/Y')
+                ->validationMessages([
+                    'required' => 'Tanggal Mulai Terhitung tidak boleh kosong',
+                        ]),
             Forms\Components\Toggle::make('create_user_account')
                 ->label('Buat Akun Pengguna')
                 ->reactive()
-                ->default(false),
+                ->default(false)
+                ->visible(fn () => auth()->user()->hasRole('superadmin')),
             Forms\Components\TextInput::make('user_email')
                 ->email()
                 ->required(fn ($get) => $get('create_user_account'))
                 ->unique(table: \App\Models\User::class, column: 'email')
                 ->label('Email Pengguna')
-                ->visible(fn ($get) => $get('create_user_account')),
+                ->visible(fn ($get) => $get('create_user_account') && auth()->user()?->hasRole('superadmin')),
             Forms\Components\TextInput::make('username_pegawai')
                 ->placeholder('Masukkan username')
                 ->required(fn ($get) => $get('create_user_account'))
                 ->unique(table: \App\Models\User::class, column: 'username')
                 ->label('username')
-                ->visible(fn ($get) => $get('create_user_account')),
+                ->visible(fn ($get) => $get('create_user_account') && auth()->user()?->hasRole('superadmin')),
             Forms\Components\TextInput::make('password')
                 ->password()
                 ->required(fn ($get) => $get('create_user_account'))
                 ->label('Kata Sandi')
-                ->visible(fn ($get) => $get('create_user_account')),
+                ->visible(fn ($get) => $get('create_user_account') && auth()->user()?->hasRole('superadmin')),
             Forms\Components\TextInput::make('password_confirmation')
                 ->password()
                 ->required(fn ($get) => $get('create_user_account'))
                 ->same('password')
                 ->label('Konfirmasi Kata Sandi')
-                ->visible(fn ($get) => $get('create_user_account'))
+                ->visible(fn ($get) => $get('create_user_account') && auth()->user()?->hasRole('superadmin'))
                 ->validationMessages([
                         'required' => 'Konfirmasi kata sandi wajib diisi',
                         'same' => 'Konfirmasi kata sandi tidak cocok',
                         ]),
-            
-            
             ])
                 ]);
     }

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\User;
 use App\Models\Semester;
 use App\Models\TahunAjaran;
+use App\Enums\StatusSuratMasukEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
@@ -28,6 +29,7 @@ class SuratMasuk extends Model
     protected $casts = [
         'tgl_terima' => 'date',
         'tgl_surat' => 'date',
+        'status' => StatusSuratMasukEnum::class,
     ];
 
     // Boot method untuk handle event

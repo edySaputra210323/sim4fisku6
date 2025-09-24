@@ -7,6 +7,7 @@ use Filament\Tables;
 use App\Models\Semester;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Enums\SemesterEnum;
 use App\Models\TahunAjaran;
 use Filament\Resources\Resource;
 use App\Filament\Admin\Clusters\Master;
@@ -70,10 +71,7 @@ class SemesterResource extends Resource
                         Forms\Components\Select::make('nm_semester')
                             ->placeholder('Pilih Semester')
                             ->label('Nama Semester')
-                            ->options([
-                                'Ganjil' => 'Ganjil',
-                                'Genap' => 'Genap',
-                            ])
+                            ->options(SemesterEnum::options())
                             ->required()
                             ->disabled(!$isTahunAjaranActive)
                             ->validationMessages([

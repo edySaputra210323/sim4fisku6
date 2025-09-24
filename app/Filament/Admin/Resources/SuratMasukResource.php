@@ -10,6 +10,7 @@ use Filament\Tables\Table;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Resources\Resource;
 use Illuminate\Support\HtmlString;
+use App\Enums\StatusSuratMasukEnum;
 use Filament\Forms\Components\Section;
 use Filament\Support\Enums\FontWeight;
 use Filament\Notifications\Notification;
@@ -130,12 +131,8 @@ class SuratMasukResource extends Resource
                         ])
                         ->disabled(!$isTahunAjaranActive || !$activeSemester),
                     Forms\Components\Select::make('status')
-                        ->options([
-                            'diterima' => 'Diterima',
-                            'diproses' => 'Diproses',
-                            'selesai' => 'Selesai',
-                        ])
-                        ->default('diterima')
+                        ->options(StatusSuratMasukEnum::options())
+                        ->default(StatusSuratMasukEnum::DITERIMA->value)
                         ->required()
                         ->columnSpan(2)
                     ])->columnSpan(2)->columns(2),
@@ -223,18 +220,10 @@ class SuratMasukResource extends Resource
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('status')
-                ->label('Status')
-                ->searchable()
-                ->badge()
-                ->color(function ($record) {
-                    if ($record->status == 'diterima') {
-                        return 'success';
-                    } elseif ($record->status == 'diproses') {
-                        return 'warning';
-                    } elseif ($record->status == 'selesai') {
-                        return 'info';
-                    }
-                }),
+                    ->label('Status')
+                    ->badge()
+                    ->formatStateUsing(fn (StatusSuratMasukEnum $state) => $state->getLabel())
+                    ->color(fn (StatusSuratMasukEnum $state) => $state->color()),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
