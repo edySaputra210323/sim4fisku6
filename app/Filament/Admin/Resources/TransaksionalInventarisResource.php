@@ -26,6 +26,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
 use Illuminate\Database\Eloquent\Builder;
+use App\Enums\JenisPenggunaInventarisEnum;
 use Illuminate\Database\Eloquent\Collection;
 use Filament\Forms\Components\Grid as FormGrid;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -212,25 +213,25 @@ class TransaksionalInventarisResource extends Resource
 
                     FormSection::make()
                         ->schema([
-        Forms\Components\Select::make('jenis_penggunaan')
-            ->label('Jenis Penggunaan')
-            ->options([
-                'mobile' => 'Mobile (Bisa Dipinjam)',
-                'tetap' => 'Tetap (Dipakai Pegawai/Guru)',
-                'permanen' => 'Permanen (Dipasang Tetap)',
-            ])
-            ->native(false)
-            ->required()
-            ->reactive() // Penting supaya perubahan langsung terdeteksi
-            ->columnSpanFull(),
-
-        Forms\Components\Select::make('pegawai_id')
-            ->label('Pengguna Tetap')
-            ->options(fn () => Pegawai::pluck('nm_pegawai', 'id'))
-            ->native(false)
-            ->required(fn ($get) => $get('jenis_penggunaan') === 'tetap')
-            ->visible(fn ($get) => $get('jenis_penggunaan') === 'tetap')
-            ->columnSpanFull(),
+                            Forms\Components\Select::make('jenis_penggunaan')
+                            ->label('Jenis Penggunaan')
+                            ->options([
+                                JenisPenggunaInventarisEnum::MOBILE->value => 'Mobile (Bisa Dipinjam)',
+                                JenisPenggunaInventarisEnum::TETAP->value => 'Tetap (Dipakai Pegawai/Guru)',
+                                JenisPenggunaInventarisEnum::PERMANEN->value => 'Permanen (Dipasang Tetap)',
+                            ])
+                            ->native(false)
+                            ->required()
+                            ->reactive() // supaya perubahan langsung terdeteksi
+                            ->columnSpanFull(),
+                        
+                        Forms\Components\Select::make('pegawai_id')
+                            ->label('Pengguna Tetap')
+                            ->options(fn () => Pegawai::pluck('nm_pegawai', 'id'))
+                            ->native(false)
+                            ->required(fn ($get) => $get('jenis_penggunaan') === JenisPenggunaInventarisEnum::TETAP->value)
+                            ->visible(fn ($get) => $get('jenis_penggunaan') === JenisPenggunaInventarisEnum::TETAP->value)
+                            ->columnSpanFull(),
     ])->columnSpan(2)->columns(2),
                 Forms\Components\Textarea::make('keterangan')
                     ->maxLength(255)
@@ -329,14 +330,8 @@ class TransaksionalInventarisResource extends Resource
             Tables\Columns\TextColumn::make('jenis_penggunaan')
                 ->searchable()
                 ->badge()
-                ->color(function ($state) {
-                    return match ($state) {
-                        'tetap' => 'warning',   // kuning
-                        'mobile' => 'success',  // hijau
-                        'permanen' => 'danger', // merah
-                        default => 'secondary', // default abu
-                    };
-                })
+                ->formatStateUsing(fn ($state) => JenisPenggunaInventarisEnum::resolve($state)?->getLabel() ?? (string) $state)
+                ->color(fn ($state) => JenisPenggunaInventarisEnum::resolve($state)?->color() ?? 'secondary')
                 ->label('Jenis Penggunaan')
                 ->description(fn ($record) => $record->pengguna?->nm_pegawai ? 'Nama : ' . $record->pengguna->nm_pegawai : null),
             Tables\Columns\TextColumn::make('kondisi')

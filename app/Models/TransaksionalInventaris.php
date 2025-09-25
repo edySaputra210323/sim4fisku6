@@ -12,6 +12,7 @@ use App\Models\SumberAnggaran;
 use App\Models\KategoriInventaris;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use App\Enums\JenisPenggunaInventarisEnum;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -47,6 +48,7 @@ class TransaksionalInventaris extends Model
     ];
 
     protected $casts = [
+        'jenis_penggunaan' => JenisPenggunaInventarisEnum::class,
         'tanggal_beli' => 'date',
         'jumlah_beli' => 'integer',
         'harga_satuan' => 'integer',

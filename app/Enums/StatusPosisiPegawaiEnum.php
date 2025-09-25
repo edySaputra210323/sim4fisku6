@@ -6,9 +6,9 @@ use Filament\Support\Contracts\HasLabel;
 
 enum StatusPosisiPegawaiEnum: string implements HasLabel
 {
-    case PTY = 'Pegawai Tetap Yayasan';
-    case KONTRAK = 'Kontrak';
-    case HONORER = 'Honorer';
+    case PTY = 'PTY';
+    case KONTRAK = 'KONTRAK';
+    case HONORER = 'HONORER';
 
     public function getLabel(): ?string
     {
@@ -18,6 +18,7 @@ enum StatusPosisiPegawaiEnum: string implements HasLabel
             self::HONORER => 'Honorer',
         };
     }
+
 
     public function color(): string
     {

@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use App\Models\Jabatan;
 use App\Models\Unit;
+use App\Models\Jabatan;
 use App\Models\Pegawai;
+use App\Enums\StatusPosisiPegawaiEnum;
 use Illuminate\Database\Eloquent\Model;
 
 class PosisiKepegawaian extends Model
@@ -24,7 +25,7 @@ class PosisiKepegawaian extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
-        'status' => 'string',
+        'status' => StatusPosisiPegawaiEnum::class,
     ];
 
     public function pegawai()

@@ -13,6 +13,7 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use App\Models\PosisiKepegawaian;
+use App\Enums\StatusPosisiPegawaiEnum;
 use Filament\Tables\Contracts\HasTable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -71,17 +72,13 @@ class PosisiKepegawaianResource extends Resource
                                 'required' => 'Unit tidak boleh kosong',
                             ]),
                 Forms\Components\Select::make('status')
-                    ->label('Status Kepegawaian')
-                    ->native(false)
-                    ->required()
-                    ->options([
-                        'permanent' => 'Permanent',
-                        'contract' => 'Contract',
-                        'honorary' => 'Honorary',
-                    ])
-                    ->validationMessages([
-                        'required' => 'Status Kepegawaian tidak boleh kosong',
-                    ]),
+                            ->label('Status Kepegawaian')
+                            ->native(false)
+                            ->required()
+                            ->options(StatusPosisiPegawaiEnum::options())
+                            ->validationMessages([
+                                'required' => 'Status Kepegawaian tidak boleh kosong',
+                            ]),
                 Forms\Components\TextInput::make('no_sk_pengangkatan')
                     ->maxLength(255)
                     ->required()
