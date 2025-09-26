@@ -11,6 +11,7 @@ use App\Models\DataSiswa;
 use Filament\Tables\Table;
 use App\Models\MutasiSiswa;
 use App\Models\TahunAjaran;
+use App\Enums\TipeMutasiEnum;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
@@ -130,10 +131,7 @@ class MutasiSiswaResource extends Resource
                             Forms\Components\Select::make('tipe_mutasi')
                             ->label('Tipe Mutasi')
                             ->disabled(!$isTahunAjaranActive || !$activeSemester)
-                            ->options([
-                                'Masuk' => 'Mutasi Masuk',
-                                'Keluar' => 'Mutasi Keluar',
-                            ])
+                            ->options(TipeMutasiEnum::options())
                             ->required()
                             ->placeholder('Pilih Tipe Mutasi')
                             ->reactive() // Membuat field ini reaktif untuk mengontrol visibilitas field lain
@@ -228,7 +226,7 @@ class MutasiSiswaResource extends Resource
         }
         return $table
         ->modifyQueryUsing(function (Builder $query) {
-            return $query->orderBy('tanggal_mutasi', 'desc');
+            return $query->orderBy('id', 'desc');
         })
             ->recordAction(null)
             ->recordUrl(null)
@@ -257,16 +255,13 @@ class MutasiSiswaResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->label('Semester'),
                     Tables\Columns\TextColumn::make('tipe_mutasi')
-                    ->sortable()
-                    ->searchable()
-                    ->badge()
-                    ->formatStateUsing(fn ($state) => ucfirst($state)) // untuk kapitalisasi
-                    ->color(fn ($state) => match (strtolower($state)) {
-                        'masuk' => 'success',
-                        'keluar' => 'danger',
-                        default => 'secondary', // fallback untuk nilai tak dikenal
-                    })
-                    ->label('Tipe Mutasi'),
+    ->sortable()
+    ->searchable()
+    ->badge()
+    ->formatStateUsing(fn ($state) => $state?->getLabel()) // ambil label dari enum
+    ->color(fn ($state) => $state?->color())              // ambil warna dari enum
+    ->label('Tipe Mutasi'),
+
                 Tables\Columns\TextColumn::make('tanggal_mutasi')
                     ->date('d/m/Y')
                     ->sortable(),

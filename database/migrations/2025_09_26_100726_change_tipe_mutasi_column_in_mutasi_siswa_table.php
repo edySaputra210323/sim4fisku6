@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('posisi_kepegawaian', function (Blueprint $table) {
-            $table->string('status')->change();
+        Schema::table('mutasi_siswa', function (Blueprint $table) {
+            $table->string('tipe_mutasi')->change();
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('posisi_kepegawaian', function (Blueprint $table) {
-            $table->enum('status', ['permanent', 'contract', 'honorary'])->comment('Status Kepegawaian');
+        Schema::table('mutasi_siswa', function (Blueprint $table) {
+            $table->enum('tipe_mutasi', ['Masuk', 'Keluar'])->change();
         });
     }
 };

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\TipePrestasiPelanggaranEnum;
 
 class PrestasiPelanggaran extends Model
 {
@@ -20,8 +21,8 @@ class PrestasiPelanggaran extends Model
     ];
 
     protected $casts = [
+        'tipe' => TipePrestasiPelanggaranEnum::class,
         'tanggal' => 'date',
-        'tipe' => 'string',
     ];
 
     // Relasi ke DataSiswa

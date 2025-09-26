@@ -12,6 +12,7 @@ use Filament\Tables\Table;
 use App\Models\JarakTempuh;
 use App\Models\StatusSiswa;
 use App\Models\PekerjaanOrtu;
+use App\Enums\StatusYatimEnum;
 use App\Models\PendidikanOrtu;
 use App\Models\PenghasilanOrtu;
 use Filament\Infolists\Infolist;
@@ -192,14 +193,10 @@ class DataSiswaResource extends Resource
                         Forms\Components\Section::make('Data Pelengkap')
                             ->schema([
                                 Forms\Components\Select::make('yatim_piatu')
-                                    ->native(false)
-                                    ->placeholder('kosongkan jika bukan yatim atau piatu')
-                                    ->options([
-                                        'Yatim' => 'Yatim',
-                                        'Piatu' => 'Piatu',
-                                        'Yatim Piatu' => 'Yatim Piatu'
-                                    ])
-                                    ->label('Yatim Piatu'),
+                                ->native(false)
+                                ->placeholder('Kosongkan jika bukan yatim/piatu')
+                                ->options(StatusYatimEnum::options()) // 👈 ambil dari enum
+                                ->label('Yatim Piatu'),
                                 Forms\Components\TextInput::make('penyakit')
                                     ->maxLength(100),
                                 
@@ -446,14 +443,11 @@ class DataSiswaResource extends Resource
                                             ->searchable()
                                             ->badge()
                                             ->alignLeft()
-                                            ->color(fn ($state) => match ($state) {
-                                                'Yatim' => 'info',
-                                                'Piatu' => 'info',
-                                                'Yatim Piatu' => 'warning',
-                                                'Bukan Yatim' => 'success',
-                                                default => 'secondary',
-                                            })
-                                            ->formatStateUsing(fn (?string $state): HtmlString => new HtmlString("<small>Yatim: " . ($state ?? '-') . "</small>")),
+                                            ->color(fn (?StatusYatimEnum $state) => $state?->color() ?? 'secondary')
+                                            ->formatStateUsing(fn (?StatusYatimEnum $state): HtmlString =>
+                                                new HtmlString("<small>Yatim: " . ($state?->getLabel() ?? '-') . "</small>")
+                                            )
+                                            ->label('Status Yatim/ Piatu'),
                                         Tables\Columns\TextColumn::make('angkatan')
                                             ->searchable()
                                             ->badge()
@@ -511,14 +505,10 @@ class DataSiswaResource extends Resource
                         ->preload()
                         ->label('Angkatan'),
                     SelectFilter::make('yatim_piatu')
-                    ->options([
-                        'Yatim' => 'Yatim',
-                        'Piatu' => 'Piatu',
-                        'Yatim Piatu' => 'Yatim Piatu',
-                    ])
-                    ->label('Yatim Piatu')
-                    ->searchable()
-                    ->preload(),
+                        ->options(StatusYatimEnum::options()) 
+                        ->label('Yatim Piatu')
+                        ->searchable()
+                        ->preload(),
                     Tables\Filters\TrashedFilter::make(),
                 ])
                 ->actions([

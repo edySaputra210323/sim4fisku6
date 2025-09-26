@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('transaksional_inventaris', function (Blueprint $table) {
-            $table->string('jenis_penggunaan')->change();
+            $table->enum('jenis_penggunaan', ['tetap', 'permanen', 'mobile'])->after('nama_inventaris');
         });
     }
 };

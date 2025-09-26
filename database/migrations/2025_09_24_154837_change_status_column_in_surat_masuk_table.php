@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('surat_masuk', function (Blueprint $table) {
-            $table->string('status')->change();
+            $table->enum('status', ['diterima', 'diproses', 'selesai'])->default('diterima');
         });
     }
 };

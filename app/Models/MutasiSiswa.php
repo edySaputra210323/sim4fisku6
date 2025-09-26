@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TipeMutasiEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -25,8 +26,8 @@ class MutasiSiswa extends Model
     ];
 
     protected $casts = [
+        'tipe_mutasi' => TipeMutasiEnum::class,
         'tanggal_mutasi' => 'date',
-        'tipe_mutasi' => 'string',
     ];
 
     // Relasi ke DataSiswa
@@ -54,15 +55,15 @@ class MutasiSiswa extends Model
 
     public function getInfoMutasiAttribute(): string
 {
-    $tipe = strtolower($this->tipe_mutasi ?? '');
+    $tipe = $this->tipe_mutasi?->value; // ambil string value dari enum
 
-    if ($tipe === 'masuk') {
+    if ($tipe === 'Masuk') {
         $asal = $this->asal_sekolah ?: '-';
         $nomor = $this->nomor_mutasi_masuk ?: '-';
         return "{$asal} ({$nomor})";
     }
 
-    if ($tipe === 'keluar') {
+    if ($tipe === 'Keluar') {
         $tujuan = $this->sekolah_tujuan ?: '-';
         $nomor = $this->nomor_mutasi_keluar ?: '-';
         return "{$tujuan} ({$nomor})";

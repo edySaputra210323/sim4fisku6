@@ -12,6 +12,7 @@ use App\Models\StatusSiswa;
 use Illuminate\Support\Str;
 use App\Models\RiwayatKelas;
 use App\Models\PekerjaanOrtu;
+use App\Enums\StatusYatimEnum;
 use App\Models\PendidikanOrtu;
 use App\Models\PenghasilanOrtu;
 use App\Models\PrestasiPelanggaran;
@@ -82,6 +83,7 @@ class DataSiswa extends Model
     ];
 
     protected $casts = [
+        'yatim_piatu' => StatusYatimEnum::class,
         'tanggal_lahir' => 'date',
         'tanggal_masuk' => 'date',
         'tanggal_keluar' => 'date',
