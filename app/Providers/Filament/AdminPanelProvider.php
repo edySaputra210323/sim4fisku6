@@ -123,7 +123,8 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
-                Authenticate::class,
+                // Authenticate::class,
+                \Filament\Http\Middleware\Authenticate::class,
             ])
             ->userMenuItems([
                 MenuItem::make()
