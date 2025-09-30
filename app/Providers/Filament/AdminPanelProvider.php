@@ -8,9 +8,11 @@ use Filament\Widgets;
 use Filament\PanelProvider;
 use App\Helpers\InspiringID;
 use Filament\Enums\ThemeMode;
+use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
 use App\Filament\Admin\Pages\Auth\Login;
 use Orion\FilamentGreeter\GreeterPlugin;
+use App\Http\Middleware\AdminRoleRedirect;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -25,10 +27,9 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use App\Filament\Admin\Widgets\JumlahSiswaPerAngkatanChart;
 use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Joaopaulolndev\FilamentEditProfile\Pages\EditProfilePage;
 use SolutionForest\FilamentSimpleLightBox\SimpleLightBoxPlugin;
 use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
-use Filament\Navigation\MenuItem;
-use Joaopaulolndev\FilamentEditProfile\Pages\EditProfilePage;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -121,6 +122,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                AdminRoleRedirect::class,
             ])
             ->authMiddleware([
                 // Authenticate::class,

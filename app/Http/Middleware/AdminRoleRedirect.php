@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
 
-class PegawaiRoleRedirect
+class AdminRoleRedirect
 {
     /**
      * Handle an incoming request.
@@ -17,17 +17,16 @@ class PegawaiRoleRedirect
     public function handle(Request $request, Closure $next): Response
     {
         $user = auth()->user();
-        $routeName = $request->route()?->getName();
 
         if ($user) {
-            // hanya role guru yang boleh akses panel pegawai
-            if (! $user->hasRole('guru')) {
+            // hanya role admin yang boleh akses panel admin
+            if (! $user->hasRole('admin')) {
                 Auth::logout();
 
                 return redirect()
-                    ->route('filament.admin.auth.login')
+                    ->route('filament.pegawai.auth.login') // arahkan ke login panel pegawai
                     ->withErrors([
-                        'email' => 'Akun anda tidak memiliki akses ke panel pegawai.',
+                        'email' => 'Akun anda tidak memiliki akses ke panel admin.',
                     ]);
             }
         }

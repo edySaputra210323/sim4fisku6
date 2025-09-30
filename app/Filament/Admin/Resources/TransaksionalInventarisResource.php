@@ -252,7 +252,7 @@ class TransaksionalInventarisResource extends Resource
                         ->label('Nota Beli')
                         ->directory('public/foto_nota_beli')
                         ->preserveFilenames()
-                        ->minSize(50)
+                        // ->minSize(50)
                         ->maxSize(2048)
                         ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'application/pdf'])
                         ->required(false),
