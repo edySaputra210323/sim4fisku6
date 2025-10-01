@@ -46,4 +46,9 @@ class RiwayatKelas extends Model
     {
         return $this->belongsTo(Semester::class, 'semester_id');
     }
+
+    public function absensi()
+    {
+        return $this->hasMany(Absensi::class, 'riwayat_kelas_id');
+    }
 }
