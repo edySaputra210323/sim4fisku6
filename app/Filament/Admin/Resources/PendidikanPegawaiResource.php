@@ -17,7 +17,7 @@ class PendidikanPegawaiResource extends Resource
 {
     protected static ?string $model = PendidikanPegawai::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+    // protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
 
     protected static ?string $navigationGroup = 'Pengelolaan Pegawai';
 

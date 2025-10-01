@@ -11,6 +11,7 @@ use Filament\Enums\ThemeMode;
 use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
 use App\Filament\Admin\Pages\Auth\Login;
+use Filament\Navigation\NavigationGroup;
 use Orion\FilamentGreeter\GreeterPlugin;
 use App\Http\Middleware\AdminRoleRedirect;
 use Filament\Http\Middleware\Authenticate;
@@ -122,7 +123,6 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                AdminRoleRedirect::class,
             ])
             ->authMiddleware([
                 // Authenticate::class,
@@ -133,6 +133,27 @@ class AdminPanelProvider extends PanelProvider
                     ->label("Pengaturan Akun")
                     ->url(fn (): string => EditProfilePage::getUrl())
                     ->icon('heroicon-o-cog-8-tooth')
+                ])
+                
+                ->navigationGroups([
+                    NavigationGroup::make()
+                         ->label('Data Siswa')
+                         ->icon('heroicon-o-academic-cap'),
+                    NavigationGroup::make()
+                        ->label('Pengelolaan Pegawai')
+                        ->icon('heroicon-o-user-group'),
+                    NavigationGroup::make()
+                        ->label('Inventaris')
+                        ->icon('heroicon-o-building-office'),
+                    NavigationGroup::make()
+                         ->label('Surat')
+                         ->icon('heroicon-o-envelope'),
+                    NavigationGroup::make()
+                         ->label('ATK')
+                         ->icon('heroicon-o-clipboard-document-list'),
+                    NavigationGroup::make()
+                         ->label('Users Management')
+                         ->icon('heroicon-o-cog-6-tooth'),
                 ]);
     }
 

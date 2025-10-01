@@ -50,9 +50,9 @@ class DataSiswaResource extends Resource
 {
     protected static ?string $model = DataSiswa::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    // protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
-    protected static ?string $navigationGroup = 'Siswa';
+    protected static ?string $navigationGroup = 'Data Siswa';
 
     protected static ?string $navigationLabel = 'Data Siswa';
 
@@ -61,6 +61,13 @@ class DataSiswaResource extends Resource
     protected static ?string $pluralModelLabel = 'Data Siswa';
 
     protected static ?string $slug = 'data-siswa';
+
+    public static function getNavigationBadge(): ?string
+    {
+    return static::getModel()::count();
+    }
+
+    protected static ?string $navigationBadgeTooltip = 'Jumlah Siswa All Status';
 
     public static function form(Form $form): Form
     {

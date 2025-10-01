@@ -29,7 +29,7 @@ class SuratKeluarResource extends Resource
 {
     protected static ?string $model = SuratKeluar::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    // protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $navigationGroup = 'Surat';
 

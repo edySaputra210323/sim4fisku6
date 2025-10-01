@@ -11,6 +11,15 @@ class KabupatenSiswaChart extends ApexChartWidget
     protected static ?string $chartId = 'kabupatenSiswaChart';
     protected static ?string $heading = 'Jumlah Siswa per Kabupaten';
 
+    // 🚀 Tambahkan ini untuk membatasi akses
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+
+        // hanya tampil kalau bukan role guru
+        return $user && ! $user->hasRole('guru');
+    }
+
     protected function getFilters(): ?array
     {
         return DataSiswa::query()

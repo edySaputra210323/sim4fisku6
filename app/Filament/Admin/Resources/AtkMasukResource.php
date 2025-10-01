@@ -16,7 +16,7 @@ use App\Filament\Admin\Resources\AtkMasukResource\Pages;
 class AtkMasukResource extends Resource
 {
     protected static ?string $model = AtkMasuk::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'ATK';
     protected static ?int $navigationSort = 2;
     protected static ?string $navigationLabel = 'ATK Masuk';

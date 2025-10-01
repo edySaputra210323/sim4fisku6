@@ -18,6 +18,15 @@ class PekerjaanOrtuChart extends ApexChartWidget
      */
     protected static ?string $heading = 'Pekerjaan Orang Tua/Wali';
 
+    // Tambahkan ini untuk membatasi akses
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+
+        // hanya tampil kalau bukan role guru
+        return $user && ! $user->hasRole('guru');
+    }
+
     /**
      * Dropdown filter angkatan
      */

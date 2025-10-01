@@ -33,9 +33,9 @@ class RiwayatKelasResource extends Resource
 
     protected static ?string $model = RiwayatKelas::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Siswa';
+    protected static ?string $navigationGroup = 'Data Siswa';
 
     protected static ?string $navigationLabel = 'Rombel';
 

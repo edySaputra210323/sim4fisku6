@@ -19,7 +19,7 @@ class ListInventaris extends Page implements HasTable
     use InteractsWithTable;
     use HasPageShield;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    // protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static string $view = 'filament.admin.pages.inventaris-pages.list-inventaris';
 

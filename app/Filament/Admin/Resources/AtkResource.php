@@ -27,7 +27,7 @@ class AtkResource extends Resource
 {
     protected static ?string $model = Atk::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'ATK';
     protected static ?int $navigationSort = 1;
     protected static ?string $navigationLabel = 'Stock ATK';

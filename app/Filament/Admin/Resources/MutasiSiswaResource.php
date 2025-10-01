@@ -28,9 +28,9 @@ class MutasiSiswaResource extends Resource
 {
     protected static ?string $model = MutasiSiswa::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-arrows-right-left';
+    // protected static ?string $navigationIcon = 'heroicon-o-arrows-right-left';
 
-    protected static ?string $navigationGroup = 'Siswa';
+    protected static ?string $navigationGroup = 'Data Siswa';
 
     protected static ?string $navigationLabel = 'Mutasi Siswa';
 
