@@ -11,16 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('absensi', function (Blueprint $table) {
+        Schema::create('absensi_header', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('riwayat_kelas_id')->constrained('riwayat_kelas')->cascadeOnDelete();
+            $table->foreignId('kelas_id')->constrained('kelas')->cascadeOnDelete();
             $table->foreignId('mapel_id')->constrained('mapel')->cascadeOnDelete();
-            $table->foreignId('pegawai_id')->constrained('pegawai')->cascadeOnDelete();
+            $table->foreignId('pegawai_id')->constrained('pegawai')->cascadeOnDelete(); // guru pengajar
+            $table->foreignId('tahun_ajaran_id')->constrained('tahun_ajaran')->cascadeOnDelete();
+            $table->foreignId('semester_id')->constrained('semester')->cascadeOnDelete();
             $table->date('tanggal');
-            $table->string('status');
-            $table->text('keterangan')->nullable();
             $table->time('jam_mulai')->nullable();
             $table->time('jam_selesai')->nullable();
+            $table->unsignedInteger('pertemuan_ke')->nullable();
+            $table->string('kegiatan')->nullable();
             $table->timestamps();
         });
     }
@@ -30,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('absensi');
+        Schema::dropIfExists('absensi_header');
     }
 };
