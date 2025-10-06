@@ -15,11 +15,13 @@ use App\Models\RiwayatKelas;
 use App\Models\AbsensiDetail;
 use App\Models\AbsensiHeader;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
 use Filament\Forms\Components\TimePicker;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Admin\Resources\AbsensiHeaderResource\Pages;
 use App\Filament\Admin\Resources\AbsensiHeaderResource\RelationManagers\AbsensiDetailRelationManager;
+use App\Filament\Admin\Resources\AbsensiHeaderResource\RelationManagers\AbsensiDetailsRelationManager;
 
 class AbsensiHeaderResource extends Resource
 {
@@ -98,44 +100,67 @@ class AbsensiHeaderResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->groups([
+            Tables\Grouping\Group::make('tanggal')
+                ->label('Tanggal')
+                ->date(),
+        ])
         ->columns([
-            Tables\Columns\TextColumn::make('kelas.nama_kelas')
-                ->label('Kelas')
-                ->sortable()
-                ->searchable(),
-
-            Tables\Columns\TextColumn::make('mapel.nama_mapel')
-                ->label('Mapel')
-                ->sortable()
-                ->searchable(),
-
+            Tables\Columns\TextColumn::make('tanggal')
+                ->label('Tanggal')
+                ->date(),
+    
             Tables\Columns\TextColumn::make('guru.nm_pegawai')
                 ->label('Guru')
                 ->sortable()
                 ->searchable(),
-
-            Tables\Columns\TextColumn::make('tahunAjaran.th_ajaran')
-                ->label('Tahun Ajaran'),
-
-            Tables\Columns\TextColumn::make('semester.nm_semester')
-                ->label('Semester'),
-
-            Tables\Columns\TextColumn::make('tanggal')
-                ->label('Tanggal')
-                ->date(),
-
-            Tables\Columns\TextColumn::make('pertemuan_ke')
-                ->label('Pertemuan Ke'),
-
-            Tables\Columns\TextColumn::make('kegiatan')
-                ->label('Kegiatan')
-                ->limit(20),
+    
+            Tables\Columns\TextColumn::make('kelas.nama_kelas')
+                ->label('Kelas')
+                ->sortable()
+                ->searchable(),
+    
+            Tables\Columns\TextColumn::make('total_siswa')
+                ->label('Total Siswa')
+                ->state(fn ($record) => $record->total_siswa)
+                // ->badge()
+                ->weight(FontWeight::Bold),
+    
+            Tables\Columns\TextColumn::make('hadir_count')
+                ->label('Hadir')
+                ->badge()
+                ->color('success'),
+    
+            Tables\Columns\TextColumn::make('sakit_count')
+                ->label('Sakit')
+                ->badge()
+                ->color('warning'),
+    
+            Tables\Columns\TextColumn::make('izin_count')
+                ->label('Izin')
+                ->badge()
+                ->color('info'),
+    
+            Tables\Columns\TextColumn::make('alpa_count')
+                ->label('Alpa')
+                ->badge()
+                ->color('danger'),
         ])
+        ->modifyQueryUsing(fn ($query) =>
+            $query->withCount([
+                'absensiDetails as total_siswa',
+                'absensiDetails as hadir_count' => fn ($q) => $q->where('status', 'hadir'),
+                'absensiDetails as sakit_count' => fn ($q) => $q->where('status', 'sakit'),
+                'absensiDetails as izin_count'  => fn ($q) => $q->where('status', 'izin'),
+                'absensiDetails as alpa_count'  => fn ($q) => $q->where('status', 'alpa'),
+            ])
+        )
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
+            Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -148,8 +173,7 @@ class AbsensiHeaderResource extends Resource
     public static function getRelations(): array
     {
         return [
-           AbsensiDetailRelationManager::class,
-        //    AbsensiDetailRelationManager::class,
+            AbsensiDetailsRelationManager::class,
         ];
     }
 

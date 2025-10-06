@@ -273,6 +273,10 @@ class MutasiSiswaResource extends Resource
                     ->label('Info Mutasi')
                     ->searchable()
                     ->sortable(),
+                    Tables\Columns\TextColumn::make('statusSebelum.status')
+                    ->label('Status Sebelum')
+                    ->sortable()
+                    ->searchable(),
                 // Tables\Columns\TextColumn::make('dokumen_mutasi')
                 //     ->searchable(),
                 Tables\Columns\IconColumn::make('dokumen_mutasi')

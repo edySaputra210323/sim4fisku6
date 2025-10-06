@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Carbon\Carbon;
+use App\Models\MutasiSiswa;
+use App\Observers\MutasiSiswaObserver;
 use Illuminate\Support\ServiceProvider;
 // use Filament\Support\Facades\FilamentAsset;
 // use Filament\Support\Assets\Js;
@@ -29,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
         //     Js::make('custom-scripts', asset('js/custom.js')),
         // ]);
         Carbon::setLocale('id');
+        MutasiSiswa::observe(MutasiSiswaObserver::class);
     }
 
 }

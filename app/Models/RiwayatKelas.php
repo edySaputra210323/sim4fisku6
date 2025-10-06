@@ -47,14 +47,4 @@ class RiwayatKelas extends Model
         return $this->belongsTo(Semester::class, 'semester_id');
     }
 
-    public function absensi()
-    {
-        return $this->hasMany(Absensi::class, 'riwayat_kelas_id');
-    }
-
-// Accessor label untuk Select
-public function getLabelAttribute()
-{
-    return ($this->siswa->nama_siswa ?? 'N/A') . ' — ' . ($this->kelas->nama_kelas ?? 'Kelas');
-}
 }

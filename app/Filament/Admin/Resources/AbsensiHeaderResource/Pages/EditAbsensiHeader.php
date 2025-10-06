@@ -13,7 +13,17 @@ class EditAbsensiHeader extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\Action::make('selesai')
+                ->label('Selesai Absensi')
+                ->color('success')
+                ->requiresConfirmation()
+                ->action(function () {
+                    // opsional: update status header jadi "selesai"
+                    // $this->record->update(['status' => 'selesai']);
+
+                    // redirect balik ke list absensi
+                    return redirect()->route('filament.admin.resources.absensi-headers.index');
+                }),
         ];
     }
 }

@@ -58,7 +58,7 @@ class AbsensiHeader extends Model
     }
 
      // 🔑 Relasi ke detail absensi
-     public function absensiDetail()
+     public function absensiDetails()
      {
          return $this->hasMany(AbsensiDetail::class, 'absensi_header_id');
      }

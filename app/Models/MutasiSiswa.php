@@ -22,6 +22,7 @@ class MutasiSiswa extends Model
         'nomor_mutasi_keluar',
         'tipe_mutasi',
         'tanggal_mutasi',
+        'status_sebelum_id',
         'keterangan',
     ];
 
@@ -71,5 +72,10 @@ class MutasiSiswa extends Model
 
     return '-';
 }
+
+    public function statusSebelum()
+    {
+        return $this->belongsTo(StatusSiswa::class, 'status_sebelum_id');
+    }
 
 }

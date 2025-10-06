@@ -113,11 +113,7 @@ class DataSiswa extends Model
 
     public function getStatusAttribute(): string
     {
-        return $this->UpdateStatusSiswa?->aktif  ? 'Aktif'  :
-               ($this->UpdateStatusSiswa?->pindah ? 'Lulus' :
-               ($this->UpdateStatusSiswa?->pindah ? 'Pindah' :
-               ($this->UpdateStatusSiswa?->pindah ? 'Cuti' :
-               ($this->UpdateStatusSiswa?->lulus  ? 'Drop Out'  : '-'))));
+        return $this->UpdateStatusSiswa?->status ?? '-';
     }
 
     // Accessor untuk alamat
@@ -242,9 +238,19 @@ class DataSiswa extends Model
     }
 
     // Relasi ke StatusSiswa
+    // public function UpdateStatusSiswa()
+    // {
+    //     return $this->belongsTo(StatusSiswa::class, 'status_id');
+    // }
+
+    public function statusSiswa()
+    {
+    return $this->belongsTo(StatusSiswa::class, 'status_id');
+    }
+
     public function UpdateStatusSiswa()
     {
-        return $this->belongsTo(StatusSiswa::class, 'status_id');
+    return $this->statusSiswa();
     }
 
     // Relasi ke MutasiSiswa (pindah)
@@ -342,11 +348,18 @@ class DataSiswa extends Model
         return "{$this->nama_siswa} - {$this->nis}";
     }
 
+    // public function scopeAktif($q)
+    // {
+    //     return $q->whereHas('UpdateStatusSiswa', fn ($s) =>
+    //         $s->whereRaw('LOWER(status) = ?', ['aktif'])
+    //     );
+    // }
+
     public function scopeAktif($q)
     {
-        return $q->whereHas('UpdateStatusSiswa', fn ($s) =>
-            $s->whereRaw('LOWER(status) = ?', ['aktif'])
-        );
+        return $q->whereHas('statusSiswa', fn ($s) =>
+        $s->where('status', 'Aktif')
+    );
     }
 
     public function scopePerempuan($q)

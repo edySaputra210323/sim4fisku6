@@ -54,23 +54,23 @@ class CreateMutasiSiswa extends CreateRecord
         return $this->getResource()::getUrl('index');
     }
 
-    protected function afterCreate(): void
-    {
-        $record = $this->record;
+    // protected function afterCreate(): void
+    // {
+    //     $record = $this->record;
 
-        if ($record->tipe_mutasi === TipeMutasiEnum::KELUAR) {
-            $statusPindah = StatusSiswa::where('status', 'Pindah')->first();
+    //     if ($record->tipe_mutasi === TipeMutasiEnum::KELUAR) {
+    //         $statusPindah = StatusSiswa::where('status', 'Pindah')->first();
     
-            if ($statusPindah) {
-                // update via relationship lebih aman
-                $record->dataSiswa()->update(['status_id' => $statusPindah->id]);
-            } else {
-                Notification::make()
-                    ->title('Error')
-                    ->body('Status "Pindah" tidak ditemukan di tabel status_siswa.')
-                    ->danger()
-                    ->send();
-            }
-        }
-    }
+    //         if ($statusPindah) {
+    //             // update via relationship lebih aman
+    //             $record->dataSiswa()->update(['status_id' => $statusPindah->id]);
+    //         } else {
+    //             Notification::make()
+    //                 ->title('Error')
+    //                 ->body('Status "Pindah" tidak ditemukan di tabel status_siswa.')
+    //                 ->danger()
+    //                 ->send();
+    //         }
+    //     }
+    // }
 }

@@ -12,17 +12,19 @@ class CreateAbsensiHeader extends CreateRecord
     protected static string $resource = AbsensiHeaderResource::class;
 
     protected function afterCreate(): void
-{
+    {
     $riwayatKelas = RiwayatKelas::where('kelas_id', $this->record->kelas_id)
         ->where('tahun_ajaran_id', $this->record->tahun_ajaran_id)
         ->where('semester_id', $this->record->semester_id)
         ->get();
 
-    foreach ($riwayatKelas as $riwayat) {
-        $this->record->details()->create([
-            'riwayat_kelas_id' => $riwayat->id,
-            'status' => 'hadir', // default
-        ]);
+
+        foreach ($riwayatKelas as $riwayat) {
+            $this->record->absensiDetails()->create([
+                'riwayat_kelas_id' => $riwayat->id,
+                'status' => 'hadir', // default
+                'keterangan' => null,
+            ]);
+         }
     }
-}
 }

@@ -22,4 +22,10 @@ class StatusSiswa extends Model
     {
         return $this->hasMany(RiwayatKelas::class, 'status_id');
     }
+
+    public function statusSebelum()
+    {
+    return $this->belongsTo(StatusSiswa::class, 'status_sebelum_id');
+    }
+
 }
