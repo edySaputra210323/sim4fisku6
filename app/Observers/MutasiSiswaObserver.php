@@ -47,6 +47,11 @@ class MutasiSiswaObserver
             return;
         }
 
+        $siswa = $mutasiSiswa->dataSiswa;
+
+         // catat waktu perubahan status
+         $siswa->updateQuietly(['last_status_updated_at' => now()]);
+
         // Jika mutasi = KELUAR
         if ($mutasiSiswa->tipe_mutasi === TipeMutasiEnum::KELUAR) {
             $statusKeluar = StatusSiswa::whereRaw('LOWER(status) = ?', ['pindah'])->first();
@@ -57,6 +62,10 @@ class MutasiSiswaObserver
                     'tanggal_keluar' => $mutasiSiswa->tanggal_mutasi,
                 ]);
             }
+
+            $siswa->riwayatKelas()
+                ->where('status_aktif', true)
+                ->update(['status_aktif' => false]);
         }
 
         // Jika mutasi = MASUK
@@ -69,6 +78,11 @@ class MutasiSiswaObserver
                     'tanggal_masuk' => $mutasiSiswa->tanggal_mutasi,
                 ]);
             }
+            //aktifkan kembali riwayat kelas terbaru (jika ada)
+            $riwayatTerbaru = $siswa->riwayatKelas()->latest()->first();
+                if ($riwayatTerbaru) {
+                    $riwayatTerbaru->update(['status_aktif' => true]);
+                }
         }
     }
 
@@ -79,12 +93,20 @@ class MutasiSiswaObserver
 
         if (! $mutasiSiswa->status_sebelum_id) return;
 
+         // catat waktu rollback status
+        $siswa->updateQuietly(['last_status_updated_at' => now()]);
+
         // Jika mutasi KELUAR dihapus → kembalikan status sebelumnya, hapus tanggal_keluar
         if ($mutasiSiswa->tipe_mutasi === TipeMutasiEnum::KELUAR) {
             $siswa->update([
                 'status_id'      => $mutasiSiswa->status_sebelum_id,
                 'tanggal_keluar' => null,
             ]);
+         // aktifkan kembali riwayat kelas terakhir
+         $riwayatTerbaru = $siswa->riwayatKelas()->latest()->first();
+         if ($riwayatTerbaru) {
+             $riwayatTerbaru->update(['status_aktif' => true]);
+         }
         }
 
         // Jika mutasi MASUK dihapus → tetap aktif, tapi reset tanggal_masuk
@@ -93,6 +115,10 @@ class MutasiSiswaObserver
                 'status_id'     => $mutasiSiswa->status_sebelum_id,
                 'tanggal_masuk' => null,
             ]);
+        // nonaktifkan riwayat kelas terakhir (opsional)
+        $siswa->riwayatKelas()
+            ->where('status_aktif', true)
+            ->update(['status_aktif' => false]);
         }
     }
 }

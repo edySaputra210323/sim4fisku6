@@ -80,6 +80,7 @@ class DataSiswa extends Model
         'no_hp_wali',
         'user_id',
         'unit_id',
+        'last_status_updated_at',
     ];
 
     protected $casts = [
@@ -88,6 +89,7 @@ class DataSiswa extends Model
         'tanggal_masuk' => 'date',
         'tanggal_keluar' => 'date',
         'jenis_kelamin' => 'string',
+        'last_status_updated_at' => 'datetime',
     ];
 
     public function getTempatTanggalLahirAttribute()
