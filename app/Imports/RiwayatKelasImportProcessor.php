@@ -9,6 +9,7 @@ use App\Models\DataSiswa;
 use App\Models\TahunAjaran;
 use App\Models\Semester;
 use App\Models\RiwayatKelas;
+use App\Models\StatusSiswa;
 use App\Models\RiwayatKelasImportFailed;
 use Illuminate\Support\Collection;
 use Filament\Notifications\Notification;
@@ -21,10 +22,12 @@ class RiwayatKelasImportProcessor implements ToCollection, WithHeadingRow
 
     public function collection(Collection $rows)
     {
-        // Validasi tahun ajaran dan semester aktif
+        // 🟢 1. Validasi tahun ajaran & semester aktif
         $activeTahunAjaran = TahunAjaran::where('status', true)->first();
         $activeSemester = $activeTahunAjaran
-            ? Semester::where('th_ajaran_id', $activeTahunAjaran->id)->where('status', true)->first()
+            ? Semester::where('th_ajaran_id', $activeTahunAjaran->id)
+                ->where('status', true)
+                ->first()
             : null;
 
         if (!$activeTahunAjaran || !$activeSemester) {
@@ -36,7 +39,12 @@ class RiwayatKelasImportProcessor implements ToCollection, WithHeadingRow
             return;
         }
 
-        // Validasi header
+        // 🟢 2. Nonaktifkan semua riwayat kelas aktif dari tahun ajaran sebelumnya
+        RiwayatKelas::where('status_aktif', true)
+            ->where('tahun_ajaran_id', '<>', $activeTahunAjaran->id)
+            ->update(['status_aktif' => false]);
+
+        // 🟢 3. Validasi header
         $headers = array_keys($rows->first()->toArray());
         $missingHeaders = array_diff($this->requiredHeaders, $headers);
         if (!empty($missingHeaders)) {
@@ -49,44 +57,39 @@ class RiwayatKelasImportProcessor implements ToCollection, WithHeadingRow
             return;
         }
 
-        // Ambil data master
+        // 🟢 4. Ambil data master (cache ke array agar cepat)
         $kelasMap = Kelas::select('id', 'nama_kelas')->get()->toArray();
-        $pegawaiMap = Pegawai::select('id', 'nm_pegawai')
-            ->whereNotNull('nm_pegawai') // Pastikan nm_pegawai tidak null
-            ->get()
-            ->toArray();
-        $siswaMap = DataSiswa::select('id', 'nis')->get()->toArray();
+        $pegawaiMap = Pegawai::select('id', 'nm_pegawai')->whereNotNull('nm_pegawai')->get()->toArray();
+        $siswaMap = DataSiswa::select('id', 'nis', 'status_id')->get()->toArray();
 
-        // Log data untuk debugging
-        \Log::info('Pegawai Map: ' . json_encode($pegawaiMap));
-        \Log::info('Kelas Map: ' . json_encode($kelasMap));
-        \Log::info('Siswa Map: ' . json_encode($siswaMap));
-
-        // Kumpulkan data valid dan error
+        // 🟢 5. Siapkan array hasil validasi
         $validRows = [];
         $errors = [];
 
         foreach ($rows as $keyIndex => $row) {
-            if (array_filter($row->toArray()) === []) {
-                continue;
-            }
+            if (array_filter($row->toArray()) === []) continue;
 
             $index = $keyIndex + 2;
             $errorMessage = null;
 
-            // Log row untuk debugging
-            \Log::info("Processing row {$index}: " . json_encode($row->toArray()));
-
-            // Validasi NIS
+            // 🟠 Validasi NIS
             $siswa_id = null;
             if (in_array($row['nis'], [null, '', '-', '#N/A'])) {
                 $errorMessage = 'NIS tidak boleh kosong';
             } else {
-                $siswa_id = $this->searchInArray($siswaMap, 'nis', trim($row['nis']));
-                if (!$siswa_id) {
+                $siswaData = collect($siswaMap)->firstWhere('nis', trim($row['nis']));
+                if (!$siswaData) {
                     $errorMessage = "NIS [{$row['nis']}] tidak ditemukan di database siswa";
                 } else {
-                    // Cek apakah siswa sudah terdaftar di riwayat_kelas untuk tahun ajaran dan semester aktif
+                    $siswa_id = $siswaData['id'];
+
+                    // 🔵 Pastikan siswa berstatus aktif
+                    $status = StatusSiswa::find($siswaData['status_id']);
+                    if ($status && strtolower($status->status) !== 'aktif') {
+                        $errorMessage = "Siswa dengan NIS [{$row['nis']}] tidak berstatus aktif";
+                    }
+
+                    // 🔵 Cek apakah sudah ada riwayat di tahun & semester aktif
                     $existingRiwayat = RiwayatKelas::where('data_siswa_id', $siswa_id)
                         ->where('tahun_ajaran_id', $activeTahunAjaran->id)
                         ->where('semester_id', $activeSemester->id)
@@ -97,33 +100,29 @@ class RiwayatKelasImportProcessor implements ToCollection, WithHeadingRow
                 }
             }
 
-            // Validasi kelas
+            // 🟠 Validasi kelas
             $kelas_id = null;
             if (in_array($row['kelas'], [null, '', '-', '#N/A'])) {
-                if ($errorMessage) $errorMessage .= ", ";
-                $errorMessage .= 'Kelas tidak boleh kosong';
+                $errorMessage = ($errorMessage ? $errorMessage . ', ' : '') . 'Kelas tidak boleh kosong';
             } else {
                 $kelas_id = $this->searchInArray($kelasMap, 'nama_kelas', trim($row['kelas']));
                 if (!$kelas_id) {
-                    if ($errorMessage) $errorMessage .= ", ";
-                    $errorMessage .= "Kelas [{$row['kelas']}] tidak ditemukan di database kelas";
+                    $errorMessage = ($errorMessage ? $errorMessage . ', ' : '') . "Kelas [{$row['kelas']}] tidak ditemukan di database kelas";
                 }
             }
 
-            // Validasi wali kelas
+            // 🟠 Validasi wali kelas
             $guru_id = null;
             if (in_array($row['walas'], [null, '', '-', '#N/A'])) {
-                if ($errorMessage) $errorMessage .= ", ";
-                $errorMessage .= 'Wali kelas tidak boleh kosong';
+                $errorMessage = ($errorMessage ? $errorMessage . ', ' : '') . 'Wali kelas tidak boleh kosong';
             } else {
                 $guru_id = $this->searchInArray($pegawaiMap, 'nm_pegawai', trim($row['walas']));
                 if (!$guru_id) {
-                    if ($errorMessage) $errorMessage .= ", ";
-                    $errorMessage .= "Wali kelas [{$row['walas']}] tidak ditemukan di database pegawai";
+                    $errorMessage = ($errorMessage ? $errorMessage . ', ' : '') . "Wali kelas [{$row['walas']}] tidak ditemukan di database pegawai";
                 }
             }
 
-            // Simpan data ke array
+            // 🔵 Kumpulkan hasil
             $rowData = [
                 'data_siswa_id' => $siswa_id,
                 'kelas_id' => $kelas_id,
@@ -143,9 +142,9 @@ class RiwayatKelasImportProcessor implements ToCollection, WithHeadingRow
             }
         }
 
-        // Jika ada error, simpan ke riwayat_kelas_import_failed
+        // 🟢 6. Tangani error (jika ada)
         if (!empty($errors)) {
-            foreach ($errors as $index => $rowData) {
+            foreach ($errors as $rowData) {
                 RiwayatKelasImportFailed::updateOrCreate(
                     [
                         'nis' => $rowData['nis'],
@@ -164,7 +163,7 @@ class RiwayatKelasImportProcessor implements ToCollection, WithHeadingRow
             return;
         }
 
-        // Jika semua valid, simpan ke riwayat_kelas
+        // 🟢 7. Simpan semua data valid ke riwayat_kelas
         foreach ($validRows as $rowData) {
             RiwayatKelas::create([
                 'data_siswa_id' => $rowData['data_siswa_id'],
@@ -172,15 +171,17 @@ class RiwayatKelasImportProcessor implements ToCollection, WithHeadingRow
                 'pegawai_id' => $rowData['pegawai_id'],
                 'tahun_ajaran_id' => $rowData['tahun_ajaran_id'],
                 'semester_id' => $rowData['semester_id'],
+                'status_aktif' => true,
                 'created_by' => auth()->id(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
         }
 
+        // 🟢 8. Notifikasi sukses
         Notification::make()
             ->title('SISTEM')
-            ->body('Data rombel berhasil diimpor')
+            ->body('Data rombel berhasil diimpor dan status aktif diperbarui')
             ->success()
             ->send();
     }
@@ -188,7 +189,7 @@ class RiwayatKelasImportProcessor implements ToCollection, WithHeadingRow
     protected function searchInArray(array $data, string $searchKey, string $searchValue): ?int
     {
         foreach ($data as $item) {
-            if (isset($item[$searchKey]) && $item[$searchKey] === trim($searchValue)) {
+            if (isset($item[$searchKey]) && trim(strtolower($item[$searchKey])) === strtolower($searchValue)) {
                 return $item['id'];
             }
         }

@@ -23,7 +23,8 @@ class Semester extends Model
     ];
 
     protected $casts = [
-        'status' => SemesterEnum::class,
+        'nm_semester' => SemesterEnum::class,
+        // 'status' => SemesterEnum::class,
         'periode_mulai' => 'date',
         'periode_akhir' => 'date',
     ];
@@ -66,4 +67,14 @@ class Semester extends Model
       {
           return $this->hasMany(NilaiSiswa::class, 'semester_id');
       }
+
+      public function getNmSemesterAttribute($value)
+        {
+            // Jika sudah berupa enum, kembalikan label string-nya
+            if ($value instanceof \App\Enums\SemesterEnum) {
+                return $value->getLabel();
+            }
+            // Jika masih string biasa (misal hasil query mentah)
+            return $value;
+        }
 }
