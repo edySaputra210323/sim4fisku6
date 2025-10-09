@@ -15,6 +15,11 @@ class RiwayatKelas extends Model
         'pegawai_id',
         'tahun_ajaran_id',
         'semester_id',
+        'status_aktif',
+    ];
+
+    protected $casts = [
+        'status_aktif' => 'boolean',
     ];
 
     // Relasi ke DataSiswa

@@ -397,7 +397,7 @@ class DataSiswaResource extends Resource
         return $table
         ->extremePaginationLinks()
         ->recordUrl(null)
-        ->paginated([5, 10, 20, 50])
+        ->paginated([10, 20, 120])
         ->defaultPaginationPageOption(10)
         ->striped()
         ->recordAction(null)
@@ -511,6 +511,15 @@ class DataSiswaResource extends Resource
                         ->searchable()
                         ->preload()
                         ->label('Angkatan'),
+                    SelectFilter::make('jenis_kelamin')
+                        ->options(fn () => \App\Models\DataSiswa::query()
+                            ->select('jenis_kelamin')
+                            ->distinct()
+                            ->pluck('jenis_kelamin', 'jenis_kelamin')
+                            ->toArray())
+                        ->searchable()
+                        ->preload()
+                        ->label('jenis_kelamin'),
                     SelectFilter::make('yatim_piatu')
                         ->options(StatusYatimEnum::options()) 
                         ->label('Yatim Piatu')
