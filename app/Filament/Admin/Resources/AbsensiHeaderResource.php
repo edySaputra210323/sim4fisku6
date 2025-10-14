@@ -81,17 +81,29 @@ class AbsensiHeaderResource extends Resource
                 ->required()
                 ->disabled(fn ($record) => $record !== null),
 
-            Forms\Components\TimePicker::make('jam_mulai')
-                ->label('Jam Mulai')
-                ->disabled(fn ($record) => $record !== null),
+            Forms\Components\Select::make('jam_ke')
+                ->label('Jam Ke')
+                ->multiple() // 🔹 Bisa pilih lebih dari satu jam
+                ->options([
+                    1 => 'Jam ke-1',
+                    2 => 'Jam ke-2',
+                    3 => 'Jam ke-3',
+                    4 => 'Jam ke-4',
+                    5 => 'Jam ke-5',
+                    6 => 'Jam ke-6',
+                    7 => 'Jam ke-7',
+                    8 => 'Jam ke-8',
+                    9 => 'Jam ke-9',
+                    10 => 'Jam ke-10',
+                ])
+                ->required()
+                ->preload()
+                ->searchable(),
 
-            Forms\Components\TimePicker::make('jam_selesai')
-                ->label('Jam Selesai')
+            Forms\Components\TextInput::make('materi')
+                ->label('Materi')
+                ->maxLength(255)
                 ->disabled(fn ($record) => $record !== null),
-
-            Forms\Components\TextInput::make('pertemuan_ke')
-                ->numeric()
-                ->label('Pertemuan Ke'),
 
             Forms\Components\TextInput::make('kegiatan')
                 ->label('Kegiatan')
@@ -133,11 +145,12 @@ class AbsensiHeaderResource extends Resource
                     ->limit(20)
                     ->tooltip(fn ($record) => $record->guru->nm_pegawai ?? '-'),
     
-                Tables\Columns\TextColumn::make('pertemuan_ke')
-                    ->label('Pertemuan')
-                    ->alignCenter()
-                    ->badge()
-                    ->color('gray'),
+Tables\Columns\TextColumn::make('jam_ke')
+    ->label('Jam')
+    ->alignCenter()
+    ->badge()
+    ->color('gray')
+    ->formatStateUsing(fn($state) => is_array($state) ? implode(', ', $state) : $state),
     
                 Tables\Columns\TextColumn::make('kegiatan')
                     ->label('Kegiatan')

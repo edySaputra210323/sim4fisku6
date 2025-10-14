@@ -19,10 +19,9 @@ return new class extends Migration
             $table->foreignId('tahun_ajaran_id')->constrained('tahun_ajaran')->cascadeOnDelete();
             $table->foreignId('semester_id')->constrained('semester')->cascadeOnDelete();
             $table->date('tanggal');
-            $table->time('jam_mulai')->nullable();
-            $table->time('jam_selesai')->nullable();
-            $table->unsignedInteger('pertemuan_ke')->nullable();
-            $table->string('kegiatan')->nullable();
+            $table->json('jam_ke')->nullable();
+            $table->string('materi', 255)->nullable();
+            $table->string('kegiatan', 255)->nullable();
             $table->timestamps();
         });
     }

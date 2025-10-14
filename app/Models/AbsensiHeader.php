@@ -21,10 +21,14 @@ class AbsensiHeader extends Model
         'tahun_ajaran_id',
         'semester_id',
         'tanggal',
-        'jam_mulai',
-        'jam_selesai',
-        'pertemuan_ke',
+        'jam_ke',
+        'materi',
         'kegiatan',
+    ];
+
+    protected $casts = [
+        'tanggal' => 'date',
+        'jam_ke' => 'array',
     ];
 
     // Relasi ke Kelas
