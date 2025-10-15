@@ -101,36 +101,20 @@ class RekapJurnalGuruExport implements FromCollection, WithHeadings, WithStyles,
     $semesterText = strtoupper($semesterAktif?->nm_semester ?? '-');
 
     // ============================================================
-    // 🔹 3️⃣ HEADER LEMBAGA + LOGO
+    // 🔹 3️⃣ HEADER LEMBAGA
     // ============================================================
-
-    // 🖼️ Tambahkan logo di kiri atas
-    $logoPath = public_path('images/logoSMPIT.png');
-    if (file_exists($logoPath)) {
-        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-        $drawing->setName('Logo Sekolah');
-        $drawing->setDescription('Logo SMPIT');
-        $drawing->setPath($logoPath);
-        $drawing->setHeight(90); // tinggi logo (px)
-        $drawing->setCoordinates('A1');
-        $drawing->setOffsetX(10);
-        $drawing->setOffsetY(5);
-        $drawing->setWorksheet($sheet);
-    }
-
-    // Geser teks ke kolom B agar tidak tertimpa logo
     foreach (range(1, 8) as $row) {
-        $sheet->mergeCells("B{$row}:G{$row}");
+        $sheet->mergeCells("A{$row}:G{$row}");
     }
 
-    $sheet->setCellValue('B1', 'AL-FITYAN SCHOOL KUBU RAYA');
-    $sheet->setCellValue('B2', 'No. Dokumen : YYS-F-KUR-0305 / No. Revisi : 00 / Berlaku : 01 Juli 2024');
-    $sheet->setCellValue('B4', 'JURNAL MENGAJAR');
-    $sheet->setCellValue('B5', "SEMESTER {$semesterText}");
-    $sheet->setCellValue('B6', 'SMPIT AL-FITYAN KUBU RAYA');
-    $sheet->setCellValue('B7', "TAHUN AJARAN {$tahunAjaranText}");
+    $sheet->setCellValue('A1', 'AL-FITYAN SCHOOL KUBU RAYA');
+    $sheet->setCellValue('A2', 'No. Dokumen : YYS-F-KUR-0305 / No. Revisi : 00 / Berlaku : 01 Juli 2024');
+    $sheet->setCellValue('A4', 'JURNAL MENGAJAR');
+    $sheet->setCellValue('A5', "SEMESTER {$semesterText}");
+    $sheet->setCellValue('A6', 'SMPIT AL-FITYAN KUBU RAYA');
+    $sheet->setCellValue('A7', "TAHUN AJARAN {$tahunAjaranText}");
 
-    $sheet->getStyle('B1:B7')->applyFromArray([
+    $sheet->getStyle('A1:A7')->applyFromArray([
         'font' => [
             'bold' => true,
             'name' => 'Times New Roman',
@@ -141,10 +125,24 @@ class RekapJurnalGuruExport implements FromCollection, WithHeadings, WithStyles,
         ],
     ]);
 
-    $sheet->getStyle('B1')->getFont()->setSize(12);
-    $sheet->getStyle('B2')->getFont()->setSize(12);
-    $sheet->getStyle('B4')->getFont()->setSize(18);
-    $sheet->getStyle('B5:B7')->getFont()->setSize(14);
+    $sheet->getStyle('A1')->getFont()->setSize(12);
+    $sheet->getStyle('A2')->getFont()->setSize(12);
+    $sheet->getStyle('A4')->getFont()->setSize(18);
+    $sheet->getStyle('A5:A7')->getFont()->setSize(14);
+
+    // ============================================================
+    // 🔹 3️⃣.1️⃣ TAMBAHKAN LOGO DI SEBELAH KIRI KOP
+    // ============================================================
+    $logoPath = public_path('images/logoSMPIT.png');
+    if (file_exists($logoPath)) {
+        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+        $drawing->setPath($logoPath);
+        $drawing->setHeight(85); // tinggi logo dalam pixel
+        $drawing->setCoordinates('A1'); // posisinya di cell A1
+        $drawing->setOffsetX(25); // geser sedikit ke kanan dari batas sel
+        $drawing->setOffsetY(15);  // geser sedikit ke bawah agar sejajar teks
+        $drawing->setWorksheet($sheet);
+    }
 
     // ============================================================
     // 🔹 4️⃣ INFO GURU / KELAS / MAPEL
@@ -164,11 +162,6 @@ class RekapJurnalGuruExport implements FromCollection, WithHeadings, WithStyles,
             'vertical'   => Alignment::VERTICAL_CENTER,
         ],
     ]);
-
-    // Jarak sebelum tabel
-    $sheet->setCellValue('A13', '');
-    $sheet->setCellValue('A14', '');
-    $sheet->setCellValue('A15', '');
 
     // ============================================================
     // 🔹 5️⃣ HEADER TABEL UTAMA
@@ -197,7 +190,7 @@ class RekapJurnalGuruExport implements FromCollection, WithHeadings, WithStyles,
     ]);
 
     // ============================================================
-    // 🔹 6️⃣ Cari baris terakhir yg berisi data SEBELUM styling range
+    // 🔹 6️⃣ Cari baris terakhir data
     // ============================================================
     $lastDataRow = $sheet->getHighestDataRow();
     if (!$lastDataRow || $lastDataRow < 18) {
@@ -232,7 +225,7 @@ class RekapJurnalGuruExport implements FromCollection, WithHeadings, WithStyles,
     ]);
 
     // ============================================================
-    // 🔹 8️⃣ BORDER HANYA SAMPAI DATA TERAKHIR
+    // 🔹 8️⃣ BORDER
     // ============================================================
     $sheet->getStyle("A16:G{$lastDataRow}")->applyFromArray([
         'borders' => [
@@ -242,7 +235,6 @@ class RekapJurnalGuruExport implements FromCollection, WithHeadings, WithStyles,
         ],
     ]);
 
-    // Garis tebal di bawah header
     $sheet->getStyle('A17:G17')->applyFromArray([
         'borders' => [
             'bottom' => [
@@ -260,5 +252,6 @@ class RekapJurnalGuruExport implements FromCollection, WithHeadings, WithStyles,
 
     return [];
 }
+
 
 }

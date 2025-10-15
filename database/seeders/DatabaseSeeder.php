@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Closure;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Database\Seeders\MapelSeeder;
 use Database\Seeders\GedungSeeder;
 use Database\Seeders\PegawaiSeeder;
 use Database\Seeders\RuanganSeeder;
@@ -67,6 +68,7 @@ class DatabaseSeeder extends Seeder
             SuplayerSeeder::class,
             KategoriAtkseeder::class,
             statusPegawaiSeeder::class,
+            MapelSeeder::class,
         ]);
     }
 
