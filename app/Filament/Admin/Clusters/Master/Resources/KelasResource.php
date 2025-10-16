@@ -49,6 +49,12 @@ class KelasResource extends Resource
                                 'unique' => 'Kelas sudah ada, gunakan nama kelas yang lain',
                                 'required' => 'Nama Kelas tidak boleh kosong',
                             ]),
+                        Forms\Components\Select::make('wali_kelas_id')
+                            ->label('Wali Kelas')
+                            ->relationship('waliKelas', 'nm_pegawai')
+                            ->searchable()
+                            ->preload()
+                            ->required(),
                     ]),
             ]);
     }
@@ -85,6 +91,8 @@ class KelasResource extends Resource
                     }
                 ),
                 Tables\Columns\TextColumn::make('nama_kelas')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('waliKelas.nm_pegawai')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

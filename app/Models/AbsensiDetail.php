@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AbsensiDetail extends Model
 {
+    use HasFactory;
+
     protected $table = 'absensi_detail';
 
     protected $fillable = [
@@ -15,28 +19,61 @@ class AbsensiDetail extends Model
         'keterangan',
     ];
 
-    // Relasi ke Header
-    public function header()
+    protected $casts = [
+        'keterangan' => 'string',
+    ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | 🔗 Relasi
+    |--------------------------------------------------------------------------
+    */
+
+    /** Header absensi (wali kelas atau guru) */
+    public function header(): BelongsTo
     {
         return $this->belongsTo(AbsensiHeader::class, 'absensi_header_id');
     }
 
-    // Relasi ke RiwayatKelas
-    public function riwayatKelas()
+    /** Relasi ke riwayat kelas */
+    public function riwayatKelas(): BelongsTo
     {
         return $this->belongsTo(RiwayatKelas::class, 'riwayat_kelas_id');
     }
 
-    // Shortcut relasi ke Data Siswa lewat RiwayatKelas
-    public function siswa()
+    /** Shortcut langsung ke siswa dari riwayat kelas */
+    public function siswa(): BelongsTo
     {
-        return $this->hasOneThrough(
-            DataSiswa::class, 
-            RiwayatKelas::class,
-            'id',             // Foreign key di tabel riwayat_kelas
-            'id',             // Foreign key di tabel data_siswa
-            'riwayat_kelas_id', // Local key di tabel absensi_detail
-            'data_siswa_id'     // Local key di tabel riwayat_kelas
-        );
+        return $this->belongsTo(DataSiswa::class, 'data_siswa_id');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 🧮 Accessor & Helper
+    |--------------------------------------------------------------------------
+    */
+
+    /** Warna status (misalnya untuk badge di Filament Table) */
+    public function getStatusColorAttribute(): string
+    {
+        return match ($this->status) {
+            'hadir' => 'success',
+            'sakit' => 'warning',
+            'izin'  => 'info',
+            'alpa'  => 'danger',
+            default => 'secondary',
+        };
+    }
+
+    /** Label status (untuk tampilan yang rapi) */
+    public function getStatusLabelAttribute(): string
+    {
+        return ucfirst($this->status);
+    }
+
+    /** Nama siswa (langsung akses tanpa harus eager load riwayat) */
+    public function getNamaSiswaAttribute(): ?string
+    {
+        return $this->riwayatKelas?->siswa?->nama_lengkap;
     }
 }

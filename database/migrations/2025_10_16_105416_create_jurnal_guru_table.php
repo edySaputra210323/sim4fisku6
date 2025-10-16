@@ -11,18 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('absensi_header', function (Blueprint $table) {
+        Schema::create('jurnal_guru', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('pegawai_id')->constrained('pegawai')->cascadeOnDelete();
             $table->foreignId('kelas_id')->constrained('kelas')->cascadeOnDelete();
-            $table->foreignId('pegawai_id')->constrained('pegawai')->cascadeOnDelete(); // guru pengajar
+            $table->foreignId('mapel_id')->constrained('mapel')->cascadeOnDelete();
             $table->foreignId('tahun_ajaran_id')->constrained('tahun_ajaran')->cascadeOnDelete();
             $table->foreignId('semester_id')->constrained('semester')->cascadeOnDelete();
+
             $table->date('tanggal');
-            $table->string('status_input')->default('draft'); // draft / final (opsional)
-            $table->text('catatan')->nullable(); // catatan umum hari itu
+            $table->json('jam_ke')->nullable(); // bisa multi jam
+            $table->string('materi')->nullable();
+            $table->text('kegiatan')->nullable();
+
+            // siswa tidak hadir di jam ini
+            $table->json('siswa_tidak_hadir')->nullable(); // contoh: {"123":"izin","124":"sakit"}
+
             $table->timestamps();
-            // Hindari duplikasi absensi untuk kelas dan tanggal yang sama
-            $table->unique(['kelas_id', 'tanggal'], 'unique_absensi_per_kelas_tanggal');
         });
     }
 
@@ -31,6 +36,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('absensi_header');
+        Schema::dropIfExists('jurnal_guru');
     }
 };

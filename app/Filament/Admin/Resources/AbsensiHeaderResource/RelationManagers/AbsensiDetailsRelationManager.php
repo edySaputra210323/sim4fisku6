@@ -8,71 +8,64 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AbsensiDetailsRelationManager extends RelationManager
 {
     protected static string $relationship = 'absensiDetails';
 
+    protected static ?string $title = 'Daftar Kehadiran Siswa';
+
     public function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\Select::make('status')
-                    ->label('Status')
-                    ->options([
-                        'hadir' => 'Hadir',
-                        'sakit' => 'Sakit',
-                        'izin'  => 'Izin',
-                        'alpa'  => 'Alpa',
-                    ])
-                    ->required(),
+        return $form->schema([
+            Forms\Components\Select::make('status')
+                ->label('Status Kehadiran')
+                ->options([
+                    'hadir' => 'Hadir',
+                    'sakit' => 'Sakit',
+                    'izin'  => 'Izin',
+                    'alpa'  => 'Alpa',
+                ])
+                ->required(),
 
-                Forms\Components\Textarea::make('keterangan')
-                    ->label('Keterangan')
-                    ->nullable(),
-            ]);
+            Forms\Components\Textarea::make('keterangan')
+                ->label('Keterangan')
+                ->rows(2)
+                ->maxLength(255)
+                ->nullable(),
+        ]);
     }
 
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('nama_siswa')
             ->columns([
-                 // ambil nama siswa dari relasi
-                 Tables\Columns\TextColumn::make('riwayatKelas.dataSiswa.nama_siswa')
-                 ->label('Nama Siswa')
-                 ->sortable()
-                 ->searchable(),
+                Tables\Columns\TextColumn::make('riwayatKelas.dataSiswa.nama_siswa')
+    ->label('Nama Siswa')
+    ->sortable()
+    ->searchable()
+    ->wrap(),
 
-             Tables\Columns\SelectColumn::make('status')
-                 ->label('Status')
-                 ->options([
-                     'hadir' => 'Hadir',
-                     'sakit' => 'Sakit',
-                     'izin'  => 'Izin',
-                     'alpa'  => 'Alpa',
-                 ])
-                 ->rules(['required']),
+Tables\Columns\SelectColumn::make('status')
+    ->label('Status')
+    ->options([
+        'hadir' => 'Hadir',
+        'sakit' => 'Sakit',
+        'izin'  => 'Izin',
+        'alpa'  => 'Alpa',
+    ])
+    ->rules(['required']),
 
-             Tables\Columns\TextColumn::make('keterangan')
-                 ->label('Keterangan')
-                 ->limit(30),
+Tables\Columns\TextInputColumn::make('keterangan')
+    ->label('Keterangan')
+    ->placeholder('-')
+    ->sortable()
+    ->searchable(),
             ])
-            ->filters([
-                //
-            ])
-            ->headerActions([
-                // Tables\Actions\CreateAction::make(),
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->headerActions([]) // absensi detail di-generate otomatis, tidak perlu tambah manual
+            ->actions([]) // tidak perlu Edit/Delete manual
+            ->bulkActions([]) // tidak perlu hapus massal
+            ->striped()
+            ->paginated(false); // tampilkan semua siswa sekaligus
     }
 }

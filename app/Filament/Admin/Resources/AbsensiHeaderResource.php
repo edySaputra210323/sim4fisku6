@@ -16,6 +16,7 @@ use App\Models\AbsensiDetail;
 use App\Models\AbsensiHeader;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
+use Filament\Forms\Components\Section;
 use Filament\Support\Enums\FontWeight;
 use Filament\Forms\Components\TimePicker;
 use Illuminate\Database\Eloquent\Builder;
@@ -30,86 +31,43 @@ class AbsensiHeaderResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function form(Form $form): Form
+     public static function form(Form $form): Form
     {
         return $form
-        ->schema([
-            Forms\Components\Select::make('kelas_id')
-                ->label('Kelas')
-                ->relationship('kelas', 'nama_kelas')
-                ->searchable()
-                ->preload()
-                ->required()
-                ->disabled(fn ($record) => $record !== null),
+            ->schema([
+                Forms\Components\Section::make('Data Absensi')
+                    ->description('Isi informasi dasar untuk absensi hari ini.')
+                    ->schema([
+                        Forms\Components\Select::make('kelas_id')
+                        ->label('Kelas')
+                        ->relationship('kelas', 'nama_kelas')
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->reactive() // penting untuk trigger perubahan
+                        ->afterStateUpdated(function ($state, callable $set) {
+                            if ($state) {
+                                // Ambil wali kelas berdasarkan kelas yang dipilih
+                                $kelas = \App\Models\Kelas::with('waliKelas')->find($state);
+                                $set('pegawai_id', $kelas?->waliKelas?->id);
+                            } else {
+                                $set('pegawai_id', null);
+                            }
+                        }),
 
-            Forms\Components\Select::make('mapel_id')
-                ->label('Mapel')
-                ->relationship('mapel', 'nama_mapel')
-                ->searchable()
-                ->preload()
-                ->required()
-                ->disabled(fn ($record) => $record !== null),
+                    Forms\Components\Select::make('pegawai_id')
+                        ->label('Wali Kelas')
+                        ->relationship('guru', 'nm_pegawai')
+                        ->disabled() // tidak bisa diubah manual
+                        ->dehydrated(), // tetap dikirim ke server saat simpan
 
-                   // tampilkan hanya jika superadmin
-                Forms\Components\Select::make('pegawai_id')
-                ->label('Guru')
-                ->relationship('guru', 'nm_pegawai')
-                ->searchable()
-                ->preload()
-                ->required()
-                ->hidden(fn () => Auth::user()->hasRole('guru'))
-                ->disabled(fn ($record) => $record !== null),
-
-            // Forms\Components\Select::make('tahun_ajaran_id')
-            //     ->label('Tahun Ajaran')
-            //     ->relationship('tahunAjaran', 'th_ajaran')
-            //     ->searchable()
-            //     ->preload()
-            //     ->required()
-            //     ->disabled(fn ($record) => $record !== null),
-
-            // Forms\Components\Select::make('semester_id')
-            //     ->label('Semester')
-            //     ->relationship('semester', 'nm_semester')
-            //     ->searchable()
-            //     ->preload()
-            //     ->required()
-            //     ->disabled(fn ($record) => $record !== null),
-
-            Forms\Components\DatePicker::make('tanggal')
-                ->label('Tanggal')
-                ->required()
-                ->disabled(fn ($record) => $record !== null),
-
-            Forms\Components\Select::make('jam_ke')
-                ->label('Jam Ke')
-                ->multiple() // 🔹 Bisa pilih lebih dari satu jam
-                ->options([
-                    1 => 'Jam ke-1',
-                    2 => 'Jam ke-2',
-                    3 => 'Jam ke-3',
-                    4 => 'Jam ke-4',
-                    5 => 'Jam ke-5',
-                    6 => 'Jam ke-6',
-                    7 => 'Jam ke-7',
-                    8 => 'Jam ke-8',
-                    9 => 'Jam ke-9',
-                    10 => 'Jam ke-10',
-                ])
-                ->required()
-                ->preload()
-                ->searchable(),
-
-            Forms\Components\TextInput::make('materi')
-                ->label('Materi')
-                ->maxLength(255)
-                ->disabled(fn ($record) => $record !== null),
-
-            Forms\Components\TextInput::make('kegiatan')
-                ->label('Kegiatan')
-                ->maxLength(255)
-                ->disabled(fn ($record) => $record !== null),
-        ]);
+                        Forms\Components\DatePicker::make('tanggal')
+                            ->label('Tanggal Absensi')
+                            ->default(now())
+                            ->required()
+                            ->disabled(fn($record) => $record !== null),
+                    ]),
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -123,72 +81,46 @@ class AbsensiHeaderResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('tanggal')
                     ->label('Tanggal')
-                    ->date('d F Y') // 📅 Format tanggal Indonesia: 28 Januari 2025
+                    ->date('d F Y')
+                    ->icon('heroicon-o-calendar')
                     ->sortable()
-                    ->icon('heroicon-o-calendar') // ikon kecil biar manis
-                    ->weight(FontWeight::Medium)
                     ->alignCenter(),
-    
-                Tables\Columns\TextColumn::make('mapel.nama_mapel')
-                    ->label('Mata Pelajaran')
-                    ->sortable()
-                    ->searchable()
-                    ->icon('heroicon-o-book-open')
-                    ->limit(20)
-                    ->tooltip(fn ($record) => $record->mapel->nama_mapel ?? '-'),
-    
+
                 Tables\Columns\TextColumn::make('guru.nm_pegawai')
-                    ->label('Guru')
-                    ->sortable()
+                    ->label('Wali Kelas')
                     ->icon('heroicon-o-user')
-                    ->wrap()
-                    ->limit(20)
-                    ->tooltip(fn ($record) => $record->guru->nm_pegawai ?? '-'),
-    
-Tables\Columns\TextColumn::make('jam_ke')
-    ->label('Jam')
-    ->alignCenter()
-    ->badge()
-    ->color('gray')
-    ->formatStateUsing(fn($state) => is_array($state) ? implode(', ', $state) : $state),
-    
-                Tables\Columns\TextColumn::make('kegiatan')
-                    ->label('Kegiatan')
-                    ->wrap()
-                    ->limit(25)
-                    ->tooltip(fn ($record) => $record->kegiatan ?? '-'),
+                    ->sortable()
+                    ->wrap(),
 
                 Tables\Columns\TextColumn::make('kelas.nama_kelas')
                     ->label('Kelas')
-                    ->sortable()
-                    ->searchable()
                     ->badge()
                     ->color('info')
                     ->alignCenter(),
-    
+
                 Tables\Columns\TextColumn::make('total_siswa')
                     ->label('Total')
                     ->weight(FontWeight::Bold)
                     ->alignCenter(),
-    
+
                 Tables\Columns\TextColumn::make('hadir_count')
                     ->label('H')
                     ->badge()
                     ->color('success')
                     ->alignCenter(),
-    
+
                 Tables\Columns\TextColumn::make('sakit_count')
                     ->label('S')
                     ->badge()
                     ->color('warning')
                     ->alignCenter(),
-    
+
                 Tables\Columns\TextColumn::make('izin_count')
                     ->label('I')
                     ->badge()
                     ->color('info')
                     ->alignCenter(),
-    
+
                 Tables\Columns\TextColumn::make('alpa_count')
                     ->label('A')
                     ->badge()
@@ -196,13 +128,13 @@ Tables\Columns\TextColumn::make('jam_ke')
                     ->alignCenter(),
             ])
             ->defaultSort('tanggal', 'desc')
-            ->modifyQueryUsing(fn ($query) =>
+            ->modifyQueryUsing(fn($query) =>
                 $query->withCount([
                     'absensiDetails as total_siswa',
-                    'absensiDetails as hadir_count' => fn ($q) => $q->where('status', 'hadir'),
-                    'absensiDetails as sakit_count' => fn ($q) => $q->where('status', 'sakit'),
-                    'absensiDetails as izin_count'  => fn ($q) => $q->where('status', 'izin'),
-                    'absensiDetails as alpa_count'  => fn ($q) => $q->where('status', 'alpa'),
+                    'absensiDetails as hadir_count' => fn($q) => $q->where('status', 'hadir'),
+                    'absensiDetails as sakit_count' => fn($q) => $q->where('status', 'sakit'),
+                    'absensiDetails as izin_count'  => fn($q) => $q->where('status', 'izin'),
+                    'absensiDetails as alpa_count'  => fn($q) => $q->where('status', 'alpa'),
                 ])
             )
             ->filters([
@@ -214,8 +146,8 @@ Tables\Columns\TextColumn::make('jam_ke')
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
-                            ->when($data['from'], fn ($q, $date) => $q->whereDate('tanggal', '>=', $date))
-                            ->when($data['until'], fn ($q, $date) => $q->whereDate('tanggal', '<=', $date));
+                            ->when($data['from'], fn($q, $date) => $q->whereDate('tanggal', '>=', $date))
+                            ->when($data['until'], fn($q, $date) => $q->whereDate('tanggal', '<=', $date));
                     }),
             ])
             ->actions([
