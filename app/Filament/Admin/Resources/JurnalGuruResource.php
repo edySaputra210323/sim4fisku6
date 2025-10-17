@@ -52,17 +52,15 @@ class JurnalGuruResource extends Resource
                             ->label('Tanggal')
                             ->default(now())
                             ->required(),
-                            Forms\Components\Select::make('kelas_id')
+                        Forms\Components\Select::make('kelas_id')
                             ->label('Kelas')
                             ->relationship('kelas', 'nama_kelas')
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->reactive(), // penting: buat parent reaktif
+                            ->reactive()
+                            ->afterStateUpdated(fn (callable $set) => $set('absensi', [])),
                             ]),
-                        
-                        
-
                         Forms\Components\Select::make('mapel_id')
                             ->label('Mata Pelajaran')
                             ->relationship('mapel', 'nama_mapel')
@@ -105,50 +103,57 @@ class JurnalGuruResource extends Resource
                 Section::make('Siswa Tidak Hadir')
                     ->description('Isi data siswa yang tidak hadir di jam ini.')
                     ->schema([
-                    Forms\Components\Repeater::make('siswa_tidak_hadir')
+                        Forms\Components\Repeater::make('absensi')
+                        ->relationship() // pivot ke tabel absensi
                         ->label('Daftar Ketidakhadiran')
                         ->reactive()
                         ->schema([
-                    Forms\Components\Select::make('riwayat_kelas_id')
-                        ->label('Nama Siswa')
-                        ->searchable()
-                        ->options(function (callable $get, callable $set, $state) {
-                            $kelasId = $get('../../kelas_id');
-                            $tahunAktif = \App\Models\TahunAjaran::where('status', 1)->first();
-                            $semesterAktif = \App\Models\Semester::where('status', 1)->first();
-
-                            if (!$kelasId || !$tahunAktif || !$semesterAktif) return [];
-                // Ambil siswa yang sudah dipilih di repeater
-                $selected = collect($get('../../siswa_tidak_hadir'))
-                    ->pluck('riwayat_kelas_id')
-                    ->filter()
-                    ->toArray();
-
-                return \App\Models\RiwayatKelas::where('kelas_id', $kelasId)
-                    ->where('tahun_ajaran_id', $tahunAktif->id)
-                    ->where('semester_id', $semesterAktif->id)
-                    ->where('status_aktif', 1)
-                    ->whereNotIn('id', $selected) // 🚫 Jangan tampilkan yang sudah dipilih
-                    ->with('dataSiswa')
-                    ->get()
-                    ->pluck('dataSiswa.nama_siswa', 'id')
-                    ->toArray();
-                    })
-                    ->reactive()
-                    ->required(),
-                Forms\Components\Select::make('status')
-                    ->label('Keterangan')
-                    ->options([
-                        'sakit' => 'Sakit',
-                        'izin'  => 'Izin',
-                        'alpa'  => 'Alpa',
-                    ])
-                    ->required(),
-                    ])
-                    ->columns(2)
-                    ->collapsed(false)
-                    ->default([])
-                    ->createItemButtonLabel('Tambah Siswa'),
+                            Forms\Components\Select::make('riwayat_kelas_id')
+                                ->label('Nama Siswa')
+                                ->searchable()
+                                ->reactive()
+                                ->options(function (callable $get, $set) {
+                                    $kelasId = $get('../../kelas_id');
+                                    $tahunAktif = \App\Models\TahunAjaran::where('status', 1)->first();
+                                    $semesterAktif = \App\Models\Semester::where('status', 1)->first();
+                    
+                                    if (!$kelasId || !$tahunAktif || !$semesterAktif) {
+                                        return [];
+                                    }
+                    
+                                    // Ambil semua siswa yang sudah dipilih di repeater
+                                    $selected = collect($get('../../absensi'))
+                                        ->pluck('riwayat_kelas_id')
+                                        ->filter()
+                                        ->toArray();
+                    
+                                    // Ambil siswa dari riwayat kelas, tapi exclude yang sudah dipilih
+                                    return \App\Models\RiwayatKelas::where('kelas_id', $kelasId)
+                                        ->where('tahun_ajaran_id', $tahunAktif->id)
+                                        ->where('semester_id', $semesterAktif->id)
+                                        ->where('status_aktif', 1)
+                                        ->whereNotIn('id', $selected)
+                                        ->with('dataSiswa')
+                                        ->get()
+                                        ->pluck('dataSiswa.nama_siswa', 'id')
+                                        ->toArray();
+                                })
+                                ->required(),
+                    
+                            Forms\Components\Select::make('status')
+                                ->label('Keterangan')
+                                ->options([
+                                    'sakit' => 'Sakit',
+                                    'izin'  => 'Izin',
+                                    'alpa'  => 'Alpa',
+                                ])
+                                ->required(),
+                        ])
+                        ->columns(2)
+                        ->createItemButtonLabel('Tambah Siswa')
+                        ->live(onBlur: true) // biar re-render setelah inputan berubah
+                    
+                    
                                     ]),
                             ])->columns(2);
                             
@@ -185,48 +190,36 @@ class JurnalGuruResource extends Resource
                     ->limit(30)
                     ->wrap(),
 
-Tables\Columns\TextColumn::make('siswa_tidak_hadir')
-    ->label('Siswa Tidak Hadir')
-    ->html()
-    ->wrap()
-    ->formatStateUsing(function ($state) {
-        if (is_string($state)) {
-            $decoded = json_decode($state, true);
-            $state = is_array($decoded) ? $decoded : [];
-        }
+                Tables\Columns\TextColumn::make('absensi')
+                    ->label('Siswa Tidak Hadir')
+                    ->html()
+                    ->formatStateUsing(function ($state, $record) {
+                        if ($record->absensi->isEmpty()) {
+                            return '<span class="text-green-600 font-medium">Semua hadir</span>';
+                        }
 
-        if (empty($state)) {
-            return '<span class="text-green-600 font-medium">Semua hadir</span>';
-        }
+                        $result = '<ul class="list-disc list-inside space-y-1">';
+                        foreach ($record->absensi as $absen) {
+                            $nama = $absen->riwayatKelas?->dataSiswa?->nama_siswa ?? 'Tidak diketahui';
+                            $status = ucfirst($absen->status);
 
-        $result = '<ul class="list-disc list-inside space-y-1">';
-        foreach ($state as $item) {
-            $riwayat = \App\Models\RiwayatKelas::with('dataSiswa')
-                ->find($item['riwayat_kelas_id'] ?? null);
+                            $color = match ($absen->status) {
+                                'sakit' => 'bg-yellow-100 text-yellow-800',
+                                'izin'  => 'bg-blue-100 text-blue-800',
+                                'alpa'  => 'bg-red-100 text-red-800',
+                                default => 'bg-gray-100 text-gray-800',
+                            };
 
-            $nama = $riwayat?->dataSiswa?->nama_siswa ?? 'Tidak diketahui';
-            $status = ucfirst($item['status'] ?? '-');
-
-            $color = match (strtolower($status)) {
-                'sakit' => 'bg-yellow-100 text-yellow-800',
-                'izin'  => 'bg-blue-100 text-blue-800',
-                'alpa'  => 'bg-red-100 text-red-800',
-                default => 'bg-gray-100 text-gray-800',
-            };
-
-            $result .= "
-                <li>
-                    <span class='font-semibold'>{$nama}</span> 
-                    <span class='px-2 py-0.5 rounded text-xs {$color}'>{$status}</span>
-                </li>";
-        }
-
-        $result .= '</ul>';
-        return $result;
-    }),
-
-
-
+                            $result .= "
+                                <li>
+                                    <span class='font-semibold'>{$nama}</span> 
+                                    <span class='px-2 py-0.5 rounded text-xs {$color}'>{$status}</span>
+                                </li>";
+                        }
+                        $result .= '</ul>';
+                        return $result;
+                    })
+                    ->extraAttributes(['style' => 'max-height: 160px; overflow-y: auto;']),                
             ])
             ->defaultSort('tanggal', 'desc')
             ->filters([])

@@ -21,14 +21,26 @@ class JurnalGuru extends Model
         'jam_ke',
         'materi',
         'kegiatan',
-        'siswa_tidak_hadir',
     ];
+
 
     protected $casts = [
         'jam_ke' => 'array',
-        'siswa_tidak_hadir' => 'array',
         'tanggal' => 'date',
     ];
+    
+    // protected function setSiswaTidakHadirAttribute($value)
+    // {
+    //     // Jika bentuknya string (misal: "{...}, {...}")
+    //     if (is_string($value) && !str_starts_with(trim($value), '[')) {
+    //         $value = "[$value]";
+    //     }
+    
+    //     // Decode agar jadi array valid, lalu encode ulang
+    //     $array = is_array($value) ? $value : json_decode($value, true);
+    
+    //     $this->attributes['siswa_tidak_hadir'] = json_encode($array ?? []);
+    // }
 
     // 🔹 Relasi
     public function guru()
@@ -54,5 +66,10 @@ class JurnalGuru extends Model
     public function semester()
     {
         return $this->belongsTo(Semester::class, 'semester_id');
+    }
+
+    public function absensi()
+    {
+    return $this->hasMany(JurnalGuruAbsen::class, 'jurnal_guru_id');
     }
 }
