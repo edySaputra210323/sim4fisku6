@@ -12,7 +12,6 @@ class Kelas extends Model
     protected $table = 'kelas';
     protected $fillable = [
         'nama_kelas',
-        'wali_kelas_id'
     ];
 
     // Relasi ke RiwayatKelas
@@ -21,8 +20,4 @@ class Kelas extends Model
         return $this->hasMany(RiwayatKelas::class, 'kelas_id');
     }
 
-    public function waliKelas()
-    {
-        return $this->belongsTo(Pegawai::class, 'wali_kelas_id');
-    }
 }

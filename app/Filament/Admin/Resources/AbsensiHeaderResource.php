@@ -31,44 +31,66 @@ class AbsensiHeaderResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-     public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Forms\Components\Section::make('Data Absensi')
-                    ->description('Isi informasi dasar untuk absensi hari ini.')
-                    ->schema([
-                        Forms\Components\Select::make('kelas_id')
+public static function form(Form $form): Form
+{
+    return $form
+        ->schema([
+            Forms\Components\Section::make('Data Absensi')
+                ->description('Isi informasi dasar untuk absensi hari ini.')
+                ->schema([
+                    Forms\Components\Select::make('kelas_id')
                         ->label('Kelas')
                         ->relationship('kelas', 'nama_kelas')
                         ->searchable()
                         ->preload()
                         ->required()
-                        ->reactive() // penting untuk trigger perubahan
+                        ->reactive()
                         ->afterStateUpdated(function ($state, callable $set) {
-                            if ($state) {
-                                // Ambil wali kelas berdasarkan kelas yang dipilih
-                                $kelas = \App\Models\Kelas::with('waliKelas')->find($state);
-                                $set('pegawai_id', $kelas?->waliKelas?->id);
-                            } else {
-                                $set('pegawai_id', null);
-                            }
-                        }),
+                            $tahunAktif = \App\Models\TahunAjaran::where('status', 1)->first();
+                            $semesterAktif = \App\Models\Semester::where('status', 1)->first();
+
+                            $walas = \App\Models\RiwayatKelas::where('kelas_id', $state)
+                                ->where('tahun_ajaran_id', $tahunAktif?->id)
+                                ->where('semester_id', $semesterAktif?->id)
+                                ->first()?->guru;
+
+                            $set('pegawai_id', $walas?->id);
+                        })
+                        ->disabled(fn($record) => $record !== null),
 
                     Forms\Components\Select::make('pegawai_id')
                         ->label('Wali Kelas')
-                        ->relationship('guru', 'nm_pegawai')
-                        ->disabled() // tidak bisa diubah manual
-                        ->dehydrated(), // tetap dikirim ke server saat simpan
+                        ->options(\App\Models\Pegawai::pluck('nm_pegawai', 'id'))
+                        ->disabled()
+                        ->dehydrated(),
 
-                        Forms\Components\DatePicker::make('tanggal')
-                            ->label('Tanggal Absensi')
-                            ->default(now())
-                            ->required()
-                            ->disabled(fn($record) => $record !== null),
-                    ]),
-            ]);
-    }
+                    Forms\Components\DatePicker::make('tanggal')
+                        ->label('Tanggal Absensi')
+                        ->default(now())
+                        ->required()
+                        ->disabled(fn($record) => $record !== null),
+
+                    Forms\Components\Textarea::make('catatan')
+                        ->label('Catatan / Keterangan Tambahan')
+                        ->rows(3)
+                        ->maxLength(255)
+                        ->placeholder('Contoh: Beberapa siswa mengikuti lomba pramuka...')
+                        ->columnSpanFull()
+                        ->nullable(),
+                ]),
+
+            // ⚠️ Informasi tambahan (hanya muncul saat edit)
+            Forms\Components\Section::make('Informasi')
+                ->visible(fn($record) => $record !== null)
+                ->schema([
+                    Forms\Components\Placeholder::make('info_edit')
+                        ->label('Perhatian')
+                        ->content('Data dasar absensi (kelas, wali kelas, tanggal) tidak dapat diubah setelah absensi dibuat.')
+                        ->helperText('Anda masih dapat memperbarui kehadiran siswa di bagian bawah.'),
+                ]),
+        ]);
+}
+
 
     public static function table(Table $table): Table
     {

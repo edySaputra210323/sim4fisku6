@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use App\Models\JurnalGuru;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
@@ -124,4 +125,9 @@ protected static function boot()
     {
         return $this->belongsTo(StatusPegawai::class);
     }
+
+    public function jurnalGuru()
+{
+    return $this->hasMany(JurnalGuru::class, 'pegawai_id');
+}
 }

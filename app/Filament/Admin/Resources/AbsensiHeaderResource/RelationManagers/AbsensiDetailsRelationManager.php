@@ -2,12 +2,15 @@
 
 namespace App\Filament\Admin\Resources\AbsensiHeaderResource\RelationManagers;
 
+use stdClass;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\DB;
+use Filament\Tables\Contracts\HasTable;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Resources\RelationManagers\RelationManager;
 
 class AbsensiDetailsRelationManager extends RelationManager
 {
@@ -40,32 +43,50 @@ class AbsensiDetailsRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('riwayatKelas.dataSiswa.nama_siswa')
-    ->label('Nama Siswa')
-    ->sortable()
-    ->searchable()
-    ->wrap(),
+                        // Kolom nomor urut
+            Tables\Columns\TextColumn::make('index')
+                ->label('No')
+                ->width('1%')
+                ->alignCenter()
+                ->state(function ($livewire, stdClass $rowLoop): string {
+                    // $livewire adalah instance RelationManager yang mengimplement HasTable
+                    $perPage = intval(method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 0);
+                    $page = intval(method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1);
+                    $iteration = intval($rowLoop->iteration ?? 0);
 
-Tables\Columns\SelectColumn::make('status')
-    ->label('Status')
-    ->options([
-        'hadir' => 'Hadir',
-        'sakit' => 'Sakit',
-        'izin'  => 'Izin',
-        'alpa'  => 'Alpa',
-    ])
-    ->rules(['required']),
+                    if ($perPage <= 0) {
+                        return (string) $iteration;
+                    }
 
-Tables\Columns\TextInputColumn::make('keterangan')
-    ->label('Keterangan')
-    ->placeholder('-')
-    ->sortable()
-    ->searchable(),
+                    return (string) (
+                        $iteration + ($perPage * ($page - 1))
+                    );
+                }),
+            Tables\Columns\TextColumn::make('riwayatKelas.dataSiswa.nama_siswa')
+                ->label('Nama Siswa')
+                ->sortable()
+                ->searchable()
+                ->wrap(),
+
+            Tables\Columns\SelectColumn::make('status')
+                ->label('Status')
+                ->options([
+                    'hadir' => 'Hadir',
+                    'sakit' => 'Sakit',
+                    'izin'  => 'Izin',
+                    'alpa'  => 'Alpa',
+                ])
+                ->rules(['required']),
+            Tables\Columns\TextInputColumn::make('keterangan')
+                ->label('Keterangan')
+                ->placeholder('-')
+                ->sortable()
+                ->searchable(),
             ])
-            ->headerActions([]) // absensi detail di-generate otomatis, tidak perlu tambah manual
-            ->actions([]) // tidak perlu Edit/Delete manual
-            ->bulkActions([]) // tidak perlu hapus massal
-            ->striped()
-            ->paginated(false); // tampilkan semua siswa sekaligus
+                ->headerActions([]) // absensi detail di-generate otomatis, tidak perlu tambah manual
+                ->actions([]) // tidak perlu Edit/Delete manual
+                ->bulkActions([]) // tidak perlu hapus massal
+                ->striped()
+                ->paginated(false); // tampilkan semua siswa sekaligus
     }
 }

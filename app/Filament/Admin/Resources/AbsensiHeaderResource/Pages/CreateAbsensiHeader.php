@@ -26,38 +26,32 @@ class CreateAbsensiHeader extends CreateRecord
         $data['tahun_ajaran_id'] = $tahunAktif?->id;
         $data['semester_id'] = $semesterAktif?->id;
 
-         // Jika pegawai_id belum terisi (dari form), isi otomatis berdasarkan kelas
-    if (empty($data['pegawai_id']) && !empty($data['kelas_id'])) {
-        $kelas = \App\Models\Kelas::find($data['kelas_id']);
-        $data['pegawai_id'] = $kelas?->wali_kelas_id;
-    }
-
     return $data;
     }
 
     protected function beforeCreate(): void
-{
-    $data = $this->form->getState();
+    {
+        $data = $this->form->getState();
 
-    $tahunAktif = \App\Models\TahunAjaran::where('status', 1)->first();
-    $semesterAktif = \App\Models\Semester::where('status', 1)->first();
+        $tahunAktif = \App\Models\TahunAjaran::where('status', 1)->first();
+        $semesterAktif = \App\Models\Semester::where('status', 1)->first();
 
-    $exists = \App\Models\AbsensiHeader::where('kelas_id', $data['kelas_id'])
-        ->whereDate('tanggal', $data['tanggal'])
-        ->where('tahun_ajaran_id', $tahunAktif?->id)
-        ->where('semester_id', $semesterAktif?->id)
-        ->exists();
+        $exists = \App\Models\AbsensiHeader::where('kelas_id', $data['kelas_id'])
+            ->whereDate('tanggal', $data['tanggal'])
+            ->where('tahun_ajaran_id', $tahunAktif?->id)
+            ->where('semester_id', $semesterAktif?->id)
+            ->exists();
 
-    if ($exists) {
-        \Filament\Notifications\Notification::make()
-            ->danger()
-            ->title('Data absensi sudah ada')
-            ->body('Absensi untuk kelas ini pada tanggal tersebut sudah dibuat sebelumnya.')
-            ->send();
+        if ($exists) {
+            \Filament\Notifications\Notification::make()
+                ->danger()
+                ->title('Data absensi sudah ada')
+                ->body('Absensi untuk kelas ini pada tanggal tersebut sudah dibuat sebelumnya.')
+                ->send();
 
-        $this->halt(); // hentikan proses create agar tidak error SQL
+            $this->halt(); // hentikan proses create agar tidak error SQL
+        }
     }
-}
 
     protected function afterCreate(): void
     {

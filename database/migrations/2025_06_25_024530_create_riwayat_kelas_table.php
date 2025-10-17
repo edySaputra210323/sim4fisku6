@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('data_siswa_id')->constrained('data_siswa');
             $table->foreignId('kelas_id')->constrained('kelas');
-            $table->foreignId('pegawai_id')->nullable()->constrained('pegawai')->nullOnDelete();
             $table->foreignId('tahun_ajaran_id')->constrained('tahun_ajaran');
             $table->foreignId('semester_id')->constrained('semester');
             $table->timestamps();

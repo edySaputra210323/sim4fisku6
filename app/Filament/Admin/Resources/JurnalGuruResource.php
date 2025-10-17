@@ -1,0 +1,258 @@
+<?php
+
+namespace App\Filament\Admin\Resources;
+
+use Filament\Forms;
+use Filament\Tables;
+use App\Models\Pegawai;
+use App\Models\Semester;
+use Filament\Forms\Form;
+use App\Models\JurnalGuru;
+use Filament\Tables\Table;
+use App\Models\TahunAjaran;
+use App\Models\RiwayatKelas;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Grid;
+use Illuminate\Support\Facades\Auth;
+use Filament\Forms\Components\Section;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Admin\Resources\JurnalGuruResource\Pages;
+use App\Filament\Admin\Resources\JurnalGuruResource\RelationManagers;
+
+class JurnalGuruResource extends Resource
+{
+    protected static ?string $model = JurnalGuru::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-book-open';
+
+    protected static ?string $navigationLabel = 'Jurnal Guru';
+
+    protected static ?string $pluralModelLabel = 'Jurnal Guru';
+
+    protected static ?string $modelLabel = 'Jurnal Guru';
+
+    protected static ?string $slug = 'jurnal-guru';
+
+    // ---------------------------
+    // 📋 FORM
+    // ---------------------------
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Section::make('Data Jurnal Guru')
+                    ->schema([
+                        Grid::make([
+                                'sm' => 2,
+                        ])
+                            ->schema([
+                        Forms\Components\DatePicker::make('tanggal')
+                            ->label('Tanggal')
+                            ->default(now())
+                            ->required(),
+                            Forms\Components\Select::make('kelas_id')
+                            ->label('Kelas')
+                            ->relationship('kelas', 'nama_kelas')
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->reactive(), // penting: buat parent reaktif
+                            ]),
+                        
+                        
+
+                        Forms\Components\Select::make('mapel_id')
+                            ->label('Mata Pelajaran')
+                            ->relationship('mapel', 'nama_mapel')
+                            ->searchable()
+                            ->preload()
+                            ->required(),
+
+                        Forms\Components\Select::make('pegawai_id')
+                            ->label('Guru')
+                            ->options(\App\Models\Pegawai::pluck('nm_pegawai', 'id'))
+                            ->default(fn () => Auth::user()->pegawai_id ?? null)
+                            ->visible(fn () => Auth::user()?->hasRole('superadmin')),
+
+                        Forms\Components\Select::make('jam_ke')
+                            ->label('Jam Ke')
+                            ->multiple()
+                            ->options([
+                                1 => 'Jam ke-1',
+                                2 => 'Jam ke-2',
+                                3 => 'Jam ke-3',
+                                4 => 'Jam ke-4',
+                                5 => 'Jam ke-5',
+                                6 => 'Jam ke-6',
+                                7 => 'Jam ke-7',
+                            ])
+                            ->required(),
+
+                        Forms\Components\TextInput::make('materi')
+                            ->label('Materi Pembelajaran')
+                            ->maxLength(255)
+                            ->required(),
+
+                        Forms\Components\Textarea::make('kegiatan')
+                            ->label('Kegiatan Pembelajaran')
+                            ->rows(3)
+                            ->maxLength(500)
+                            ->required(),
+                    ])->columns(2),
+
+                Section::make('Siswa Tidak Hadir')
+                    ->description('Isi data siswa yang tidak hadir di jam ini.')
+                    ->schema([
+                    Forms\Components\Repeater::make('siswa_tidak_hadir')
+                        ->label('Daftar Ketidakhadiran')
+                        ->reactive()
+                        ->schema([
+                    Forms\Components\Select::make('riwayat_kelas_id')
+                        ->label('Nama Siswa')
+                        ->searchable()
+                        ->options(function (callable $get, callable $set, $state) {
+                            $kelasId = $get('../../kelas_id');
+                            $tahunAktif = \App\Models\TahunAjaran::where('status', 1)->first();
+                            $semesterAktif = \App\Models\Semester::where('status', 1)->first();
+
+                            if (!$kelasId || !$tahunAktif || !$semesterAktif) return [];
+                // Ambil siswa yang sudah dipilih di repeater
+                $selected = collect($get('../../siswa_tidak_hadir'))
+                    ->pluck('riwayat_kelas_id')
+                    ->filter()
+                    ->toArray();
+
+                return \App\Models\RiwayatKelas::where('kelas_id', $kelasId)
+                    ->where('tahun_ajaran_id', $tahunAktif->id)
+                    ->where('semester_id', $semesterAktif->id)
+                    ->where('status_aktif', 1)
+                    ->whereNotIn('id', $selected) // 🚫 Jangan tampilkan yang sudah dipilih
+                    ->with('dataSiswa')
+                    ->get()
+                    ->pluck('dataSiswa.nama_siswa', 'id')
+                    ->toArray();
+                    })
+                    ->reactive()
+                    ->required(),
+                Forms\Components\Select::make('status')
+                    ->label('Keterangan')
+                    ->options([
+                        'sakit' => 'Sakit',
+                        'izin'  => 'Izin',
+                        'alpa'  => 'Alpa',
+                    ])
+                    ->required(),
+                    ])
+                    ->columns(2)
+                    ->collapsed(false)
+                    ->default([])
+                    ->createItemButtonLabel('Tambah Siswa'),
+                                    ]),
+                            ])->columns(2);
+                            
+                    }
+        public static function table(Table $table): Table
+        {
+            return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('tanggal')
+                    ->label('Tanggal')
+                    ->date('d F Y')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('guru.nm_pegawai')
+                    ->label('Guru')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('kelas.nama_kelas')
+                    ->label('Kelas')
+                    ->badge()
+                    ->color('info'),
+
+                Tables\Columns\TextColumn::make('mapel.nama_mapel')
+                    ->label('Mapel')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('jam_ke')
+                    ->label('Jam Ke')
+                    ->formatStateUsing(fn ($state) => is_array($state) ? implode(' - ', $state) : $state)
+                    ->alignCenter(),
+
+                Tables\Columns\TextColumn::make('materi')
+                    ->label('Materi')
+                    ->limit(30)
+                    ->wrap(),
+
+Tables\Columns\TextColumn::make('siswa_tidak_hadir')
+    ->label('Siswa Tidak Hadir')
+    ->html()
+    ->wrap()
+    ->formatStateUsing(function ($state) {
+        if (is_string($state)) {
+            $decoded = json_decode($state, true);
+            $state = is_array($decoded) ? $decoded : [];
+        }
+
+        if (empty($state)) {
+            return '<span class="text-green-600 font-medium">Semua hadir</span>';
+        }
+
+        $result = '<ul class="list-disc list-inside space-y-1">';
+        foreach ($state as $item) {
+            $riwayat = \App\Models\RiwayatKelas::with('dataSiswa')
+                ->find($item['riwayat_kelas_id'] ?? null);
+
+            $nama = $riwayat?->dataSiswa?->nama_siswa ?? 'Tidak diketahui';
+            $status = ucfirst($item['status'] ?? '-');
+
+            $color = match (strtolower($status)) {
+                'sakit' => 'bg-yellow-100 text-yellow-800',
+                'izin'  => 'bg-blue-100 text-blue-800',
+                'alpa'  => 'bg-red-100 text-red-800',
+                default => 'bg-gray-100 text-gray-800',
+            };
+
+            $result .= "
+                <li>
+                    <span class='font-semibold'>{$nama}</span> 
+                    <span class='px-2 py-0.5 rounded text-xs {$color}'>{$status}</span>
+                </li>";
+        }
+
+        $result .= '</ul>';
+        return $result;
+    }),
+
+
+
+            ])
+            ->defaultSort('tanggal', 'desc')
+            ->filters([])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListJurnalGurus::route('/'),
+            'create' => Pages\CreateJurnalGuru::route('/create'),
+            'edit' => Pages\EditJurnalGuru::route('/{record}/edit'),
+        ];
+    }
+}

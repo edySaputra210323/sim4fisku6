@@ -23,9 +23,8 @@ return new class extends Migration
             $table->json('jam_ke')->nullable(); // bisa multi jam
             $table->string('materi')->nullable();
             $table->text('kegiatan')->nullable();
-
-            // siswa tidak hadir di jam ini
             $table->json('siswa_tidak_hadir')->nullable(); // contoh: {"123":"izin","124":"sakit"}
+            $table->unique(['pegawai_id', 'kelas_id', 'mapel_id', 'tanggal'], 'unique_jurnal_per_hari');
 
             $table->timestamps();
         });
