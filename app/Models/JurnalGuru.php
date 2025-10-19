@@ -72,4 +72,9 @@ class JurnalGuru extends Model
     {
     return $this->hasMany(JurnalGuruAbsen::class, 'jurnal_guru_id');
     }
+
+    public function jam()
+    {
+        return $this->hasMany(JurnalGuruJam::class, 'jurnal_guru_id');
+    }
 }

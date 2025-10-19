@@ -92,4 +92,9 @@ class CreateAbsensiHeader extends CreateRecord
     {
         return $this->getResource()::getUrl('edit', ['record' => $this->record]);
     }
+
+    protected function getCreatedNotificationTitle(): ?string
+    {
+        return 'Absensi berhasil dibuat';
+    }
 }

@@ -20,7 +20,6 @@ return new class extends Migration
             $table->foreignId('semester_id')->constrained('semester')->cascadeOnDelete();
 
             $table->date('tanggal');
-            $table->json('jam_ke')->nullable(); // bisa multi jam
             $table->string('materi')->nullable();
             $table->text('kegiatan')->nullable();
             $table->unique(['pegawai_id', 'kelas_id', 'mapel_id', 'tanggal'], 'unique_jurnal_per_hari');

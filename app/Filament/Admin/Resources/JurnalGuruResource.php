@@ -74,19 +74,34 @@ class JurnalGuruResource extends Resource
                             ->default(fn () => Auth::user()->pegawai_id ?? null)
                             ->visible(fn () => Auth::user()?->hasRole('superadmin')),
 
-                        Forms\Components\Select::make('jam_ke')
-                            ->label('Jam Ke')
-                            ->multiple()
-                            ->options([
-                                1 => 'Jam ke-1',
-                                2 => 'Jam ke-2',
-                                3 => 'Jam ke-3',
-                                4 => 'Jam ke-4',
-                                5 => 'Jam ke-5',
-                                6 => 'Jam ke-6',
-                                7 => 'Jam ke-7',
-                            ])
-                            ->required(),
+                       Forms\Components\Select::make('jam_ke_multiple')
+                        ->label('Jam Ke')
+                        ->multiple()
+                        ->options([
+                            1 => 'Jam ke-1',
+                            2 => 'Jam ke-2',
+                            3 => 'Jam ke-3',
+                            4 => 'Jam ke-4',
+                            5 => 'Jam ke-5',
+                            6 => 'Jam ke-6',
+                            7 => 'Jam ke-7',
+                        ])
+                        ->dehydrated(false) // jangan simpan ke kolom di tabel utama
+                        ->afterStateHydrated(function ($set, $record) {
+                            // Saat form edit, isi data berdasarkan relasi jam
+                            if ($record) {
+                                $set('jam_ke_multiple', $record->jam->pluck('jam_ke')->toArray());
+                            }
+                        })
+                        ->afterStateUpdated(function ($state, $record) {
+                            if (!$record) return;
+
+                            // Sinkronkan dengan tabel pivot
+                            $record->jam()->delete(); // hapus dulu semua jam lama
+                            foreach ($state as $jamKe) {
+                                $record->jam()->create(['jam_ke' => $jamKe]);
+                            }
+                        }),
 
                         Forms\Components\TextInput::make('materi')
                             ->label('Materi Pembelajaran')
@@ -109,36 +124,38 @@ class JurnalGuruResource extends Resource
                         ->reactive()
                         ->schema([
                             Forms\Components\Select::make('riwayat_kelas_id')
-                                ->label('Nama Siswa')
-                                ->searchable()
-                                ->reactive()
-                                ->options(function (callable $get, $set) {
-                                    $kelasId = $get('../../kelas_id');
-                                    $tahunAktif = \App\Models\TahunAjaran::where('status', 1)->first();
-                                    $semesterAktif = \App\Models\Semester::where('status', 1)->first();
-                    
-                                    if (!$kelasId || !$tahunAktif || !$semesterAktif) {
-                                        return [];
-                                    }
-                    
-                                    // Ambil semua siswa yang sudah dipilih di repeater
-                                    $selected = collect($get('../../absensi'))
-                                        ->pluck('riwayat_kelas_id')
-                                        ->filter()
-                                        ->toArray();
-                    
-                                    // Ambil siswa dari riwayat kelas, tapi exclude yang sudah dipilih
-                                    return \App\Models\RiwayatKelas::where('kelas_id', $kelasId)
-                                        ->where('tahun_ajaran_id', $tahunAktif->id)
-                                        ->where('semester_id', $semesterAktif->id)
-                                        ->where('status_aktif', 1)
-                                        ->whereNotIn('id', $selected)
-                                        ->with('dataSiswa')
-                                        ->get()
-                                        ->pluck('dataSiswa.nama_siswa', 'id')
-                                        ->toArray();
-                                })
-                                ->required(),
+    ->label('Nama Siswa')
+    ->searchable()
+    ->reactive()
+    ->options(function (callable $get) {
+        $kelasId = $get('../../kelas_id');
+        $tahunAktif = \App\Models\TahunAjaran::where('status', 1)->first();
+        $semesterAktif = \App\Models\Semester::where('status', 1)->first();
+
+        if (!$kelasId || !$tahunAktif || !$semesterAktif) {
+            return [];
+        }
+
+        $selected = collect($get('../../absensi'))
+            ->pluck('riwayat_kelas_id')
+            ->filter()
+            ->toArray();
+
+        return \App\Models\RiwayatKelas::where('kelas_id', $kelasId)
+            ->where('tahun_ajaran_id', $tahunAktif->id)
+            ->where('semester_id', $semesterAktif->id)
+            ->where('status_aktif', 1)
+            ->whereNotIn('id', $selected)
+            ->with('dataSiswa')
+            ->get()
+            ->pluck('dataSiswa.nama_siswa', 'id')
+            ->toArray();
+    })
+    ->getOptionLabelUsing(function ($value) {
+        $riwayat = \App\Models\RiwayatKelas::with('dataSiswa')->find($value);
+        return $riwayat?->dataSiswa?->nama_siswa ?? 'Tidak diketahui';
+    })
+    ->required(),
                     
                             Forms\Components\Select::make('status')
                                 ->label('Keterangan')
@@ -182,7 +199,26 @@ class JurnalGuruResource extends Resource
 
                 Tables\Columns\TextColumn::make('jam_ke')
                     ->label('Jam Ke')
-                    ->formatStateUsing(fn ($state) => is_array($state) ? implode(' - ', $state) : $state)
+                    ->formatStateUsing(function ($state) {
+                    if (is_array($state)) {
+                        $count = count($state);
+
+                        if ($count === 0) {
+                            return '-';
+                        } elseif ($count === 1) {
+                            return $state[0];
+                        } elseif ($count === 2) {
+                            return implode(' & ', $state);
+                        } else {
+                            // contoh: 1, 2, 3 & 4
+                            $last = array_pop($state);
+                            return implode(', ', $state) . ' & ' . $last;
+                        }
+                    }
+
+                    return $state;
+                })
+
                     ->alignCenter(),
 
                 Tables\Columns\TextColumn::make('materi')
