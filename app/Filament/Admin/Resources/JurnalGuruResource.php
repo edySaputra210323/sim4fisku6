@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Pegawai;
+use App\Enums\JamKeEnum;
 use App\Models\Semester;
 use Filament\Forms\Form;
 use App\Models\JurnalGuru;
@@ -61,48 +62,35 @@ class JurnalGuruResource extends Resource
                             ->reactive()
                             ->afterStateUpdated(fn (callable $set) => $set('absensi', [])),
                             ]),
+                        Grid::make([
+                                'sm' => 2,
+                        ])
+                            ->schema([
                         Forms\Components\Select::make('mapel_id')
                             ->label('Mata Pelajaran')
                             ->relationship('mapel', 'nama_mapel')
                             ->searchable()
                             ->preload()
                             ->required(),
-
+                            Forms\Components\Select::make('jam_ke_multiple')
+                            ->label('Jam Ke')
+                            ->multiple()
+                            ->options(JamKeEnum::options())
+                            ->required()
+                            ->dehydrated(false) // jangan simpan ke kolom utama
+                            ->afterStateHydrated(function ($set, $record) {
+                                if ($record) {
+                                    $set('jam_ke_multiple', $record->jam->pluck('jam_ke')->toArray());
+                                }
+                            }),
+                        ]),
                         Forms\Components\Select::make('pegawai_id')
                             ->label('Guru')
                             ->options(\App\Models\Pegawai::pluck('nm_pegawai', 'id'))
                             ->default(fn () => Auth::user()->pegawai_id ?? null)
                             ->visible(fn () => Auth::user()?->hasRole('superadmin')),
 
-                       Forms\Components\Select::make('jam_ke_multiple')
-                        ->label('Jam Ke')
-                        ->multiple()
-                        ->options([
-                            1 => 'Jam ke-1',
-                            2 => 'Jam ke-2',
-                            3 => 'Jam ke-3',
-                            4 => 'Jam ke-4',
-                            5 => 'Jam ke-5',
-                            6 => 'Jam ke-6',
-                            7 => 'Jam ke-7',
-                        ])
-                        ->dehydrated(false) // jangan simpan ke kolom di tabel utama
-                        ->afterStateHydrated(function ($set, $record) {
-                            // Saat form edit, isi data berdasarkan relasi jam
-                            if ($record) {
-                                $set('jam_ke_multiple', $record->jam->pluck('jam_ke')->toArray());
-                            }
-                        })
-                        ->afterStateUpdated(function ($state, $record) {
-                            if (!$record) return;
-
-                            // Sinkronkan dengan tabel pivot
-                            $record->jam()->delete(); // hapus dulu semua jam lama
-                            foreach ($state as $jamKe) {
-                                $record->jam()->create(['jam_ke' => $jamKe]);
-                            }
-                        }),
-
+                       
                         Forms\Components\TextInput::make('materi')
                             ->label('Materi Pembelajaran')
                             ->maxLength(255)
@@ -113,7 +101,7 @@ class JurnalGuruResource extends Resource
                             ->rows(3)
                             ->maxLength(500)
                             ->required(),
-                    ])->columns(2),
+                    ])->columnSpan(1)->columns(1),
 
                 Section::make('Siswa Tidak Hadir')
                     ->description('Isi data siswa yang tidak hadir di jam ini.')
@@ -123,61 +111,71 @@ class JurnalGuruResource extends Resource
                         ->label('Daftar Ketidakhadiran')
                         ->reactive()
                         ->schema([
-                            Forms\Components\Select::make('riwayat_kelas_id')
-    ->label('Nama Siswa')
-    ->searchable()
-    ->reactive()
-    ->options(function (callable $get) {
-        $kelasId = $get('../../kelas_id');
-        $tahunAktif = \App\Models\TahunAjaran::where('status', 1)->first();
-        $semesterAktif = \App\Models\Semester::where('status', 1)->first();
+                    Forms\Components\Select::make('riwayat_kelas_id')
+                        ->label('Nama Siswa')
+                        ->searchable()
+                        ->reactive()
+                        ->options(function (callable $get) {
+                            $kelasId = $get('../../kelas_id');
+                            $tahunAktif = \App\Models\TahunAjaran::where('status', 1)->first();
+                            $semesterAktif = \App\Models\Semester::where('status', 1)->first();
 
-        if (!$kelasId || !$tahunAktif || !$semesterAktif) {
-            return [];
-        }
-
-        $selected = collect($get('../../absensi'))
-            ->pluck('riwayat_kelas_id')
-            ->filter()
-            ->toArray();
-
-        return \App\Models\RiwayatKelas::where('kelas_id', $kelasId)
-            ->where('tahun_ajaran_id', $tahunAktif->id)
-            ->where('semester_id', $semesterAktif->id)
-            ->where('status_aktif', 1)
-            ->whereNotIn('id', $selected)
-            ->with('dataSiswa')
-            ->get()
-            ->pluck('dataSiswa.nama_siswa', 'id')
-            ->toArray();
-    })
-    ->getOptionLabelUsing(function ($value) {
-        $riwayat = \App\Models\RiwayatKelas::with('dataSiswa')->find($value);
-        return $riwayat?->dataSiswa?->nama_siswa ?? 'Tidak diketahui';
-    })
-    ->required(),
-                    
-                            Forms\Components\Select::make('status')
-                                ->label('Keterangan')
-                                ->options([
-                                    'sakit' => 'Sakit',
-                                    'izin'  => 'Izin',
-                                    'alpa'  => 'Alpa',
+                            if (!$kelasId || !$tahunAktif || !$semesterAktif) {
+                                return [];
+                            }
+                            $selected = collect($get('../../absensi'))
+                                ->pluck('riwayat_kelas_id')
+                                ->filter()
+                                ->toArray();
+                        return \App\Models\RiwayatKelas::where('kelas_id', $kelasId)
+                            ->where('tahun_ajaran_id', $tahunAktif->id)
+                            ->where('semester_id', $semesterAktif->id)
+                            ->where('status_aktif', 1)
+                            ->whereNotIn('id', $selected)
+                            ->with('dataSiswa')
+                            ->get()
+                            ->pluck('dataSiswa.nama_siswa', 'id')
+                            ->toArray();
+                                })
+                                ->getOptionLabelUsing(function ($value) {
+                                    $riwayat = \App\Models\RiwayatKelas::with('dataSiswa')->find($value);
+                                    return $riwayat?->dataSiswa?->nama_siswa ?? 'Tidak diketahui';
+                                })
+                                ->required(),
+                     Forms\Components\Select::make('status')
+                            ->label('Keterangan')
+                            ->options([
+                                'sakit' => 'Sakit',
+                                'izin'  => 'Izin',
+                                'alpa'  => 'Alpa',
                                 ])
                                 ->required(),
-                        ])
-                        ->columns(2)
-                        ->createItemButtonLabel('Tambah Siswa')
-                        ->live(onBlur: true) // biar re-render setelah inputan berubah
+                            ])->columns(2)
+                            
+                            ->createItemButtonLabel('Tambah Siswa')
+                            ->live(onBlur: true) // biar re-render setelah inputan berubah
                     
-                    
-                                    ]),
-                            ])->columns(2);
+                                ])->columnSpan(2),
+                            ])->columns(3);
                             
                     }
-        public static function table(Table $table): Table
-        {
-            return $table
+    public static function table(Table $table): Table
+    {
+        return $table
+        ->modifyQueryUsing(function (Builder $query) {
+        return $query->orderBy('id', 'desc');
+            })
+            ->recordAction(null)
+            ->recordUrl(null)
+            ->extremePaginationLinks()
+            ->paginated([5, 10, 20, 50])
+            ->defaultPaginationPageOption(10)
+            ->striped()
+            ->poll('5s')
+            ->recordClasses(function () {
+                $classes = 'table-vertical-align-top ';
+                return $classes;
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('tanggal')
                     ->label('Tanggal')
@@ -197,76 +195,100 @@ class JurnalGuruResource extends Resource
                     ->label('Mapel')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('jam_ke')
-                    ->label('Jam Ke')
-                    ->formatStateUsing(function ($state) {
-                    if (is_array($state)) {
-                        $count = count($state);
+                Tables\Columns\TextColumn::make('jam')
+                ->label('Jam Ke')
+                ->getStateUsing(function ($record) {
+                    // Pastikan relasi ter-load. Jika belum, ambil dari DB.
+                    if (! $record->relationLoaded('jam')) {
+                        $record->load('jam');
+                    }
 
-                        if ($count === 0) {
-                            return '-';
-                        } elseif ($count === 1) {
-                            return $state[0];
-                        } elseif ($count === 2) {
-                            return implode(' & ', $state);
+                    $jamCollection = $record->jam ?? collect();
+
+                    // Ambil jam_ke yang unik, sort, dan kembalikan sebagai array (integer)
+                    $arr = collect($jamCollection)
+                        ->pluck('jam_ke')
+                        ->filter()             // hilangkan null/empty
+                        ->unique()
+                        ->map(fn($v) => (int) $v)
+                        ->sort()
+                        ->values()
+                        ->all();
+
+                    return $arr; // pasti array
+                })
+                ->formatStateUsing(function ($state) {
+                    // Normalisasi: jika bukan array, coba decode / parse jadi array
+                    if (is_string($state)) {
+                        // coba decode JSON
+                        $decoded = json_decode($state, true);
+                        if (is_array($decoded)) {
+                            $state = $decoded;
                         } else {
-                            // contoh: 1, 2, 3 & 4
-                            $last = array_pop($state);
-                            return implode(', ', $state) . ' & ' . $last;
+                            // fallback: pecah dengan koma (untuk kasus "1,2" atau "1, 2")
+                            $parts = preg_split('/\s*,\s*/', $state, -1, PREG_SPLIT_NO_EMPTY);
+                            $state = array_map(fn($v) => trim($v), $parts);
                         }
                     }
 
-                    return $state;
-                })
+                    // Jika masih bukan array, buat jadi array 1 elemen
+                    if (! is_array($state)) {
+                        $state = [$state];
+                    }
 
-                    ->alignCenter(),
+                    // Pastikan elemen numeric dan terurut
+                    $state = array_values(array_filter(array_map(fn($v) => $v === '' ? null : (int) $v, $state), fn($v) => $v !== null));
+                    sort($state, SORT_NUMERIC);
+
+                    if (empty($state)) {
+                        return '-';
+                    }
+
+                    if (count($state) === 1) {
+                        return (string) $state[0];
+                    }
+
+                    // Ambil semua kecuali terakhir
+                    $allExceptLast = array_slice($state, 0, -1);
+                    $last = end($state);
+
+                    // Gabungkan: "1, 2 & 3" atau untuk dua elemen menjadi "1 & 2"
+                    return implode(', ', $allExceptLast) . ' & ' . $last;
+                })
+                ->alignCenter(),
 
                 Tables\Columns\TextColumn::make('materi')
                     ->label('Materi')
                     ->limit(30)
                     ->wrap(),
 
-                Tables\Columns\TextColumn::make('absensi')
-                    ->label('Siswa Tidak Hadir')
-                    ->html()
-                    ->formatStateUsing(function ($state, $record) {
-                        if ($record->absensi->isEmpty()) {
-                            return '<span class="text-green-600 font-medium">Semua hadir</span>';
-                        }
-
-                        $result = '<ul class="list-disc list-inside space-y-1">';
-                        foreach ($record->absensi as $absen) {
-                            $nama = $absen->riwayatKelas?->dataSiswa?->nama_siswa ?? 'Tidak diketahui';
-                            $status = ucfirst($absen->status);
-
-                            $color = match ($absen->status) {
-                                'sakit' => 'bg-yellow-100 text-yellow-800',
-                                'izin'  => 'bg-blue-100 text-blue-800',
-                                'alpa'  => 'bg-red-100 text-red-800',
-                                default => 'bg-gray-100 text-gray-800',
-                            };
-
-                            $result .= "
-                                <li>
-                                    <span class='font-semibold'>{$nama}</span> 
-                                    <span class='px-2 py-0.5 rounded text-xs {$color}'>{$status}</span>
-                                </li>";
-                        }
-                        $result .= '</ul>';
-                        return $result;
-                    })
-                    ->extraAttributes(['style' => 'max-height: 160px; overflow-y: auto;']),                
-            ])
+                Tables\Columns\TextColumn::make('absensi_html')
+                ->label('Siswa Tidak Hadir')
+                ->html()
+                ->extraAttributes(['style' => 'max-height: 160px; overflow-y: auto;'])
+                ->alignLeft(),
+                            
+                        ])
             ->defaultSort('tanggal', 'desc')
             ->filters([])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                ->iconButton()
+                ->color('warning')
+                ->tooltip('Ubah Jurnal')
+                ->icon('heroicon-o-pencil-square'),
+            Tables\Actions\DeleteAction::make()
+                ->iconButton()
+                ->color('danger')
+                ->tooltip('Hapus Jurnal')
+                ->icon('heroicon-o-trash')
+                ->modalHeading('Hapus Jurnal'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+        ]);
     }
 
     public static function getRelations(): array

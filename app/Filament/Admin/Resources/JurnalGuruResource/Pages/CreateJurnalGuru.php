@@ -7,6 +7,7 @@ use App\Models\Semester;
 use App\Models\TahunAjaran;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Admin\Resources\JurnalGuruResource;
+use Illuminate\Support\Facades\DB;
 
 class CreateJurnalGuru extends CreateRecord
 {
@@ -35,6 +36,30 @@ class CreateJurnalGuru extends CreateRecord
 
     return $data;
     }
+
+    protected function afterCreate(): void
+{
+    $record = $this->record;
+    $jamKe = $this->data['jam_ke_multiple'] ?? [];
+
+    foreach ($jamKe as $jam) {
+        $record->jam()->create(['jam_ke' => $jam]);
+    }
+}
+
+protected function afterSave(): void
+{
+    $record = $this->record;
+    $jamKe = $this->data['jam_ke_multiple'] ?? [];
+
+    // Sinkronisasi aman di mode edit
+    DB::transaction(function () use ($record, $jamKe) {
+        $record->jam()->delete();
+        foreach ($jamKe as $jam) {
+            $record->jam()->create(['jam_ke' => $jam]);
+        }
+    });
+}
 
     public function getRedirectUrl(): string
     {

@@ -42,6 +42,38 @@ class JurnalGuru extends Model
     //     $this->attributes['siswa_tidak_hadir'] = json_encode($array ?? []);
     // }
 
+    public function getAbsensiHtmlAttribute(): string
+{
+    if ($this->absensi->isEmpty()) {
+        return '<span style="color: #16a34a; font-weight: 500;">Semua hadir</span>';
+    }
+
+    $result = '<ul style="list-style-type: disc; margin-left: 1rem;">';
+    foreach ($this->absensi as $absen) {
+        $nama = e($absen->riwayatKelas?->dataSiswa?->nama_siswa ?? 'Tidak diketahui');
+        $status = ucfirst($absen->status);
+
+        // Warna hanya untuk teks status
+        $color = match ($absen->status) {
+            'sakit' => 'color: #f3c258;', // kuning gelap
+            'izin'  => 'color: #3b88e0;', // biru
+            'alpa'  => 'color: #f30808;', // merah
+            default => 'color: #374151;', // abu
+        };
+
+        $result .= "
+            <li style='margin-bottom: 4px;'>
+                <span style='font-weight: 600;'>{$nama}</span>
+                <span style='{$color} font-size: 0.875rem; margin-left: 6px;'>
+                    {$status}
+                </span>
+            </li>";
+    }
+
+    $result .= '</ul>';
+    return $result;
+}
+
     // 🔹 Relasi
     public function guru()
     {
@@ -77,4 +109,5 @@ class JurnalGuru extends Model
     {
         return $this->hasMany(JurnalGuruJam::class, 'jurnal_guru_id');
     }
+
 }

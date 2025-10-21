@@ -4,7 +4,7 @@ namespace App\Exports;
 
 use App\Models\Semester;
 use App\Models\TahunAjaran;
-use App\Models\AbsensiHeader;
+use App\Models\JurnalGuru;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -31,13 +31,13 @@ class RekapJurnalGuruExport implements FromCollection, WithHeadings, WithStyles,
 
     public function collection()
     {
-        return AbsensiHeader::with(['guru', 'kelas', 'mapel', 'absensiDetails.riwayatKelas.dataSiswa'])
-            ->when($this->guruId, fn ($q) => $q->where('pegawai_id', $this->guruId))
-            ->when($this->kelasId, fn ($q) => $q->where('kelas_id', $this->kelasId))
-            ->when($this->mapelId, fn ($q) => $q->where('mapel_id', $this->mapelId))
-            ->whereBetween('tanggal', [$this->startDate, $this->endDate])
-            ->orderBy('tanggal')
-            ->get();
+    return JurnalGuru::with(['guru', 'kelas', 'mapel', 'absensi.riwayatKelas.dataSiswa'])
+        ->when($this->guruId, fn($q) => $q->where('pegawai_id', $this->guruId))
+        ->when($this->kelasId, fn($q) => $q->where('kelas_id', $this->kelasId))
+        ->when($this->mapelId, fn($q) => $q->where('mapel_id', $this->mapelId))
+        ->whereBetween('tanggal', [$this->startDate, $this->endDate])
+        ->orderBy('tanggal')
+        ->get();
     }
 
     public function headings(): array
@@ -50,37 +50,40 @@ class RekapJurnalGuruExport implements FromCollection, WithHeadings, WithStyles,
 
     public function map($record): array
     {
-        // Format nama siswa: huruf pertama kapital di setiap kata
         $formatNama = fn($nama) => ucwords(strtolower($nama));
 
-        $sakit = $record->absensiDetails
+        $sakit = $record->absensi
             ->where('status', 'sakit')
             ->pluck('riwayatKelas.dataSiswa.nama_siswa')
             ->map($formatNama)
             ->implode("\n");
 
-        $izin = $record->absensiDetails
+        $izin = $record->absensi
             ->where('status', 'izin')
             ->pluck('riwayatKelas.dataSiswa.nama_siswa')
             ->map($formatNama)
             ->implode("\n");
 
-        $alpa = $record->absensiDetails
+        $alpa = $record->absensi
             ->where('status', 'alpa')
             ->pluck('riwayatKelas.dataSiswa.nama_siswa')
             ->map($formatNama)
             ->implode("\n");
 
+        // Ambil jam ke dari relasi pivot baru (jurnal_guru_jam)
+        $jamKe = $record->jam?->pluck('jam_ke')->sort()->join(' & ') ?? '-';
+
         return [
             $record->tanggal->format('d/m/Y'),
-            is_array($record->jam_ke) ? implode(' & ', $record->jam_ke) : $record->jam_ke,
+            $jamKe,
             $record->materi,
             $record->kegiatan,
             $sakit,
             $izin,
             $alpa,
         ];
-    }
+}
+
 
     public function styles(Worksheet $sheet)
 {
