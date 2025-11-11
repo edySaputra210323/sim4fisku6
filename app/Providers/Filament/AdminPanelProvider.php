@@ -137,8 +137,11 @@ class AdminPanelProvider extends PanelProvider
                 
                 ->navigationGroups([
                     NavigationGroup::make()
-                         ->label('Data Siswa')
+                         ->label('Data Akademik')
                          ->icon('heroicon-o-academic-cap'),
+                    NavigationGroup::make()
+                         ->label('Data Siswa')
+                         ->icon('heroicon-o-user-group'),
                     NavigationGroup::make()
                         ->label('Pengelolaan Pegawai')
                         ->icon('heroicon-o-user-group'),

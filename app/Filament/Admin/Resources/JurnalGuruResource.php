@@ -25,6 +25,8 @@ class JurnalGuruResource extends Resource
 {
     protected static ?string $model = JurnalGuru::class;
 
+        protected static ?string $navigationGroup = 'Data Akademik';
+
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
 
     protected static ?string $navigationLabel = 'Jurnal Guru';
@@ -88,7 +90,10 @@ class JurnalGuruResource extends Resource
                             ->label('Guru')
                             ->options(\App\Models\Pegawai::pluck('nm_pegawai', 'id'))
                             ->default(fn () => Auth::user()->pegawai_id ?? null)
-                            ->visible(fn () => Auth::user()?->hasRole('superadmin')),
+                            ->visible(fn () => Auth::user()?->hasRole('superadmin'))
+                            ->required()
+                            ->searchable()
+                            ->preload(),
 
                        
                         Forms\Components\TextInput::make('materi')
@@ -184,7 +189,8 @@ class JurnalGuruResource extends Resource
 
                 Tables\Columns\TextColumn::make('guru.nm_pegawai')
                     ->label('Guru')
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
 
                 Tables\Columns\TextColumn::make('kelas.nama_kelas')
                     ->label('Kelas')

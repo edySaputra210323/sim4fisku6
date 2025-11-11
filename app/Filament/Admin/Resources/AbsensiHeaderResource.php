@@ -29,7 +29,19 @@ class AbsensiHeaderResource extends Resource
 {
     protected static ?string $model = AbsensiHeader::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+     protected static ?string $navigationGroup = 'Data Akademik';
+
+    protected static ?string $navigationLabel = 'Jurnal Kelas';
+
+    protected static ?string $pluralLabel = 'Jurnal Kelas';
+
+    protected static ?string $modelLabel = 'Jurnal Kelas';
+
+    protected static ?string $pluralModelLabel = 'Jurnal Kelas';
+
+    protected static ?string $slug = 'jurnal-kelas';
+
+    protected static ?string $navigationIcon = 'heroicon-o-book-open';
 
 public static function form(Form $form): Form
 {

@@ -18,7 +18,7 @@ class JadwalMengajarResource extends Resource
 {
     protected static ?string $model = JadwalMengajar::class;
 
-    // protected static ?string $navigationGroup = 'Akademik';
+    protected static ?string $navigationGroup = 'Data Akademik';
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
 
