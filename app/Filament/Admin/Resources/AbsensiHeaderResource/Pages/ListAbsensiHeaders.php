@@ -10,10 +10,13 @@ use App\Models\Pegawai;
 use App\Models\Semester;
 // use Filament\Tables\Actions;
 use App\Models\TahunAjaran;
+use App\Models\AbsensiHeader;
 use App\Exports\RekapAbsensiExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\RekapJurnalGuruExport;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Widgets\StatsOverviewWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Filament\Admin\Resources\AbsensiHeaderResource;
 
 class ListAbsensiHeaders extends ListRecords
@@ -49,6 +52,8 @@ class ListAbsensiHeaders extends ListRecords
                     ->label('Kelas (Opsional)')
                     ->options(fn () => Kelas::orderBy('nama_kelas')->pluck('nama_kelas','id')->toArray())
                     ->searchable()
+                    ->preload()
+                    ->required()
                     ->placeholder('Semua Kelas'),
 
                 Forms\Components\Select::make('mapel_id')
@@ -86,4 +91,14 @@ class ListAbsensiHeaders extends ListRecords
             }),
         ];
     }
+     /**
+     * 🔔 Tambahan widget di header: daftar kelas yang belum membuat absensi hari ini
+     */
+    protected function getHeaderWidgets(): array
+{
+    return [
+        \App\Filament\Admin\Resources\AbsensiHeaderResource\Widgets\StatusAbsensiWidget::class,
+    ];
+}
+
 }

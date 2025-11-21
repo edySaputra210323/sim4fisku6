@@ -18,11 +18,9 @@ class EditAbsensiHeader extends EditRecord
                 ->color('success')
                 ->requiresConfirmation()
                 ->action(function () {
-                    // opsional: update status header jadi "selesai"
-                    // $this->record->update(['status' => 'selesai']);
-
-                    // redirect balik ke list absensi
-                    return redirect()->route('filament.admin.resources.absensi-headers.index');
+                    // optional: $this->record->update(['status' => 'selesai']);
+                    return redirect(AbsensiHeaderResource::getUrl('index'));
+                    // atau jika berada di Page class: return redirect($this->getResource()::getUrl('index'));
                 }),
         ];
     }

@@ -10,11 +10,13 @@ use App\Models\Pegawai;
 use App\Models\Semester;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Tables\Filters\Filter;
 use App\Models\TahunAjaran;
 use App\Models\RiwayatKelas;
 use App\Models\AbsensiDetail;
 use App\Models\AbsensiHeader;
 use Filament\Resources\Resource;
+use Forms\Components\DatePicker;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Section;
 use Filament\Support\Enums\FontWeight;
@@ -162,28 +164,35 @@ public static function form(Form $form): Form
                     ->alignCenter(),
             ])
             ->defaultSort('tanggal', 'desc')
-            ->modifyQueryUsing(fn($query) =>
-                $query->withCount([
-                    'absensiDetails as total_siswa',
-                    'absensiDetails as hadir_count' => fn($q) => $q->where('status', 'hadir'),
-                    'absensiDetails as sakit_count' => fn($q) => $q->where('status', 'sakit'),
-                    'absensiDetails as izin_count'  => fn($q) => $q->where('status', 'izin'),
-                    'absensiDetails as alpa_count'  => fn($q) => $q->where('status', 'alpa'),
+          ->modifyQueryUsing(function (Builder $query) {
+    return $query
+        ->withCount([
+            'absensiDetails as total_siswa',
+            'absensiDetails as hadir_count' => fn($q) => $q->where('status', 'hadir'),
+            'absensiDetails as sakit_count' => fn($q) => $q->where('status', 'sakit'),
+            'absensiDetails as izin_count'  => fn($q) => $q->where('status', 'izin'),
+            'absensiDetails as alpa_count'  => fn($q) => $q->where('status', 'alpa'),
+        ]);
+        })
+        ->filters([
+            Tables\Filters\Filter::make('tanggal')
+                ->label('Filter Tanggal')
+                ->form([
+                    Forms\Components\DatePicker::make('from')->label('Dari'),
+                    Forms\Components\DatePicker::make('until')->label('Sampai'),
                 ])
-            )
-            ->filters([
-                Tables\Filters\Filter::make('tanggal')
-                    ->label('Filter Tanggal')
-                    ->form([
-                        Forms\Components\DatePicker::make('from')->label('Dari'),
-                        Forms\Components\DatePicker::make('until')->label('Sampai'),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
+                ->query(function (Builder $query, array $data): Builder {
+                    // kalau user isi filter manual, pakai itu
+                    if ($data['from'] || $data['until']) {
                         return $query
                             ->when($data['from'], fn($q, $date) => $q->whereDate('tanggal', '>=', $date))
                             ->when($data['until'], fn($q, $date) => $q->whereDate('tanggal', '<=', $date));
-                    }),
-            ])
+                    }
+
+                    // kalau tidak ada filter → tampilkan hanya hari ini
+                    return $query->whereDate('tanggal', now()->toDateString());
+                })
+        ])
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->icon('heroicon-o-eye')
