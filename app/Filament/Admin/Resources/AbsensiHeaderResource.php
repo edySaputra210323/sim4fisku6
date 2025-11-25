@@ -33,6 +33,8 @@ class AbsensiHeaderResource extends Resource
 
      protected static ?string $navigationGroup = 'Data Akademik';
 
+     protected static ?int $navigationSort = 2;
+
     protected static ?string $navigationLabel = 'Jurnal Kelas';
 
     protected static ?string $pluralLabel = 'Jurnal Kelas';
@@ -196,10 +198,17 @@ public static function form(Form $form): Form
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->icon('heroicon-o-eye')
-                    ->tooltip('Lihat detail absensi'),
+                    ->tooltip('Lihat detail absensi')
+                    ->label(false),
                 Tables\Actions\EditAction::make()
                     ->icon('heroicon-o-pencil-square')
-                    ->tooltip('Ubah data absensi'),
+                    ->tooltip('Ubah data absensi')
+                    ->label(false),
+                Tables\Actions\DeleteAction::make()
+                    ->icon('heroicon-o-trash')
+                    ->tooltip('Hapus data absensi')
+                    ->requiresConfirmation()
+                    ->label(false),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

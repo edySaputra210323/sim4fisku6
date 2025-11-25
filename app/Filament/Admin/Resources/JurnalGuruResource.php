@@ -27,6 +27,8 @@ class JurnalGuruResource extends Resource
 
         protected static ?string $navigationGroup = 'Data Akademik';
 
+        protected static ?int $navigationSort = 3;
+
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
 
     protected static ?string $navigationLabel = 'Jurnal Guru';

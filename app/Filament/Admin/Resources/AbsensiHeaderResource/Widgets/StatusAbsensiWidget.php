@@ -2,40 +2,46 @@
 
 namespace App\Filament\Admin\Resources\AbsensiHeaderResource\Widgets;
 
-use App\Models\Kelas;
+use Filament\Widgets\Widget;
 use App\Models\AbsensiHeader;
-use Filament\Widgets\StatsOverviewWidget as BaseWidget;
-use Filament\Widgets\StatsOverviewWidget\Stat;
+use App\Models\Kelas;
+use Illuminate\Support\Facades\DB;
 
-class StatusAbsensiWidget extends BaseWidget
+class StatusAbsensiWidget extends Widget
 {
-    protected function getStats(): array
+    protected static string $view = 'filament.admin.resources.absensi-header-resource.widgets.status-absensi-widget';
+
+    protected function getViewData(): array
     {
         $today = now()->toDateString();
 
-        // Ambil ID kelas yang sudah melakukan absensi hari ini
-        $kelasSudahAbsen = AbsensiHeader::whereDate('tanggal', $today)
+        // Total kelas
+        $totalKelas = Kelas::count();
+
+        // Kelas yang sudah absensi hari ini
+        $kelasSudahAbsensiIds = AbsensiHeader::whereDate('tanggal', $today)
             ->pluck('kelas_id')
+            ->unique()
             ->toArray();
 
-        // Ambil daftar kelas yang belum melakukan absensi
-        $kelasBelumAbsen = Kelas::whereNotIn('id', $kelasSudahAbsen)->get();
+        // Kelas yang belum absensi
+        $kelasBelumAbsensi = Kelas::whereNotIn('id', $kelasSudahAbsensiIds)
+            ->pluck('nama_kelas')
+            ->toArray();
 
-        if ($kelasBelumAbsen->isEmpty()) {
-            return [
-                Stat::make('Status Absensi Hari Ini', '✅ Semua kelas sudah melakukan absensi.')
-                    ->color('success')
-                    ->description('Tidak ada kelas yang tertinggal.'),
-            ];
-        }
+        $jumlahSudahAbsensi = count($kelasSudahAbsensiIds);
+        $jumlahBelumAbsensi = count($kelasBelumAbsensi);
+
+        $persentase = $totalKelas > 0
+            ? round(($jumlahSudahAbsensi / $totalKelas) * 100)
+            : 0;
 
         return [
-            Stat::make(
-                'Kelas Belum Melakukan Absensi Hari Ini',
-                $kelasBelumAbsen->pluck('nama_kelas')->join(', ')
-            )
-                ->color('danger')
-                ->description('Segera lakukan absensi harian untuk kelas tersebut.'),
+            'totalKelas' => $totalKelas,
+            'sudahAbsensi' => $jumlahSudahAbsensi,
+            'belumAbsensi' => $jumlahBelumAbsensi,
+            'persentase' => $persentase,
+            'kelasBelumAbsensi' => $kelasBelumAbsensi,
         ];
     }
 }

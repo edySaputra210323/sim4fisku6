@@ -20,6 +20,8 @@ class JadwalMengajarResource extends Resource
 
     protected static ?string $navigationGroup = 'Data Akademik';
 
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
 
     protected static ?string $navigationLabel = 'Jadwal Mengajar';
