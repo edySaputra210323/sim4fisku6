@@ -35,15 +35,15 @@ class AbsensiHeaderResource extends Resource
 
      protected static ?int $navigationSort = 2;
 
-    protected static ?string $navigationLabel = 'Jurnal Kelas';
+    protected static ?string $navigationLabel = 'Absensi';
 
-    protected static ?string $pluralLabel = 'Jurnal Kelas';
+    protected static ?string $pluralLabel = 'Absensi';
 
-    protected static ?string $modelLabel = 'Jurnal Kelas';
+    protected static ?string $modelLabel = 'Absensi';
 
-    protected static ?string $pluralModelLabel = 'Jurnal Kelas';
+    protected static ?string $pluralModelLabel = 'Absensi';
 
-    protected static ?string $slug = 'jurnal-kelas';
+    protected static ?string $slug = 'absensi';
 
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
 

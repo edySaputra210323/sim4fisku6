@@ -31,13 +31,13 @@ class JurnalGuruResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
 
-    protected static ?string $navigationLabel = 'Jurnal Guru';
+    protected static ?string $navigationLabel = 'Jurnal Mengajar';
 
-    protected static ?string $pluralModelLabel = 'Jurnal Guru';
+    protected static ?string $pluralModelLabel = 'Jurnal Mengajar';
 
-    protected static ?string $modelLabel = 'Jurnal Guru';
+    protected static ?string $modelLabel = 'Jurnal Mengajar';
 
-    protected static ?string $slug = 'jurnal-guru';
+    protected static ?string $slug = 'jurnal-mengajar';
 
     // ---------------------------
     // 📋 FORM
@@ -99,7 +99,7 @@ class JurnalGuruResource extends Resource
 
                        
                         Forms\Components\TextInput::make('materi')
-                            ->label('Materi Pembelajaran')
+                            ->label('Materi')
                             ->maxLength(255)
                             ->required(),
 

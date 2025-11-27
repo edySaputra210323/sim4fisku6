@@ -16,10 +16,18 @@ class ListJurnalGurus extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+            ->label('Buat Jurnal')
+            ->icon('heroicon-o-plus')
+            ->color('primary'),
+            // ✅ Tambahkan Export Jurnal Kelas
+            Actions\Action::make('#')
+                ->label('Export Jurnal Kelas')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('warning'),
             // ✅ Tambahkan Export Jurnal Guru di sini
             Actions\Action::make('exportJurnalGuru')
-                ->label('Export Jurnal Guru')
+                ->label('Export Jurnal Mengajar')
                 ->icon('heroicon-o-document-arrow-down')
                 ->color('success')
                 ->form([
