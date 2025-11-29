@@ -97,7 +97,7 @@ class RekapJurnalKelasExport implements FromCollection, WithHeadings, WithStyles
         $first = $this->collection()->first();
 
         // sisipkan ruang 14 baris untuk kop
-        $sheet->insertNewRowBefore(1, 14);
+        $sheet->insertNewRowBefore(1, 11);
 
         // Tahun ajaran & semester
         $tahunAktif = TahunAjaran::where('status', 1)->first();
@@ -174,6 +174,46 @@ class RekapJurnalKelasExport implements FromCollection, WithHeadings, WithStyles
         foreach (range('A', 'I') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
+
+         // ========== BAGIAN TANDA TANGAN ==========
+        // Ambil wali kelas yang aktif
+        $waliAktif = \App\Models\RiwayatKelas::where('kelas_id', $this->kelasId)
+            ->where('status_aktif', 1)
+            ->with('guru')
+            ->first();
+
+        $waliKelasName = $waliAktif?->guru?->nm_pegawai ?? '........................';
+
+        // Nama kepala sekolah (opsional bisa ambil dari DB)
+        $kepsekName = 'Heru Purwanto, S.Pd';
+
+        // Lokasi & tanggal
+        $tanggalCetak = now()->format('d F Y');
+
+        // Baris
+        $lastRow = $sheet->getHighestRow();
+        $rowTanggal  = $lastRow + 3;
+        $rowJabatan  = $lastRow + 5;
+        $rowNama     = $lastRow + 9;
+
+        // Tanggal
+        $sheet->setCellValue("E{$rowTanggal}", "Pontianak, {$tanggalCetak}");
+
+        // Jabatan
+        $sheet->setCellValue("C{$rowJabatan}", "Wali Kelas,");
+        $sheet->setCellValue("E{$rowJabatan}", "Kepala Sekolah,");
+
+        // Nama
+        $sheet->setCellValue("C{$rowNama}", "({$waliKelasName})");
+        $sheet->setCellValue("E{$rowNama}", "({$kepsekName})");
+
+        // Style
+        $sheet->getStyle("C{$rowJabatan}:E{$rowNama}")
+            ->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("C{$rowNama}")->getFont()->setBold(true);
+        $sheet->getStyle("E{$rowNama}")->getFont()->setBold(true);
+
         return [];
+
     }
 }
