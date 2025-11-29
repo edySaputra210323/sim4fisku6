@@ -164,7 +164,7 @@ class RekapJurnalKelasExport implements FromCollection, WithHeadings, WithStyles
             'borders' => ['allBorders' => ['borderStyle' => 'thin']],
         ]);
 
-        // border data
+        // border data row
         $last = $sheet->getHighestDataRow();
         if ($last < 15) $last = 15;
         $sheet->getStyle("A14:I{$last}")->applyFromArray([
