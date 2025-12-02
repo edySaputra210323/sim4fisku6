@@ -134,7 +134,9 @@ public static function form(Form $form): Form
                     ->label('Kelas')
                     ->badge()
                     ->color('info')
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->sortable()
+                    ->searchable(),
 
                 Tables\Columns\TextColumn::make('total_siswa')
                     ->label('Total')

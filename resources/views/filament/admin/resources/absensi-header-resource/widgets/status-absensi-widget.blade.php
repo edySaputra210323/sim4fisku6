@@ -2,6 +2,13 @@
     <x-filament::section>
         <div class="w-full">
 
+            {{-- HEADER TANGGAL --}}
+            <div class="mb-3 pb-2 border-b border-gray-200">
+                <h3 class="text-sm font-semibold text-gray-600">
+                    📅 Periode: {{ $today }}
+                </h3>
+            </div>
+
             {{-- MINI TABLE --}}
             <table class="w-full text-sm mb-3">
                 <tr class="border-b border-gray-200">
@@ -42,7 +49,7 @@
 
                     <div class="flex flex-wrap gap-1">
                         @foreach ($kelasBelumAbsensi as $kelas)
-                            <span class="px-2 py-1 text-xs rounded bg-red-100 text-red-700">
+                            <span class="px-2 py-1 text-xs rounded bg-red-100 text-red-700" style="color: white; background-color: #f50000; font-weight: bold;">
                                 {{ $kelas }}
                             </span>
                         @endforeach

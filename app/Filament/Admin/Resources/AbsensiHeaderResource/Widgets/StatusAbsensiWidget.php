@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 
 class StatusAbsensiWidget extends Widget
 {
+    protected int|string|array $columnSpan = 'full';
+    
     protected static string $view = 'filament.admin.resources.absensi-header-resource.widgets.status-absensi-widget';
 
     protected function getViewData(): array
@@ -37,6 +39,7 @@ class StatusAbsensiWidget extends Widget
             : 0;
 
         return [
+            'today' => now()->locale('id')->translatedFormat('l, d F Y'),
             'totalKelas' => $totalKelas,
             'sudahAbsensi' => $jumlahSudahAbsensi,
             'belumAbsensi' => $jumlahBelumAbsensi,
