@@ -278,7 +278,25 @@ class JurnalGuruResource extends Resource
                             
                         ])
             ->defaultSort('tanggal', 'desc')
-            ->filters([])
+            ->filters([
+                Tables\Filters\Filter::make('tanggal')
+                ->label('Filter Tanggal')
+                ->form([
+                    Forms\Components\DatePicker::make('from')->label('Dari'),
+                    Forms\Components\DatePicker::make('until')->label('Sampai'),
+                ])
+                ->query(function (Builder $query, array $data): Builder {
+                    // kalau user isi filter manual, pakai itu
+                    if ($data['from'] || $data['until']) {
+                        return $query
+                            ->when($data['from'], fn($q, $date) => $q->whereDate('tanggal', '>=', $date))
+                            ->when($data['until'], fn($q, $date) => $q->whereDate('tanggal', '<=', $date));
+                    }
+
+                    // kalau tidak ada filter → tampilkan hanya hari ini
+                    return $query->whereDate('tanggal', now()->toDateString());
+                })
+            ])
             ->actions([
                 Tables\Actions\EditAction::make()
                 ->iconButton()
