@@ -25,9 +25,9 @@ class JurnalGuruResource extends Resource
 {
     protected static ?string $model = JurnalGuru::class;
 
-        protected static ?string $navigationGroup = 'Data Akademik';
+    protected static ?string $navigationGroup = 'Data Akademik';
 
-        protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
 
