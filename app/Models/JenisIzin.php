@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\IzinPegawai;
+use App\Enums\StatusPengajuanEnum;
 use Illuminate\Database\Eloquent\Model;
 
 class JenisIzin extends Model
@@ -10,9 +11,13 @@ class JenisIzin extends Model
     protected $table = 'jenis_izin';
 
     protected $fillable = [
-        'nama',
+        'nama_jenis_izin',
         'deskripsi',
-        'aktif',
+        'status',
+    ];
+
+    protected $casts = [
+        'status'
     ];
 
     public function izinPegawai()

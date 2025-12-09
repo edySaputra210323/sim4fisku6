@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('jenis_izin', function (Blueprint $table) {
             $table->id();
-            $table->string('nama')->unique();     // contoh: Sakit, Izin Pulang Awal, Dinas Luar
+            $table->string('nama_jenis_izin')->unique();     // contoh: Sakit, Izin Pulang Awal, Dinas Luar
             $table->text('deskripsi')->nullable();
-            $table->boolean('aktif')->default(true);
+            $table->boolean('status')->default(true);
             $table->timestamps();
         });
     }
