@@ -14,15 +14,12 @@ return new class extends Migration
         Schema::create('izin_status_log', function (Blueprint $table) {
             $table->id();
             $table->foreignId('izin_pegawai_id')->constrained('izin_pegawai')->onDelete('cascade');
-
-            $table->string('from_status')->nullable();
-            $table->string('to_status');
-
+            $table->string('dari_status')->nullable();
+            $table->string('ke_status');
             // user yang melakukan perubahan (pegawai/ks/sdm)
-            $table->foreignId('changed_by')->constrained('users')->onDelete('cascade');
+            $table->foreignId('diubah_by')->constrained('users')->onDelete('cascade');
 
-            $table->text('reason')->nullable();
-            $table->timestamp('changed_at')->useCurrent();
+            $table->text('catatan')->nullable();
             $table->timestamps();
         });
     }
